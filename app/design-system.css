@@ -1,0 +1,1277 @@
+/* ============================================================
+   DESIGN SYSTEM — "אריג" (Fabric) — gemach-app redesign
+   Built blind to the existing UI: fresh palette, type, icon set.
+   Canonical source: scratch/design-v2/assets/design-system.css
+   ============================================================ */
+.sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+:root{
+  color-scheme: light;
+  /* --- palette: warm, textile-inspired, elegant but comfortable --- */
+  --bg: #FAF7F2;
+  --surface: #FFFFFF;
+  --surface-alt: #F4EEE6;
+  --surface-sunken: #EFE8DD;
+  --border: #E5DBCB;
+  --border-strong: #D8CAB2;
+  --text: #2A2420;
+  --text-2: #6C6155;
+  --text-3: #7A7062;
+  --text-on-primary: #FFF9F2;
+
+  --primary: #7C2E4D;
+  --primary-hover: #641F3C;
+  --primary-solid: var(--primary);
+  --primary-tint: #F5E6ED;
+  --primary-tint-2: #EACBD8;
+
+  --accent: #96661F;
+  --accent-solid: var(--accent);
+  --accent-tint: #F5EAD4;
+
+  --success: #3F6A4E;
+  --success-solid: var(--success);
+  --success-tint: #E5F0E7;
+  --warning: #8F5E22;
+  --warning-tint: #F6E9D6;
+  --danger: #A6423A;
+  --danger-solid: var(--danger);
+  --danger-tint: #F7E3E0;
+  --info: #3E6E8C;
+  --info-tint: #E3EEF3;
+
+  /* links inside free text (internal messages etc.) — follows the palette's info hue */
+  --link: var(--info);
+
+  /* AI product identity (pink/purple) — deliberately FIXED across palettes so
+     AI features stay visually distinct; override-able in the future if ever needed */
+  --ai-accent: #EC4899;
+  --ai-accent-2: #A855F7;
+
+  /* extra status hues used by list-page filters/dots (.c-purple/.c-teal) that
+     have no semantic-token equivalent — fixed hue, with dark-readable variants */
+  --status-purple: #7C3AED;
+  --status-teal: #0D9488;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* shadow tint base (r,g,b) — warm brown by default; custom palettes derive
+     it from their neutral so shadows never look "borrowed" from another hue */
+  --shadow-rgb: 60,45,30;
+  --shadow-sm: 0 1px 2px rgba(var(--shadow-rgb),.06), 0 1px 1px rgba(var(--shadow-rgb),.04);
+  --shadow-md: 0 4px 12px rgba(var(--shadow-rgb),.08), 0 2px 4px rgba(var(--shadow-rgb),.05);
+  --shadow-lg: 0 12px 32px rgba(var(--shadow-rgb),.14), 0 4px 10px rgba(var(--shadow-rgb),.06);
+
+  --font: "Segoe UI", "Assistant", "Arial Hebrew", Arial, sans-serif;
+  --sidebar-w: 248px;
+  /* live sidebar width, kept in sync with the collapse states below — lets
+     fixed-position UI (e.g. the AI widget) offset itself past the sidebar
+     instead of sitting underneath its column */
+  --sidebar-current-w: var(--sidebar-w);
+}
+:root[data-theme="dark"], :root:not([data-theme="light"]) {
+  @media (prefers-color-scheme: dark){
+    color-scheme: dark;
+  }
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg: #1B1714;
+    --surface: #24201B;
+    --surface-alt: #2C2620;
+    --surface-sunken: #191512;
+    --border: #3C342A;
+    --border-strong: #4A4032;
+    --text: #F1EAE0;
+    --text-2: #C2B8A8;
+    --text-3: #9A9081;
+    --text-on-primary: #FFF9F2;
+
+    --primary: #E293B3;
+    --primary-hover: #EAAFC7;
+    --primary-solid: #A8355C;
+    --primary-tint: #3B2530;
+    --primary-tint-2: #4A2E3B;
+
+    --accent: #E0B26E;
+    --accent-solid: #8F6529;
+    --accent-tint: #3A2F1C;
+
+    --success: #8FC0A2;
+    --success-solid: #3F6B52;
+    --success-tint: #223028;
+    --warning: #E0B26E;
+    --warning-tint: #3A2F1C;
+    --danger: #E2938B;
+    --danger-solid: #B84438;
+    --danger-tint: #3A2320;
+    --info: #8FBBD4;
+    --info-tint: #1F2E36;
+
+    --status-purple: #B79BF5;
+    --status-teal: #4FC2B8;
+
+    --shadow-rgb: 0,0,0;
+    --shadow-sm: 0 1px 2px rgba(var(--shadow-rgb),.3);
+    --shadow-md: 0 4px 12px rgba(var(--shadow-rgb),.35);
+    --shadow-lg: 0 12px 32px rgba(var(--shadow-rgb),.45);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg: #1B1714; --surface: #24201B; --surface-alt: #2C2620; --surface-sunken: #191512;
+  --border: #3C342A; --border-strong: #4A4032;
+  --text: #F1EAE0; --text-2: #C2B8A8; --text-3: #9A9081; --text-on-primary:#FFF9F2;
+  --primary: #E293B3; --primary-hover: #EAAFC7; --primary-solid:#A8355C; --primary-tint: #3B2530; --primary-tint-2:#4A2E3B;
+  --accent: #E0B26E; --accent-solid:#8F6529; --accent-tint: #3A2F1C;
+  --success: #8FC0A2; --success-solid:#3F6B52; --success-tint: #223028;
+  --warning: #E0B26E; --warning-tint: #3A2F1C;
+  --danger: #E2938B; --danger-solid:#B84438; --danger-tint: #3A2320;
+  --info: #8FBBD4; --info-tint: #1F2E36;
+  --status-purple: #B79BF5; --status-teal: #4FC2B8;
+  --shadow-rgb: 0,0,0;
+  --shadow-sm: 0 1px 2px rgba(var(--shadow-rgb),.3); --shadow-md: 0 4px 12px rgba(var(--shadow-rgb),.35); --shadow-lg: 0 12px 32px rgba(var(--shadow-rgb),.45);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--font);
+  font-size:15px; line-height:1.55; direction:rtl; text-align:right;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0 0 4px; font-weight:700; letter-spacing:-.01em}
+a{color:inherit; text-decoration:none}
+
+/* ============================================================
+   SCROLLBARS — thin, rounded, theme-aware (applies everywhere:
+   page body, sidebar nav, modals/panels, scroll-lists, tables)
+   ============================================================ */
+*{scrollbar-width:thin; scrollbar-color:var(--border-strong) transparent}
+*::-webkit-scrollbar{width:7px; height:7px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background-color:var(--border-strong); border-radius:var(--radius-full); background-clip:padding-box}
+*::-webkit-scrollbar-thumb:hover{background-color:var(--text-3)}
+*::-webkit-scrollbar-corner{background:transparent}
+.icon{width:1em;height:1em;display:inline-block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.15em}
+
+/* ============================================================
+   APP SHELL — sidebar (right, RTL) + topbar + content
+   ============================================================ */
+.app-shell{display:flex;min-height:100vh}
+/* the AI floating-widget button sits fixed at the real bottom-corner of the
+   screen (not offset past the sidebar), above the sidebar via z-index — this
+   bottom padding keeps the sidebar's own scrolled nav content clear of that
+   corner instead of running underneath the button. */
+:root{--ai-fab-clearance: 140px}
+.sidebar{
+  width:var(--sidebar-w); flex:0 0 auto; background:var(--surface);
+  border-inline-start:1px solid var(--border); padding:18px 14px calc(18px + var(--ai-fab-clearance));
+  position:sticky; top:0; height:100vh; overflow-y:auto; order:0;
+  transition:width .2s ease, padding .2s ease;
+}
+.nav-label{transition:opacity .15s ease}
+
+/* ============================================================
+   SIDEBAR COLLAPSE — 3 states cycled via the topbar's 3-bar
+   (hamburger) toggle: expanded (default) → collapsed (icon
+   rail) → hidden → back to expanded. Desktop widths only —
+   below 900px the same button drives the mobile drawer instead.
+   ============================================================ */
+@media (min-width:901px){
+  :root[data-sidebar="collapsed"]{--sidebar-current-w: 68px}
+  :root[data-sidebar="collapsed"] .sidebar{width:68px; padding:18px 10px calc(18px + var(--ai-fab-clearance))}
+  :root[data-sidebar="collapsed"] .nav-label,
+  :root[data-sidebar="collapsed"] .nav-group-label,
+  :root[data-sidebar="collapsed"] .brand-text,
+  :root[data-sidebar="collapsed"] .brand-sub{display:none}
+  :root[data-sidebar="collapsed"] .nav-link{justify-content:center; padding:11px 0}
+  :root[data-sidebar="collapsed"] .nav-badge{position:absolute; margin:0; top:6px; inset-inline-end:6px; min-width:8px; width:8px; height:8px; padding:0; font-size:0}
+  :root[data-sidebar="collapsed"] .nav-link{position:relative}
+  :root[data-sidebar="collapsed"] .brand{justify-content:center; padding-inline:0}
+  :root[data-sidebar="hidden"]{--sidebar-current-w: 0px}
+  :root[data-sidebar="hidden"] .sidebar{display:none}
+}
+@media (prefers-reduced-motion: reduce){
+  .sidebar{transition:none}
+  .nav-label{transition:none}
+}
+.brand{display:flex; align-items:center; gap:10px; padding:6px 8px 20px}
+.brand-mark{width:36px;height:36px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:var(--text-on-primary);flex:0 0 auto}
+.brand-mark .icon{width:20px;height:20px}
+.brand-text{font-weight:800;font-size:15px}
+.brand-sub{font-size:11.5px;color:var(--text-3)}
+.nav-group{margin-bottom:6px}
+.nav-group-label{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;padding:14px 10px 6px}
+.nav-link{
+  display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:var(--radius-sm);
+  color:var(--text-2); font-size:13.5px; font-weight:600; cursor:pointer; text-decoration:none;
+  border:1px solid transparent;
+}
+.nav-link .icon{width:17px;height:17px;flex:0 0 auto;color:var(--text-3)}
+.nav-link:hover{background:var(--surface-alt); color:var(--text)}
+.nav-link.active{background:var(--primary-tint); color:var(--primary); font-weight:700}
+.nav-link.active .icon{color:var(--primary)}
+.nav-badge{margin-inline-start:auto; background:var(--accent-solid); color:var(--text-on-primary); font-size:10.5px; font-weight:700; border-radius:var(--radius-full); padding:1px 6px; min-width:16px; text-align:center}
+
+/* ---- sidebar pin affordance — hover-revealed on each .nav-link, toggles that
+   item into the topbar's pinned-shortcuts row (see .topbar-pins below) ---- */
+.nav-pin-btn{
+  margin-inline-start:auto; flex:0 0 auto; width:22px; height:22px;
+  border:none; background:transparent; color:var(--text-3); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; opacity:0; transition:opacity .15s ease, color .15s ease; padding:0;
+}
+.nav-pin-btn .icon{width:13px;height:13px}
+.nav-pin-btn:hover{background:transparent; color:var(--primary-solid)}
+.nav-link:hover .nav-pin-btn, .nav-pin-btn.pinned{opacity:1}
+.nav-pin-btn.pinned{color:var(--primary-solid)}
+.nav-pin-btn.pinned .icon{fill:currentColor}
+@media (hover:none){ .nav-pin-btn{opacity:.55} }
+:root[data-sidebar="collapsed"] .nav-pin-btn{display:none}
+
+.main{flex:1 1 auto; min-width:0; order:1; display:flex; flex-direction:column}
+.topbar{
+  position:sticky; top:0; z-index:5; background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(8px); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:14px; padding:12px 24px;
+}
+.crumb{font-size:12.5px; color:var(--text-3); display:flex; align-items:center; gap:6px}
+.crumb .icon{width:13px;height:13px}
+.topbar-title{font-size:17px; font-weight:800}
+.topbar-search{position:relative; width:280px; margin-inline-start:auto}
+.search-box{
+  display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-full); padding:8px 14px; color:var(--text-3); font-size:13px; width:100%;
+  transition:border-color .15s ease;
+}
+.topbar-search.open .search-box, .search-box:focus-within{border-color:var(--primary-solid)}
+.search-box .icon{width:15px;height:15px; flex:0 0 auto; color:var(--text-3)}
+.search-box input{flex:1; min-width:0; border:none; background:transparent; padding:0; font:inherit; color:var(--text)}
+.search-box input::placeholder{color:var(--text-3)}
+.search-box input:focus{outline:none}
+.topbar-search-panel{
+  position:absolute; top:calc(100% + 10px); inset-inline-end:0; width:340px; max-width:calc(100vw - 32px); z-index:40;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg);
+  padding:14px; display:none;
+}
+.topbar-search.open .topbar-search-panel{display:block}
+.topbar-search-panel-section + .topbar-search-panel-section{margin-top:14px; padding-top:14px; border-top:1px solid var(--border)}
+.topbar-search-panel-title{display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; color:var(--text-3); text-transform:uppercase; letter-spacing:.03em; margin-bottom:10px}
+.topbar-search-panel-title .icon{width:12px;height:12px}
+.topbar-recent-item{display:flex; align-items:center; gap:10px; padding:7px 6px; border-radius:var(--radius-sm); text-decoration:none; color:var(--text); cursor:pointer}
+.topbar-recent-item:hover{background:var(--surface-alt)}
+.topbar-recent-item .kpi-icon{width:30px; height:30px}
+.topbar-recent-item strong{display:block; font-size:12.5px; font-weight:700}
+.topbar-recent-item span{font-size:11px; color:var(--text-3)}
+.icon-btn{
+  width:36px;height:36px;border-radius:var(--radius-full); border:1px solid var(--border); background:var(--surface);
+  display:flex; align-items:center; justify-content:center; color:var(--text-2); position:relative; cursor:pointer; flex:0 0 auto;
+}
+.icon-btn .icon{width:17px;height:17px}
+.icon-btn .dot{position:absolute; top:6px; inset-inline-end:6px; width:7px; height:7px; border-radius:50%; background:var(--accent-solid); border:1.5px solid var(--surface)}
+
+/* אזור אייקונים מאוחד בקצה ה-topbar (רענון → פרופיל): מסגרת אחת משותפת
+   על רקע surface, וכל כפתור בתוכה שקוף לגמרי — hover עדין בלבד */
+.topbar-icon-cluster{
+  display:flex; align-items:center; gap:2px; flex:0 0 auto;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-full); padding:3px 6px;
+}
+.topbar-icon-cluster .icon-btn{background:transparent; border:none}
+.topbar-icon-cluster .icon-btn:hover{background:var(--surface-alt)}
+.topbar-icon-cluster .user-chip{padding-inline-start:4px}
+
+/* ---- topbar pinned-shortcuts row — mirrors the sidebar's .nav-pin-btn: each
+   pinned item is a normal .icon-btn (a <Link>) with a hover-revealed remove
+   badge, same corner-badge language as .icon-btn .dot above ---- */
+/* padding+negative-margin here is NOT decorative — .topbar-pin-remove overhangs its icon
+   by 4px (top:-4px; inset-inline-end:-4px), and since this row clips/scrolls flush
+   against the icons' own edges, that alone was enough overflow to trigger a permanent
+   stray scrollbar even with a single pinned icon. The padding absorbs the overhang
+   before it counts as scrollable content; the matching negative margin cancels the
+   resulting visual shift so the row still sits exactly where it did before. */
+.topbar-pins{display:flex; align-items:center; gap:6px; flex:0 0 auto; max-width:260px; overflow-x:auto; overflow-y:hidden; padding:4px; margin:-4px}
+.topbar-pin-icon.active{background:var(--primary-tint); border-color:var(--primary-tint-2); color:var(--primary-solid)}
+.topbar-pin-remove{
+  position:absolute; top:-4px; inset-inline-end:-4px; width:16px; height:16px; border-radius:50%;
+  border:1.5px solid var(--surface); background:var(--danger-solid); color:var(--text-on-primary); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; opacity:0; transition:opacity .15s ease; padding:0; flex:0 0 auto;
+}
+.topbar-pin-remove .icon{width:9px;height:9px; stroke-width:3}
+.topbar-pin-icon:hover .topbar-pin-remove{opacity:1}
+@media (hover:none){ .topbar-pin-remove{opacity:1} }
+.user-chip{display:flex; align-items:center; gap:9px; cursor:pointer; position:relative}
+.user-menu{position:relative}
+.user-menu-dropdown{
+  position:absolute; top:calc(100% + 10px); inset-inline-end:0; min-width:220px; z-index:40;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg);
+  padding:6px; display:none;
+}
+.user-menu.open .user-menu-dropdown{display:block}
+.user-menu-head{display:flex; align-items:center; gap:10px; padding:10px 10px 12px; border-bottom:1px solid var(--border); margin-bottom:6px}
+.user-menu-head strong{font-size:13.5px; display:block}
+.user-menu-head span{font-size:11.5px; color:var(--text-3)}
+.user-menu-item{display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; border-radius:var(--radius-sm); font-size:13px; font-family:var(--font); color:var(--text); cursor:pointer; text-decoration:none; background:none; border:none; margin:0; text-align:start}
+.user-menu-item:hover{background:var(--surface-alt)}
+.user-menu-item.danger{color:var(--danger)}
+.user-menu-divider{height:1px; background:var(--border); margin:6px 2px}
+.content{padding:22px 24px 60px; flex:1}
+
+/* ============================================================
+   PAGE / SECTION helpers
+   (split multi-page architecture: each page is its own file, so no
+   .page/.active show-hide switching is needed here anymore)
+   ============================================================ */
+.page-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; flex-wrap:wrap}
+.page-head h1{font-size:22px}
+.page-desc{color:var(--text-2); font-size:13.5px; margin-top:2px}
+.page-actions{display:flex; gap:8px; flex-wrap:wrap}
+.toolbar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px}
+.toolbar .spacer{flex:1}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:7px; font-family:var(--font); font-size:13.5px; font-weight:700;
+  padding:9px 16px; border-radius:var(--radius-sm); border:1px solid transparent; cursor:pointer; white-space:nowrap;
+  transition:background .15s ease,border-color .15s ease,box-shadow .15s ease,filter .15s ease,transform .08s ease;
+}
+.btn .icon{width:16px;height:16px; flex:0 0 auto}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--primary-solid); color:var(--text-on-primary); box-shadow:0 1px 2px rgba(20,10,15,.08), 0 4px 10px color-mix(in srgb, var(--primary-solid) 30%, transparent)}
+.btn-primary:hover{filter:brightness(1.08); box-shadow:0 2px 4px rgba(20,10,15,.1), 0 6px 16px color-mix(in srgb, var(--primary-solid) 38%, transparent)}
+.btn-secondary{background:var(--surface); color:var(--text); border-color:var(--border-strong); box-shadow:var(--shadow-sm)}
+.btn-secondary:hover{background:var(--surface-alt); border-color:var(--primary-solid); color:var(--primary-solid)}
+.btn-ghost{background:transparent; color:var(--text-2)}
+.btn-ghost:hover{background:var(--surface-alt); color:var(--text)}
+.btn-danger{background:var(--danger-solid); color:var(--text-on-primary); box-shadow:0 1px 2px rgba(20,10,15,.08), 0 4px 10px color-mix(in srgb, var(--danger-solid) 30%, transparent)}
+.btn-danger:hover{filter:brightness(.94)}
+.btn-danger-ghost{background:var(--danger-tint); color:var(--danger)}
+.btn-danger-ghost:hover{background:color-mix(in srgb, var(--danger-tint) 60%, var(--danger) 12%)}
+.btn-sm{padding:6px 11px; font-size:12.5px}
+.btn-lg{padding:13px 22px; font-size:15px; border-radius:var(--radius-md)}
+.btn:disabled{opacity:.45; cursor:not-allowed; box-shadow:none; transform:none; filter:none}
+.btn-icon-only{width:36px; height:36px; padding:0; flex:0 0 auto}
+.btn-icon-only.btn-sm{width:30px; height:30px}
+.btn-icon-only.btn-lg{width:46px; height:46px}
+/* icon-only utility buttons stay borderless regardless of .btn-secondary/.btn-ghost —
+   a framed box around a single icon reads as heavier chrome than a row of icon
+   buttons needs; text buttons keep their normal bordered/filled styles. */
+.btn-icon-only.btn-secondary{background:transparent; border-color:transparent; box-shadow:none; color:var(--text-2)}
+.btn-icon-only.btn-secondary:hover{background:var(--surface-alt); border-color:transparent; color:var(--text)}
+
+/* SEARCH TOOLBAR — a search input with trailing action buttons (AI search, stats, etc.)
+   sharing one visual frame, instead of a bare input with separate floating icon buttons beside it. */
+.search-toolbar{
+  display:flex; align-items:center; gap:2px; flex:1; max-width:480px;
+  background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+  padding-inline-start:12px; padding-inline-end:4px; transition:border-color .15s ease;
+}
+.search-toolbar:focus-within{border-color:var(--primary-solid)}
+.search-toolbar > .icon{width:15px; height:15px; color:var(--text-3); flex:0 0 auto}
+.search-toolbar input{flex:1; min-width:0; border:none; background:transparent; padding:9px 8px; font:inherit; color:var(--text)}
+.search-toolbar input:focus{outline:none}
+.search-toolbar .search-toolbar-actions{display:flex; align-items:center; gap:2px; flex:0 0 auto}
+:is(.btn,.nav-link,.tab,.pill-tab,.pager button,.icon-btn,.list-card,.swatch-btn,.font-opt,.mode-btn,.density-btn,.settings-cat,.upload-zone):focus-visible{outline:2px solid var(--primary-solid); outline-offset:2px}
+
+/* ============================================================
+   FORM CONTROLS
+   ============================================================ */
+.field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px}
+.field label{font-size:12.5px; font-weight:700; color:var(--text-2)}
+.field .hint{font-size:11.5px; color:var(--text-3)}
+.field .error-text{font-size:11.5px; color:var(--danger); display:flex; align-items:center; gap:4px}
+.input, .select, .textarea{
+  font-family:var(--font); font-size:13.5px; color:var(--text); background:var(--surface);
+  border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:9px 12px; width:100%;
+}
+.input:focus, .select:focus, .textarea:focus{outline:2px solid var(--primary-tint-2); border-color:var(--primary-solid)}
+.textarea{resize:vertical; min-height:80px}
+.input-icon-wrap{position:relative}
+.input-icon-wrap .icon{position:absolute; inset-inline-start:12px; top:50%; transform:translateY(-50%); width:15px;height:15px; color:var(--text-3)}
+.input-icon-wrap .input{padding-inline-start:36px}
+.form-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:0 16px}
+.form-grid.cols-3{grid-template-columns:repeat(3,1fr)}
+.checkbox-row{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text)}
+.switch{width:38px;height:22px;border-radius:var(--radius-full);background:var(--text-3);position:relative;flex:0 0 auto;cursor:pointer; transition:background .15s ease}
+.switch::after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:var(--shadow-sm); transition:inset-inline-start .15s ease}
+.switch.on{background:var(--primary-solid)}
+.switch.on::after{inset-inline-start:18px}
+
+/* ---- password field: lead lock icon + show/hide toggle ---- */
+.password-field{position:relative}
+.password-field .input{padding-inline-start:36px; padding-inline-end:38px}
+.password-field .lead-icon{position:absolute; inset-inline-start:12px; top:50%; transform:translateY(-50%); width:15px;height:15px; color:var(--text-3); pointer-events:none}
+.password-field .toggle-visibility{position:absolute; inset-inline-end:6px; top:50%; transform:translateY(-50%); width:26px;height:26px; border-radius:var(--radius-sm); border:none; background:transparent; color:var(--text-3); display:flex; align-items:center; justify-content:center; cursor:pointer}
+.password-field .toggle-visibility:hover{background:var(--surface-alt); color:var(--text-2)}
+.password-field .toggle-visibility .icon{width:16px;height:16px}
+
+/* ---- date-trigger field: lead calendar icon + trailing native-date toggle button ---- */
+.date-trigger{position:relative}
+.date-trigger .input{padding-inline-start:36px; padding-inline-end:40px; width:100%}
+.date-trigger .lead-icon{position:absolute; inset-inline-start:12px; top:50%; transform:translateY(-50%); width:15px;height:15px; color:var(--text-3); pointer-events:none}
+.date-trigger .native-toggle{position:absolute; inset-inline-end:4px; top:50%; transform:translateY(-50%); width:30px;height:30px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; color:var(--text-3); cursor:pointer; overflow:hidden}
+.date-trigger .native-toggle:hover{background:var(--surface-alt); color:var(--text-2)}
+.date-trigger .native-toggle .icon{width:15px;height:15px; pointer-events:none}
+.date-trigger .native-toggle input[type="date"]{position:absolute; inset:0; opacity:0; cursor:pointer; border:none; padding:0}
+
+/* ---- PIN entry (manager/employee authorization) ---- */
+.pin-input{display:flex; gap:8px; direction:ltr}
+.pin-digit{width:42px;height:48px;border:1.5px solid var(--border-strong); border-radius:var(--radius-sm); background:var(--surface); font-size:20px; font-weight:700; text-align:center; color:var(--text); font-family:var(--font)}
+.pin-digit:focus{outline:2px solid var(--primary-tint-2); border-color:var(--primary-solid)}
+.pin-digit.filled{border-color:var(--primary-solid); background:var(--primary-tint)}
+
+/* ---- range slider (e.g. 0–100 zoom/level controls) ---- */
+.slider-field{display:flex; flex-direction:column; gap:8px}
+.slider-head{display:flex; justify-content:space-between; align-items:baseline; font-size:12.5px; color:var(--text-2)}
+.slider-head .slider-value{font-weight:800; font-size:14px; color:var(--primary-solid); font-variant-numeric:tabular-nums}
+.slider{
+  -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:var(--radius-full);
+  background:linear-gradient(to left, var(--primary-solid) 0%, var(--primary-solid) var(--slider-val, 50%), var(--surface-sunken) var(--slider-val, 50%), var(--surface-sunken) 100%);
+  cursor:pointer; outline:none; margin:6px 0;
+}
+.slider::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none; width:20px; height:20px; border-radius:50%;
+  background:var(--surface); border:3px solid var(--primary-solid); box-shadow:var(--shadow-md); cursor:pointer;
+  transition:transform .1s ease;
+}
+.slider::-webkit-slider-thumb:hover{transform:scale(1.12)}
+.slider::-moz-range-thumb{
+  width:20px; height:20px; border-radius:50%; background:var(--surface); border:3px solid var(--primary-solid);
+  box-shadow:var(--shadow-md); cursor:pointer;
+}
+.slider::-moz-range-track{height:6px; border-radius:var(--radius-full); background:var(--surface-sunken)}
+.slider::-moz-range-progress{height:6px; border-radius:var(--radius-full); background:var(--primary-solid)}
+.slider:focus-visible{outline:none}
+.slider:focus-visible::-webkit-slider-thumb{outline:2px solid var(--primary-solid); outline-offset:2px}
+.slider:focus-visible::-moz-range-thumb{outline:2px solid var(--primary-solid); outline-offset:2px}
+.slider-ticks{display:flex; justify-content:space-between; font-size:10.5px; color:var(--text-3)}
+
+/* ---- file upload: drop zone + selected-file chip ---- */
+.upload-zone{border:1.5px dashed var(--border-strong); border-radius:var(--radius-md); background:var(--surface-alt); padding:26px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px; cursor:pointer; transition:border-color .15s ease,background .15s ease}
+.upload-zone:hover{border-color:var(--primary-solid); background:var(--primary-tint)}
+.upload-zone .icon{width:26px;height:26px; color:var(--text-3)}
+.upload-zone strong{font-size:13.5px}
+.upload-zone .hint{font-size:11.5px; color:var(--text-3)}
+.file-chip{display:inline-flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:8px 8px 8px 10px; box-shadow:var(--shadow-sm)}
+.file-chip .file-icon{width:32px;height:32px;border-radius:var(--radius-sm);background:var(--info-tint);color:var(--info);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.file-chip .file-icon .icon{width:16px;height:16px}
+.file-chip .file-meta{display:flex;flex-direction:column;line-height:1.35}
+.file-chip .file-name{font-size:12.5px;font-weight:700}
+.file-chip .file-size{font-size:11px;color:var(--text-3)}
+.file-chip .remove-file{width:26px;height:26px;border-radius:50%;border:none;background:transparent;color:var(--text-3);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto}
+.file-chip .remove-file:hover{background:var(--danger-tint);color:var(--danger)}
+.file-chip .remove-file .icon{width:14px;height:14px}
+
+/* ---- Hebrew date picker popover (token-driven — follows active palette) ---- */
+.datepicker{width:280px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:14px}
+.datepicker-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
+.datepicker-head strong{font-size:13.5px}
+.datepicker-nav{display:flex; gap:2px}
+.datepicker-weekdays{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); text-align:center; font-size:10.5px; font-weight:700; color:var(--text-3); margin-bottom:4px}
+.datepicker-grid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px}
+.datepicker-day{aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:var(--radius-sm); font-size:12.5px; cursor:pointer; color:var(--text); gap:0; border:1.5px solid transparent; min-width:0; overflow:hidden}
+.datepicker-day .g-num{font-size:8.5px; color:var(--text-3); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-inline:1px}
+.datepicker-day:hover{background:var(--surface-alt)}
+.datepicker-day.muted{color:var(--text-3); opacity:.4}
+.datepicker-day.today{border-color:var(--primary-solid)}
+.datepicker-day.selected{background:var(--primary-solid); color:var(--text-on-primary)}
+.datepicker-day.selected .g-num{color:rgba(255,255,255,.75)}
+.datepicker-day.in-range{background:var(--primary-tint); color:var(--primary-solid); font-weight:700}
+.datepicker-foot{display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); font-size:12px}
+.datepicker-foot button{background:none;border:none;color:var(--primary-solid);font-weight:700;font-size:12px;cursor:pointer;font-family:var(--font)}
+
+/* ---- date-range trigger: pill bar with two date segments + trailing calendar icon
+   (popover itself reuses .modal + two .datepicker-* panels, see HebrewDateRangePicker) ---- */
+.date-range-trigger{display:flex; align-items:center; gap:6px; height:41px; width:100%; padding-inline-start:14px; padding-inline-end:4px; border:1px solid var(--border-strong); border-radius:var(--radius-full); background:var(--surface); cursor:pointer; transition:border-color .15s ease, box-shadow .15s ease}
+.date-range-trigger.open{border-color:var(--primary-solid); box-shadow:0 0 0 2px var(--primary-tint-2)}
+.date-range-trigger .seg{display:flex; align-items:center; gap:6px; flex:1; min-width:0; overflow:hidden}
+.date-range-trigger .seg-end{padding-inline-start:10px; border-inline-start:1px solid var(--border)}
+.date-range-trigger .seg-label{font-size:11px; font-weight:700; color:var(--text-3); white-space:nowrap; flex:0 0 auto}
+.date-range-trigger .seg-value{font-size:12.5px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.date-range-trigger .seg-value.placeholder{color:var(--text-3)}
+.date-range-trigger .seg-arrow{display:flex; align-items:center; color:var(--text-3); flex:0 0 auto}
+.date-range-trigger .seg-arrow .icon{width:12px;height:12px}
+.date-range-trigger .trigger-icon{width:33px;height:33px;border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--text-3); background:var(--surface-alt); flex:0 0 auto}
+.date-range-trigger .trigger-icon .icon{width:16px;height:16px}
+/* וריאנט "שטוח" לסרגלי סינון: אותו עיצוב ואותו גובה כמו .search-toolbar שלצידו —
+   רדיוס זהה במקום גלולה, וגובה שנמתח לגובה השורה (השתמש עם .toolbar align-items:stretch) */
+.range-flat .date-range-trigger{height:100%; min-height:41px; border-radius:var(--radius-sm)}
+
+/* ============================================================
+   BADGES / STATUS PILLS
+   ============================================================ */
+.badge{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:var(--radius-full)}
+.badge .icon{width:11px;height:11px}
+.badge-neutral{background:var(--surface-sunken); color:var(--text-2)}
+.badge-primary{background:var(--primary-tint); color:var(--primary)}
+.badge-success{background:var(--success-tint); color:var(--success)}
+.badge-warning{background:var(--warning-tint); color:var(--warning)}
+.badge-danger{background:var(--danger-tint); color:var(--danger)}
+.badge-info{background:var(--info-tint); color:var(--info)}
+.dot-badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-2)}
+.dot-badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+
+/* ============================================================
+   CARDS / KPI / PANEL
+   ============================================================ */
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm)}
+.card-pad{padding:18px}
+.card-head{display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--border)}
+.card-head h3{font-size:14.5px}
+.card-title-row{display:flex;align-items:center;gap:8px}
+.card-title-row .icon{width:16px;height:16px;color:var(--text-3)}
+.kpi-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px}
+.kpi-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:16px 18px; box-shadow:var(--shadow-sm)}
+.kpi-top{display:flex; align-items:center; justify-content:space-between}
+.kpi-icon{width:34px;height:34px;border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center}
+.kpi-icon .icon{width:17px;height:17px}
+.kpi-label{font-size:12px; color:var(--text-2); font-weight:600; margin-top:10px}
+.kpi-value{font-size:24px; font-weight:800; margin-top:2px; font-variant-numeric:tabular-nums}
+.kpi-trend{font-size:11.5px; font-weight:700; display:flex; align-items:center; gap:3px; margin-top:4px}
+.trend-up{color:var(--success)}
+.trend-down{color:var(--danger)}
+.list-card{display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:var(--radius-md); border:1px solid var(--border); background:var(--surface); margin-bottom:8px; transition:border-color .15s ease,box-shadow .15s ease}
+.list-card:hover{border-color:var(--border-strong); box-shadow:var(--shadow-sm)}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+/* .table-wrap must stay overflow:visible so .table-foot's position:sticky;
+   bottom:0 resolves against the real page/viewport instead of getting
+   trapped as its own scroll container (a sticky element is always confined
+   to its nearest ancestor scroll container, even one with no actual
+   overflowing content — and that's true even when the "container" is the
+   table-wrap's own former overflow-x:auto, which had no vertical overflow
+   of its own). Horizontal scrolling for wide tables now lives on the inner
+   .table-scroll wrapper instead (overflow doesn't apply to a bare <table>
+   element itself — confirmed live: an overflow-x:auto declared directly on
+   table.data computes back to visible and never takes effect). */
+.table-wrap{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm)}
+/* an optional search/filter strip integrated into the table's own frame (as the first
+   child of .table-wrap, before .table-scroll) instead of floating above it as a bare
+   .toolbar row — used on history-style pages where a search bar sitting loose above
+   the card looked disconnected. No background of its own (stays flush with .table-wrap's
+   surface so the shared rounded top corners never get a mismatched-fill seam), just a
+   border-bottom to separate it from the table below. */
+.table-head-toolbar{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:14px 16px; border-bottom:1px solid var(--border)}
+.table-scroll{overflow-x:auto}
+table.data{width:100%; border-collapse:collapse; font-size:13px}
+/* replaces the corner-clipping .table-wrap used to give for free via its own
+   overflow — rounds just the header's outer corners to match --radius-lg */
+table.data thead th:first-child{border-start-start-radius:var(--radius-lg)}
+table.data thead th:last-child{border-start-end-radius:var(--radius-lg)}
+table.data thead th{
+  text-align:start; font-size:11.5px; font-weight:700; color:var(--text-3); text-transform:uppercase; letter-spacing:.03em;
+  padding:12px 16px; background:var(--surface-alt); border-bottom:1px solid var(--border); white-space:nowrap;
+}
+table.data thead th.sortable{cursor:pointer; user-select:none}
+table.data thead th .icon{width:11px;height:11px; margin-inline-start:3px; vertical-align:-1px; stroke-width:1.5; opacity:.4; transition:opacity .15s ease}
+table.data thead th.sortable:hover .icon, table.data thead th.sort-active .icon{opacity:1; color:var(--primary-solid)}
+table.data tbody td{padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; font-variant-numeric:tabular-nums}
+table.data tbody tr:last-child td{border-bottom:none}
+table.data tbody tr:hover{background:var(--surface-alt)}
+table.data tbody tr.row-flag{background:var(--danger-tint)}
+.cell-primary{font-weight:700}
+.cell-muted{color:var(--text-3)}
+.row-actions{display:flex; gap:6px; justify-content:flex-start}
+.table-foot{
+  display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-top:1px solid var(--border);
+  background:var(--surface-alt); font-size:12.5px; color:var(--text-2);
+  position:sticky; bottom:0; z-index:2; border-radius:0 0 var(--radius-lg) var(--radius-lg);
+  box-shadow:0 -4px 8px -4px rgba(20,10,15,.08);
+  transition:border-radius .15s ease;
+}
+/* בזמן שהשורה תקועה בתחתית החלון (StickyTableHeaders מדליק .is-stuck) הפינות המעוגלות
+   חושפות את תאי הטבלה שמאחוריהן דרך מפרצי הפינות השקופים — לכן הן מתיישרות זמנית;
+   כשמגיעים לסוף הטבלה המחלקה יורדת והפינות המעוגלות של המסגרת חוזרות. */
+.table-foot.is-stuck{border-radius:0}
+/* a pagination bar placed ABOVE the table (rare — most tables only have one, at the bottom)
+   must not sticky-to-viewport-bottom or use bottom-rounded corners like the normal .table-foot */
+.table-foot-top{position:static; border-top:none; border-bottom:1px solid var(--border); border-radius:var(--radius-lg) var(--radius-lg) 0 0; box-shadow:none}
+.pager{display:flex; align-items:center; gap:4px}
+.pager button{width:28px;height:28px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--text-2);cursor:pointer}
+.pager button.active{background:var(--primary-solid); color:var(--text-on-primary); border-color:var(--primary-solid)}
+.pager .icon{width:14px;height:14px}
+
+/* ============================================================
+   TABS / EMPTY STATE / AVATAR / MODAL / TOAST / STEPPER
+   ============================================================ */
+.tabs{display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:18px}
+.tab{padding:10px 4px; margin-inline-end:22px; font-size:13.5px; font-weight:700; color:var(--text-3); border-bottom:2px solid transparent; cursor:pointer; display:flex; align-items:center; gap:6px}
+.tab .icon{width:15px;height:15px}
+.tab.active{color:var(--primary-solid); border-color:var(--primary-solid)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.settings-cat{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--radius-md); cursor:pointer; font-size:13px; color:var(--text-2); border:1px solid transparent}
+.settings-cat .icon{width:16px;height:16px; color:var(--text-3); flex:0 0 auto}
+.settings-cat:hover{background:var(--surface-alt)}
+.settings-cat.active{background:var(--primary-tint); color:var(--primary-solid); font-weight:700; border-color:var(--primary-tint-2)}
+.settings-cat.active .icon{color:var(--primary-solid)}
+.pill-tabs{display:flex; gap:6px; flex-wrap:wrap}
+.pill-tab{padding:7px 14px; border-radius:var(--radius-full); font-size:12.5px; font-weight:700; border:1px solid var(--border); background:var(--surface); color:var(--text-2); cursor:pointer}
+.pill-tab.active{background:var(--primary-solid); border-color:var(--primary-solid); color:var(--text-on-primary)}
+
+/* ============================================================
+   LOADING STATES — spinner + skeleton placeholders
+   ============================================================ */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:20px;height:20px;border-radius:50%;border:2.5px solid var(--border);border-top-color:var(--primary-solid);animation:spin .7s linear infinite; flex:0 0 auto}
+.spinner.lg{width:34px;height:34px;border-width:3px}
+@media (prefers-reduced-motion: reduce){ .spinner{animation-duration:1.6s} }
+
+.loading-inline{display:flex; align-items:center; gap:10px; color:var(--text-2); font-size:13px; padding:26px; justify-content:center}
+
+@keyframes shimmer{0%{background-position:-200px 0}100%{background-position:calc(200px + 100%) 0}}
+.skeleton{border-radius:var(--radius-sm); background:linear-gradient(90deg, var(--surface-alt) 25%, var(--surface-sunken) 37%, var(--surface-alt) 63%); background-size:400px 100%; animation:shimmer 1.4s ease infinite}
+@media (prefers-reduced-motion: reduce){ .skeleton{animation:none; background:var(--surface-sunken)} }
+.skeleton-text{height:12px; margin-bottom:8px}
+.skeleton-text.w-30{width:30%}
+.skeleton-text.w-40{width:40%}
+.skeleton-text.w-60{width:60%}
+.skeleton-text.w-80{width:80%}
+.skeleton-row{display:flex; gap:16px; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border)}
+.skeleton-row:last-child{border-bottom:none}
+.skeleton-avatar{width:34px; height:34px; border-radius:50%; flex:0 0 auto}
+.skeleton-thumb{width:40px; height:40px; border-radius:var(--radius-sm); flex:0 0 auto}
+
+.page-loading{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:70px 24px; color:var(--text-2); font-size:13.5px}
+
+.empty-state{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:52px 24px; color:var(--text-3)}
+.empty-state .icon{width:40px;height:40px; margin-bottom:12px; color:var(--text-3)}
+.empty-state h4{color:var(--text-2); font-size:14.5px}
+.empty-state p{font-size:12.5px; max-width:320px}
+
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--primary-tint);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12.5px;flex:0 0 auto;position:relative}
+.status-dot{position:absolute; bottom:-1px; inset-inline-end:-1px; width:10px; height:10px; border-radius:50%; border:2px solid var(--surface)}
+.status-dot.online{background:var(--success)}
+.status-dot.offline{background:var(--danger)}
+.avatar.lg{width:56px;height:56px;font-size:18px}
+
+.callout{display:flex; gap:10px; padding:13px 15px; border-radius:var(--radius-md); font-size:12.5px; border:1px solid transparent}
+.callout .icon{width:16px;height:16px; flex:0 0 auto; margin-top:1px}
+.callout-info{background:var(--info-tint); color:var(--info); border-color:color-mix(in srgb, var(--info) 25%, transparent)}
+.callout-warning{background:var(--warning-tint); color:var(--warning); border-color:color-mix(in srgb, var(--warning) 25%, transparent)}
+.callout-danger{background:var(--danger-tint); color:var(--danger); border-color:color-mix(in srgb, var(--danger) 25%, transparent)}
+.callout-success{background:var(--success-tint); color:var(--success); border-color:color-mix(in srgb, var(--success) 25%, transparent)}
+
+.modal-backdrop{background:rgba(20,14,10,.5); border-radius:var(--radius-lg); padding:34px}
+.modal{background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); max-width:520px; margin:0 auto; overflow:hidden; border:1px solid var(--border)}
+.modal-head{display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--border)}
+.modal-head strong{display:flex; align-items:center; gap:8px; font-size:15px}
+.modal-head strong .icon{width:17px;height:17px; color:var(--primary-solid)}
+.modal-body{padding:22px}
+.modal-body .field:last-child{margin-bottom:0}
+.modal-foot{display:flex; justify-content:flex-end; gap:8px; padding:14px 22px; border-top:1px solid var(--border); background:var(--surface-alt)}
+
+/* ---- חלונית הלוח הכפול (HebrewDateRangePicker): מודל בגובה קבוע — הגוף נגלל, הכותרת והכפתורים תמיד גלויים.
+   חייב לשבת אחרי חוקי ה-.modal ובספציפיות כפולה, אחרת max-width:520px של .modal דורס ---- */
+.modal.range-cal-modal{width:auto; max-width:min(100%,680px); max-height:92vh; margin:0; display:flex; flex-direction:column; min-width:0}
+.modal.range-cal-modal .modal-body{overflow-y:auto; overscroll-behavior:contain}
+.modal.range-cal-modal .modal-foot{flex-wrap:wrap}
+.range-cal-summary{margin:4px 0 0 0; font-size:12.5px; color:var(--text-3)}
+.range-cal-summary strong{color:var(--primary-solid)}
+.range-cal-count{font-weight:700}
+.range-cal-presets{margin-bottom:12px; align-items:center}
+.range-cal-presets-label{font-size:12.5px; font-weight:700; color:var(--text-3)}
+.range-cal-controls{display:flex; align-items:center; gap:8px; margin-bottom:14px}
+.range-cal-controls .select{flex:1; min-width:0}
+.range-cal-panels{display:flex; flex-wrap:wrap; gap:14px; justify-content:center}
+.datepicker.range-panel{width:280px; max-width:100%; box-shadow:none; border:1px solid var(--border); padding:10px 12px}
+
+/* ============================================================
+   PALETTE PRESETS — live switcher, alternate brand hues
+   (only primary/accent families vary; neutrals + semantic
+   colors stay constant so every palette still reads as "אריג")
+   ============================================================ */
+:root[data-palette="forest"]{
+  --primary:#2E5C40; --primary-hover:#234833; --primary-solid:var(--primary);
+  --primary-tint:#E3EEE6; --primary-tint-2:#C7DECD;
+  --accent:#9C5423; --accent-solid:var(--accent); --accent-tint:#F6E2D2;
+}
+:root[data-palette="forest"][data-theme="dark"]{
+  --primary:#8FCB9F; --primary-hover:#A8DAB4; --primary-solid:#2E6B45;
+  --primary-tint:#1E3226; --primary-tint-2:#28402F;
+  --accent:#E0A374; --accent-solid:#8F4E1E; --accent-tint:#3A2A1C;
+}
+:root[data-palette="ocean"]{
+  --primary:#1F5C66; --primary-hover:#17454C; --primary-solid:var(--primary);
+  --primary-tint:#E1EEF0; --primary-tint-2:#BFDBDF;
+  --accent:#8A661F; --accent-solid:var(--accent); --accent-tint:#F3E7CF;
+}
+:root[data-palette="ocean"][data-theme="dark"]{
+  --primary:#7FC7CF; --primary-hover:#9AD4DA; --primary-solid:#1F6570;
+  --primary-tint:#1B2E31; --primary-tint-2:#233C40;
+  --accent:#E0BE7E; --accent-solid:#8C6A28; --accent-tint:#362C1B;
+}
+:root[data-palette="plum"]{
+  --primary:#5B3A73; --primary-hover:#472C5C; --primary-solid:var(--primary);
+  --primary-tint:#EEE7F2; --primary-tint-2:#D9C7E3;
+  --accent:#3F6E6E; --accent-solid:var(--accent); --accent-tint:#E2EEEE;
+}
+:root[data-palette="plum"][data-theme="dark"]{
+  --primary:#C7A3DB; --primary-hover:#D6BCE6; --primary-solid:#6B4485;
+  --primary-tint:#2C2233; --primary-tint-2:#392A42;
+  --accent:#8FC2C2; --accent-solid:#356363; --accent-tint:#1C2E2E;
+}
+:root[data-palette="amber"]{
+  --primary:#A85A1E; --primary-hover:#8A4816; --primary-solid:var(--primary);
+  --primary-tint:#F5E6D3; --primary-tint-2:#E8C9A0;
+  --accent:#2E6B6B; --accent-solid:var(--accent); --accent-tint:#DCEDEB;
+}
+:root[data-palette="amber"][data-theme="dark"]{
+  --primary:#E0A868; --primary-hover:#EABD86; --primary-solid:#8F5A1E;
+  --primary-tint:#3A2A18; --primary-tint-2:#4A3620;
+  --accent:#7FC2C2; --accent-solid:#255757; --accent-tint:#1C2E2E;
+}
+:root[data-palette="slate"]{
+  --primary:#3E5266; --primary-hover:#2E3E4D; --primary-solid:var(--primary);
+  --primary-tint:#E4E9EE; --primary-tint-2:#C2CEDA;
+  --accent:#A8622E; --accent-solid:var(--accent); --accent-tint:#F3E2D2;
+}
+:root[data-palette="slate"][data-theme="dark"]{
+  --primary:#9FB4C7; --primary-hover:#B4C6D6; --primary-solid:#3E5A70;
+  --primary-tint:#212B33; --primary-tint-2:#2A3944;
+  --accent:#E0A374; --accent-solid:#8F5424; --accent-tint:#3A2A1C;
+}
+:root[data-palette="rose"]{
+  --primary:#A03A54; --primary-hover:#822C42; --primary-solid:var(--primary);
+  --primary-tint:#F5E2E7; --primary-tint-2:#E8BFCB;
+  --accent:#6E7A3A; --accent-solid:var(--accent); --accent-tint:#EBEED9;
+}
+:root[data-palette="rose"][data-theme="dark"]{
+  --primary:#E091A8; --primary-hover:#EAADC0; --primary-solid:#8F3350;
+  --primary-tint:#332128; --primary-tint-2:#402530;
+  --accent:#B7C27E; --accent-solid:#5C6529; --accent-tint:#2C2F1C;
+}
+:root[data-palette="indigo"]{
+  --primary:#3E4E8C; --primary-hover:#2E3B6B; --primary-solid:var(--primary);
+  --primary-tint:#E4E6F2; --primary-tint-2:#C2C8E3;
+  --accent:#B8862E; --accent-solid:var(--accent); --accent-tint:#F5E9D0;
+}
+:root[data-palette="indigo"][data-theme="dark"]{
+  --primary:#A3ADD9; --primary-hover:#B8C0E0; --primary-solid:#4A5A9E;
+  --primary-tint:#242A42; --primary-tint-2:#2E3752;
+  --accent:#E0BA6E; --accent-solid:#8F6820; --accent-tint:#382C18;
+}
+:root[data-palette="turquoise"]{
+  --primary:#1E7A7A; --primary-hover:#166060; --primary-solid:var(--primary);
+  --primary-tint:#DFF0EF; --primary-tint-2:#B8DEDC;
+  --accent:#B85A42; --accent-solid:var(--accent); --accent-tint:#F5E1DA;
+}
+:root[data-palette="turquoise"][data-theme="dark"]{
+  --primary:#6FCFCF; --primary-hover:#8ADCDC; --primary-solid:#1E7A7A;
+  --primary-tint:#1B302F; --primary-tint-2:#233E3D;
+  --accent:#E29278; --accent-solid:#8F4A32; --accent-tint:#38251E;
+}
+:root[data-palette="mustard"]{
+  --primary:#8C7A1E; --primary-hover:#6E5F16; --primary-solid:var(--primary);
+  --primary-tint:#F2EDD4; --primary-tint-2:#DED0A0;
+  --accent:#6E3A5C; --accent-solid:var(--accent); --accent-tint:#EEE0E9;
+}
+:root[data-palette="mustard"][data-theme="dark"]{
+  --primary:#D9C570; --primary-hover:#E4D48C; --primary-solid:#8C7A1E;
+  --primary-tint:#332D18; --primary-tint-2:#403A20;
+  --accent:#C293B3; --accent-solid:#6E3A5C; --accent-tint:#2E2028;
+}
+:root[data-palette="fuchsia"]{
+  --primary:#A02E8C; --primary-hover:#821F70; --primary-solid:var(--primary);
+  --primary-tint:#F5E2F0; --primary-tint-2:#E8BFDE;
+  --accent:#2E7A5C; --accent-solid:var(--accent); --accent-tint:#DCEEE5;
+}
+:root[data-palette="fuchsia"][data-theme="dark"]{
+  --primary:#E091D0; --primary-hover:#EAADD8; --primary-solid:#8F2E76;
+  --primary-tint:#332030; --primary-tint-2:#40263C;
+  --accent:#7FC2A3; --accent-solid:#255C3F; --accent-tint:#1C2E24;
+}
+:root[data-palette="coffee"]{
+  --primary:#6B4A2E; --primary-hover:#523620; --primary-solid:var(--primary);
+  --primary-tint:#EEE4D8; --primary-tint-2:#D9C2A3;
+  --accent:#2E6B7A; --accent-solid:var(--accent); --accent-tint:#DCEBEE;
+}
+:root[data-palette="coffee"][data-theme="dark"]{
+  --primary:#C7A374; --primary-hover:#D6B88C; --primary-solid:#6B4A2E;
+  --primary-tint:#2E2318; --primary-tint-2:#3A2C1E;
+  --accent:#7FBCC7; --accent-solid:#255560; --accent-tint:#1C2C2E;
+}
+:root[data-palette="mint"]{
+  --primary:#2E7A5C; --primary-hover:#1E5C44; --primary-solid:var(--primary);
+  --primary-tint:#DCEEE5; --primary-tint-2:#B0DCC7;
+  --accent:#B8622E; --accent-solid:var(--accent); --accent-tint:#F5E2D2;
+}
+:root[data-palette="mint"][data-theme="dark"]{
+  --primary:#7FC2A3; --primary-hover:#9AD4B8; --primary-solid:#2E7A5C;
+  --primary-tint:#1C2E24; --primary-tint-2:#233C30;
+  --accent:#E0A374; --accent-solid:#8F5424; --accent-tint:#3A2A1C;
+}
+:root[data-palette="burgundy"]{
+  --primary:#5C1E28; --primary-hover:#431620; --primary-solid:var(--primary);
+  --primary-tint:#EEDFE1; --primary-tint-2:#D9B8BE;
+  --accent:#8C6E1E; --accent-solid:var(--accent); --accent-tint:#F2E9D0;
+}
+:root[data-palette="burgundy"][data-theme="dark"]{
+  --primary:#C77E8C; --primary-hover:#D69AA6; --primary-solid:#6B2530;
+  --primary-tint:#2E1B1E; --primary-tint-2:#3A2126;
+  --accent:#D9BE70; --accent-solid:#8C6E1E; --accent-tint:#332D18;
+}
+
+/* ------------------------------------------------------------
+   PRESET NEUTRAL SETS — full-coverage counterpart to the hue
+   blocks above: every preset now explicitly carries its neutral
+   set (--bg, --surface*, --border*, --text*, --text-on-primary +
+   --shadow-rgb). All 14 presets deliberately share the default
+   warm אריג neutrals, so nothing is visually reskinned — the
+   grouped rules below exist so (a) a preset is a complete,
+   self-describing palette, and (b) a future preset can override
+   its neutrals by adding a more specific block AFTER these.
+   Structure mirrors the base tokens exactly (light rule →
+   @media auto-dark rule → explicit [data-theme="dark"] rule);
+   keep that order — a light rule placed after the dark ones
+   would silently win the cascade (see project memory on
+   media-query source order). Must stay BEFORE the high-contrast
+   block so contrast keeps winning at equal specificity.
+   ------------------------------------------------------------ */
+:root[data-palette="forest"], :root[data-palette="ocean"], :root[data-palette="plum"],
+:root[data-palette="amber"], :root[data-palette="slate"], :root[data-palette="rose"],
+:root[data-palette="indigo"], :root[data-palette="turquoise"], :root[data-palette="mustard"],
+:root[data-palette="fuchsia"], :root[data-palette="coffee"], :root[data-palette="mint"],
+:root[data-palette="burgundy"]{
+  --bg:#FAF7F2; --surface:#FFFFFF; --surface-alt:#F4EEE6; --surface-sunken:#EFE8DD;
+  --border:#E5DBCB; --border-strong:#D8CAB2;
+  --text:#2A2420; --text-2:#6C6155; --text-3:#7A7062; --text-on-primary:#FFF9F2;
+  --shadow-rgb:60,45,30;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"])[data-palette="forest"], :root:not([data-theme="light"])[data-palette="ocean"],
+  :root:not([data-theme="light"])[data-palette="plum"], :root:not([data-theme="light"])[data-palette="amber"],
+  :root:not([data-theme="light"])[data-palette="slate"], :root:not([data-theme="light"])[data-palette="rose"],
+  :root:not([data-theme="light"])[data-palette="indigo"], :root:not([data-theme="light"])[data-palette="turquoise"],
+  :root:not([data-theme="light"])[data-palette="mustard"], :root:not([data-theme="light"])[data-palette="fuchsia"],
+  :root:not([data-theme="light"])[data-palette="coffee"], :root:not([data-theme="light"])[data-palette="mint"],
+  :root:not([data-theme="light"])[data-palette="burgundy"]{
+    --bg:#1B1714; --surface:#24201B; --surface-alt:#2C2620; --surface-sunken:#191512;
+    --border:#3C342A; --border-strong:#4A4032;
+    --text:#F1EAE0; --text-2:#C2B8A8; --text-3:#9A9081; --text-on-primary:#FFF9F2;
+    --shadow-rgb:0,0,0;
+  }
+}
+:root[data-palette="forest"][data-theme="dark"], :root[data-palette="ocean"][data-theme="dark"],
+:root[data-palette="plum"][data-theme="dark"], :root[data-palette="amber"][data-theme="dark"],
+:root[data-palette="slate"][data-theme="dark"], :root[data-palette="rose"][data-theme="dark"],
+:root[data-palette="indigo"][data-theme="dark"], :root[data-palette="turquoise"][data-theme="dark"],
+:root[data-palette="mustard"][data-theme="dark"], :root[data-palette="fuchsia"][data-theme="dark"],
+:root[data-palette="coffee"][data-theme="dark"], :root[data-palette="mint"][data-theme="dark"],
+:root[data-palette="burgundy"][data-theme="dark"]{
+  --bg:#1B1714; --surface:#24201B; --surface-alt:#2C2620; --surface-sunken:#191512;
+  --border:#3C342A; --border-strong:#4A4032;
+  --text:#F1EAE0; --text-2:#C2B8A8; --text-3:#9A9081; --text-on-primary:#FFF9F2;
+  --shadow-rgb:0,0,0;
+}
+
+/* ============================================================
+   HIGH-CONTRAST MODE — accessibility display mode, overrides
+   neutrals + primary/accent regardless of the chosen palette
+   ============================================================ */
+:root[data-theme="contrast"]{
+  color-scheme: light;
+  --bg:#FFFFFF; --surface:#FFFFFF; --surface-alt:#F0F0F0; --surface-sunken:#E4E4E4;
+  --border:#000000; --border-strong:#000000;
+  --text:#000000; --text-2:#000000; --text-3:#2B2B2B; --text-on-primary:#FFFFFF;
+  --primary:#00285C; --primary-hover:#001B3D; --primary-solid:#00285C;
+  --primary-tint:#D9E4F2; --primary-tint-2:#AFC6E3;
+  --accent:#5C3D00; --accent-solid:#5C3D00; --accent-tint:#F2E7CC;
+  --success:#0B5C1F; --success-tint:#D3EBD8;
+  --warning:#6B4400; --warning-tint:#F2E2C2;
+  --danger:#7A0000; --danger-tint:#F2D2D2;
+  --info:#00335C; --info-tint:#D2E2F2;
+  --shadow-sm:none; --shadow-md:0 2px 6px rgba(0,0,0,.3); --shadow-lg:0 4px 14px rgba(0,0,0,.35);
+}
+:root[data-theme="contrast"] .card, :root[data-theme="contrast"] .table-wrap, :root[data-theme="contrast"] .kpi-card,
+:root[data-theme="contrast"] .input, :root[data-theme="contrast"] .select, :root[data-theme="contrast"] .textarea,
+:root[data-theme="contrast"] .btn-secondary{ border-width:1.5px }
+:root[data-theme="contrast"] .btn:focus-visible, :root[data-theme="contrast"] .nav-link:focus-visible{ outline-width:3px }
+
+/* ============================================================
+   FONT PRESETS — live switcher
+   ============================================================ */
+:root{ --font-heading: var(--font); }
+:root[data-font="modern"]{ --font:"Calibri","Segoe UI",Arial,sans-serif; --font-heading:"Calibri","Segoe UI",Arial,sans-serif; }
+:root[data-font="classic"]{ --font-heading:"David","Times New Roman",serif; }
+:root[data-font="rounded"]{ --font:"Segoe UI Rounded","Segoe UI",Arial,sans-serif; --font-heading:"Segoe UI Rounded","Segoe UI",Arial,sans-serif; }
+:root[data-font="contemporary"]{ --font:"Trebuchet MS","Segoe UI",Arial,sans-serif; --font-heading:"Trebuchet MS","Segoe UI",Arial,sans-serif; }
+:root[data-font="condensed"]{ --font:"Bahnschrift","Segoe UI",Arial,sans-serif; --font-heading:"Bahnschrift","Segoe UI",Arial,sans-serif; }
+:root[data-font="editorial"]{ --font:"Constantia","Georgia",serif; --font-heading:"Constantia","Georgia",serif; }
+/* --- extended list (33 more, opened via the "עוד גופנים" dropdown) --- */
+:root[data-font="arial"]{ --font:Arial,"Segoe UI",sans-serif; --font-heading:Arial,"Segoe UI",sans-serif; }
+:root[data-font="arial-black"]{ --font:"Arial Black",Arial,sans-serif; --font-heading:"Arial Black",Arial,sans-serif; }
+:root[data-font="tahoma"]{ --font:Tahoma,"Segoe UI",sans-serif; --font-heading:Tahoma,"Segoe UI",sans-serif; }
+:root[data-font="verdana"]{ --font:Verdana,"Segoe UI",sans-serif; --font-heading:Verdana,"Segoe UI",sans-serif; }
+:root[data-font="calibri-light"]{ --font:"Calibri Light",Calibri,"Segoe UI",sans-serif; --font-heading:"Calibri Light",Calibri,"Segoe UI",sans-serif; }
+:root[data-font="candara"]{ --font:Candara,"Segoe UI",sans-serif; --font-heading:Candara,"Segoe UI",sans-serif; }
+:root[data-font="corbel"]{ --font:Corbel,"Segoe UI",sans-serif; --font-heading:Corbel,"Segoe UI",sans-serif; }
+:root[data-font="franklin-gothic"]{ --font:"Franklin Gothic Medium",Arial,sans-serif; --font-heading:"Franklin Gothic Medium",Arial,sans-serif; }
+:root[data-font="gadugi"]{ --font:Gadugi,"Segoe UI",sans-serif; --font-heading:Gadugi,"Segoe UI",sans-serif; }
+:root[data-font="century-gothic"]{ --font:"Century Gothic","Segoe UI",sans-serif; --font-heading:"Century Gothic","Segoe UI",sans-serif; }
+:root[data-font="lucida-sans"]{ --font:"Lucida Sans Unicode","Segoe UI",sans-serif; --font-heading:"Lucida Sans Unicode","Segoe UI",sans-serif; }
+:root[data-font="ms-sans-serif"]{ --font:"Microsoft Sans Serif",Arial,sans-serif; --font-heading:"Microsoft Sans Serif",Arial,sans-serif; }
+:root[data-font="segoe-black"]{ --font:"Segoe UI Black","Segoe UI",sans-serif; --font-heading:"Segoe UI Black","Segoe UI",sans-serif; }
+:root[data-font="miriam"]{ --font:Miriam,David,"Segoe UI",sans-serif; --font-heading:Miriam,David,"Segoe UI",sans-serif; }
+:root[data-font="rod"]{ --font:Rod,David,"Segoe UI",sans-serif; --font-heading:Rod,David,"Segoe UI",sans-serif; }
+:root[data-font="aharoni"]{ --font:Aharoni,David,"Segoe UI",sans-serif; --font-heading:Aharoni,David,"Segoe UI",sans-serif; }
+:root[data-font="frank-ruehl"]{ --font:"FrankRuehl",David,serif; --font-heading:"FrankRuehl",David,serif; }
+:root[data-font="narkisim"]{ --font:Narkisim,David,serif; --font-heading:Narkisim,David,serif; }
+:root[data-font="levenim"]{ --font:"Levenim MT",David,"Segoe UI",sans-serif; --font-heading:"Levenim MT",David,"Segoe UI",sans-serif; }
+:root[data-font="gisha"]{ --font:Gisha,"Segoe UI",sans-serif; --font-heading:Gisha,"Segoe UI",sans-serif; }
+:root[data-font="georgia"]{ --font:Georgia,serif; --font-heading:Georgia,serif; }
+:root[data-font="cambria"]{ --font:Cambria,Georgia,serif; --font-heading:Cambria,Georgia,serif; }
+:root[data-font="palatino"]{ --font:"Palatino Linotype",Georgia,serif; --font-heading:"Palatino Linotype",Georgia,serif; }
+:root[data-font="sitka"]{ --font:Sitka,Georgia,serif; --font-heading:Sitka,Georgia,serif; }
+:root[data-font="sylfaen"]{ --font:Sylfaen,Georgia,serif; --font-heading:Sylfaen,Georgia,serif; }
+:root[data-font="times"]{ --font:"Times New Roman",serif; --font-heading:"Times New Roman",serif; }
+:root[data-font="consolas"]{ --font:Consolas,"Courier New",monospace; --font-heading:Consolas,"Courier New",monospace; }
+:root[data-font="lucida-console"]{ --font:"Lucida Console",Consolas,monospace; --font-heading:"Lucida Console",Consolas,monospace; }
+:root[data-font="ms-gothic"]{ --font:"MS Gothic","Segoe UI",sans-serif; --font-heading:"MS Gothic","Segoe UI",sans-serif; }
+:root[data-font="segoe-print"]{ --font:"Segoe Print","Segoe UI",sans-serif; --font-heading:"Segoe Print","Segoe UI",sans-serif; }
+:root[data-font="segoe-script"]{ --font:"Segoe Script","Segoe UI",cursive; --font-heading:"Segoe Script","Segoe UI",cursive; }
+:root[data-font="ink-free"]{ --font:"Ink Free","Segoe Print","Segoe UI",cursive; --font-heading:"Ink Free","Segoe Print","Segoe UI",cursive; }
+:root[data-font="impact"]{ --font:Impact,Arial,sans-serif; --font-heading:Impact,Arial,sans-serif; }
+h1,h2,h3,h4{font-family:var(--font-heading)}
+
+/* ============================================================
+   DENSITY — comfortable (default) vs compact
+   ============================================================ */
+:root[data-density="compact"] .btn{padding:6px 12px}
+:root[data-density="compact"] .btn-icon-only{width:30px; height:30px}
+:root[data-density="compact"] .btn-sm{padding:4px 9px}
+:root[data-density="compact"] table.data thead th{padding:8px 12px}
+:root[data-density="compact"] table.data tbody td{padding:8px 12px}
+:root[data-density="compact"] .list-card{padding:8px 11px; margin-bottom:6px}
+:root[data-density="compact"] .card-pad{padding:13px}
+:root[data-density="compact"] .kpi-card{padding:12px 14px}
+:root[data-density="compact"] .content{padding:16px 24px 40px}
+:root[data-density="compact"] .field{margin-bottom:10px}
+
+/* ============================================================
+   TEXT SIZE — relative scaling, independent of density/palette.
+   Scales the whole app-shell proportionally (text + spacing +
+   icons together) rather than only font-size, so layout stays
+   coherent at every step; the floating switcher itself is
+   outside .app-shell and always stays at its own fixed size.
+   ============================================================ */
+:root[data-text-scale="small"] .app-shell{zoom:0.9}
+:root[data-text-scale="large"] .app-shell{zoom:1.12}
+:root[data-text-scale="xlarge"] .app-shell{zoom:1.28}
+
+/* ============================================================
+   DISPLAY SETTINGS CONTROLS — palette/font/mode/density pickers
+   (used on the "עיצוב ותצוגה" page)
+   ============================================================ */
+.swatch-row{display:flex; gap:8px; flex-wrap:wrap}
+.swatch-btn{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);cursor:pointer;padding:0}
+.swatch-btn.active{border-color:var(--text); box-shadow:0 0 0 2px var(--surface), 0 0 0 4px var(--text)}
+/* "custom" swatch — same base look as a preset, plus a small edit-pencil
+   glyph so it reads as "create/edit your own" rather than a 15th preset */
+.swatch-btn-custom{display:flex; align-items:center; justify-content:center}
+.swatch-btn-custom .icon{width:13px;height:13px; color:#fff; filter:drop-shadow(0 0 1px rgba(0,0,0,.55))}
+.custom-palette-editor{margin-top:14px; padding-top:14px; border-top:1px solid var(--border)}
+.custom-palette-editor .hint{font-size:11.5px; color:var(--text-3); margin-top:2px}
+.color-field-row{display:flex; align-items:center; gap:10px}
+.color-swatch-input{width:40px; height:40px; padding:0; border:1px solid var(--border-strong); border-radius:var(--radius-sm); background:var(--surface); cursor:pointer; flex:0 0 auto}
+.color-swatch-input::-webkit-color-swatch-wrapper{padding:3px}
+.color-swatch-input::-webkit-color-swatch{border:none; border-radius:6px}
+.color-swatch-input::-moz-color-swatch{border:none; border-radius:6px}
+.color-field-hex{font-size:12.5px; color:var(--text-2); font-family:Consolas, monospace; direction:ltr; text-align:start}
+.font-btn-row{display:flex; flex-direction:column; gap:5px}
+.font-opt{padding:8px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); cursor:pointer; font-size:13px; text-align:start; color:var(--text)}
+.font-opt.active{border-color:var(--primary-solid); background:var(--primary-tint); color:var(--primary-solid); font-weight:700}
+.mode-row{display:grid; grid-template-columns:1fr 1fr; gap:6px}
+.mode-btn{padding:7px 4px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); cursor:pointer; font-size:11.5px; display:flex;align-items:center;justify-content:center;gap:4px; color:var(--text-2)}
+.mode-btn .icon{width:13px;height:13px}
+.mode-btn.active{border-color:var(--primary-solid); background:var(--primary-tint); color:var(--primary-solid)}
+.density-row{display:flex; gap:6px}
+.density-btn{flex:1; padding:7px 4px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); cursor:pointer; font-size:11.5px; color:var(--text-2)}
+.density-btn.active{border-color:var(--primary-solid); background:var(--primary-tint); color:var(--primary-solid)}
+
+/* ---- עמוד "עיצוב ותצוגה" (redesign) — קומפקטי, רוחב מוגבל, סעיפים ---- */
+.settings-wrap{max-width:860px}
+.settings-card{margin-bottom:16px}
+.mode-row-4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:640px){ .mode-row-4{grid-template-columns:repeat(2,1fr)} }
+.font-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); gap:6px}
+.font-grid .font-opt{text-align:center}
+.settings-two-col{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+@media (max-width:640px){ .settings-two-col{grid-template-columns:1fr} }
+.saved-palette-list{display:flex; flex-direction:column; gap:8px; margin-bottom:4px}
+.saved-palette-row{display:flex; align-items:center; gap:10px; border:1px solid var(--border); border-radius:var(--radius-md); padding:8px 12px; background:var(--surface)}
+.saved-palette-row.active{border-color:var(--primary-solid); background:var(--primary-tint)}
+.saved-palette-dot{width:26px; height:26px; border-radius:50%; flex:0 0 auto; border:1px solid var(--border-strong)}
+.saved-palette-name{flex:1; font-size:13px; font-weight:700; color:var(--text)}
+.saved-palette-actions{display:flex; gap:6px; align-items:center}
+.saved-palette-delete .icon{width:14px; height:14px}
+.saved-palette-delete:hover{color:var(--danger); border-color:var(--danger)}
+.settings-inline-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; font-size:13px}
+.settings-inline-actions{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:12px}
+.color-fields-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px}
+.color-fields-grid .field{margin-bottom:0}
+.neutral-auto-toggle{display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--text-2); cursor:pointer; white-space:nowrap}
+.preview-rows{display:flex; flex-direction:column; gap:6px; margin-top:12px}
+.preview-row{display:flex; align-items:center; gap:10px}
+.preview-row-label{flex:0 0 34px; font-size:11.5px; color:var(--text-3)}
+.preview-strip{display:flex; gap:4px; flex:1}
+.preview-cell{flex:1; height:24px; border-radius:6px; border:1px solid var(--border)}
+
+.toast{display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); box-shadow:var(--shadow-md); border-radius:var(--radius-md); padding:12px 16px; font-size:13px; max-width:340px}
+.toast .icon{width:17px;height:17px}
+.toast.success{border-inline-start:3px solid var(--success)}
+.toast.success .icon{color:var(--success)}
+
+.stepper{display:flex; align-items:center; gap:0; margin-bottom:22px}
+.step{display:flex; align-items:center; gap:8px; color:var(--text-3); font-size:12.5px; font-weight:700}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--surface-sunken);color:var(--text-3);display:flex;align-items:center;justify-content:center;font-size:12px}
+.step.done .step-num{background:var(--success-solid); color:var(--text-on-primary)}
+.step.current .step-num{background:var(--primary-solid); color:var(--text-on-primary)}
+.step.current{color:var(--text)}
+.step-line{width:40px; height:2px; background:var(--border-strong); margin:0 8px}
+
+.chat-thread{display:flex; flex-direction:column; gap:12px}
+.bubble{max-width:70%; padding:11px 14px; border-radius:var(--radius-md); font-size:13.5px; line-height:1.5; position:relative}
+.bubble.user{align-self:flex-end; background:var(--primary); color:var(--text-on-primary); border-end-end-radius:2px}
+.bubble.assistant{align-self:flex-start; background:var(--surface-alt); color:var(--text); border:1px solid var(--border); border-end-start-radius:2px}
+
+/* hover-revealed copy action, same corner-badge language as .icon-btn .dot /
+   .topbar-pin-remove above ---- */
+.bubble-copy-btn{
+  position:absolute; top:-9px; inset-inline-end:-9px; width:22px; height:22px; border-radius:50%;
+  border:1px solid var(--border); background:var(--surface); color:var(--text-2); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; opacity:0; transition:opacity .15s ease, color .15s ease; padding:0; flex:0 0 auto; box-shadow:var(--shadow-sm);
+}
+.bubble-copy-btn .icon{width:11px;height:11px}
+.bubble-copy-btn.copied{color:var(--success)}
+.bubble:hover .bubble-copy-btn{opacity:1}
+@media (hover:none){ .bubble-copy-btn{opacity:1} }
+
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+.section-title{font-size:13px; font-weight:800; color:var(--text-2); text-transform:uppercase; letter-spacing:.03em; margin:26px 0 12px}
+.section-title:first-child{margin-top:0}
+.swatch{width:100%; height:64px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm)}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius-full);padding:4px 10px;font-size:12px;color:var(--text-2)}
+
+/* print surfaces are shown as framed "paper" previews inline in the gallery */
+.paper-preview{background:#fff; color:#1a1a1a; border-radius:var(--radius-md); box-shadow:var(--shadow-md); padding:26px; max-width:640px; margin:0 auto; font-size:12.5px}
+.paper-preview h2,.paper-preview h3{color:#1a1a1a}
+
+/* ---- print report design language: letterhead, outlined boxes,
+   icon section headers, colored status words — token-driven so
+   these follow the live palette switcher like everything else ---- */
+.print-letterhead{display:flex; align-items:center; gap:12px; padding-bottom:14px; margin-bottom:20px; border-bottom:2px solid var(--primary-solid)}
+.print-mark{width:38px;height:38px;border-radius:9px;background:var(--primary-solid);color:var(--text-on-primary);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.print-mark .icon{width:20px;height:20px}
+.print-org{font-weight:800; font-size:15px; color:#1a1a1a}
+.print-contact{font-size:11.5px; color:#666; margin-top:1px}
+
+.print-box{border:1.5px solid #d9d2c4; border-radius:10px; padding:12px 16px; margin-bottom:16px}
+
+.print-section-title{display:flex; align-items:center; gap:7px; font-size:14px; font-weight:800; color:var(--primary-solid); margin:18px 0 8px}
+.print-section-title .icon{width:15px;height:15px}
+
+.print-status{font-weight:700}
+.print-status.done{color:#2f7a4e}
+.print-status.pending{color:#a6641f}
+.print-status.issue{color:#a6423a}
+
+.print-check{width:14px;height:14px;border:1.5px solid #999;border-radius:3px;display:inline-flex;align-items:center;justify-content:center}
+.print-check.done{background:var(--primary-solid); border-color:var(--primary-solid)}
+.print-check.done .icon{width:10px;height:10px;color:var(--text-on-primary);stroke-width:3}
+
+.print-totals-box{border:1.5px solid var(--primary-solid); border-radius:10px; padding:12px 16px; background:color-mix(in srgb, var(--primary-solid) 6%, white); margin:12px 0; display:flex; justify-content:space-between; align-items:center}
+
+.print-sig{display:flex; gap:24px; margin-top:36px}
+.print-sig > div{flex:1; text-align:center; border-top:1.5px solid #999; padding-top:10px; font-size:12px; color:#555}
+
+/* ============================================================
+   SYSTEM STATES — full-page error / 404 / no-access / banner
+   ============================================================ */
+.state-page{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:70px 24px; max-width:440px; margin:0 auto}
+.state-page .state-icon{width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center; margin-bottom:22px}
+.state-page .state-icon .icon{width:34px;height:34px}
+.state-page .state-code{font-size:13px; font-weight:800; letter-spacing:.06em; color:var(--text-3); text-transform:uppercase; margin-bottom:6px}
+.state-page h2{font-size:21px; margin-bottom:8px}
+.state-page p{color:var(--text-2); font-size:13.5px; margin-bottom:22px}
+.state-page .state-actions{display:flex; gap:10px}
+
+/* ============================================================
+   CONTENT PAGES — typography-focused (help, privacy, terms)
+   ============================================================ */
+.content-page{max-width:720px; margin:0 auto}
+.content-page h1{font-size:26px; margin-bottom:6px}
+.content-page .content-updated{color:var(--text-3); font-size:12.5px; margin-bottom:32px}
+.content-page h2{font-size:17px; margin:30px 0 10px; padding-top:6px}
+.content-page h2:first-of-type{margin-top:0}
+.content-page p{color:var(--text-2); font-size:14.5px; line-height:1.8; margin-bottom:14px}
+.content-page ul, .content-page ol{color:var(--text-2); font-size:14.5px; line-height:1.8; margin:0 0 14px; padding-inline-start:22px}
+.content-page li{margin-bottom:4px}
+.content-page strong{color:var(--text)}
+.content-toc{background:var(--surface-alt); border:1px solid var(--border); border-radius:var(--radius-lg); padding:18px 20px; margin-bottom:32px}
+.content-toc h4{font-size:12px; text-transform:uppercase; letter-spacing:.03em; color:var(--text-3); margin-bottom:10px}
+.content-toc a{display:block; font-size:13.5px; color:var(--primary-solid); text-decoration:none; padding:4px 0}
+.content-toc a:hover{text-decoration:underline}
+
+.faq-search{margin-bottom:24px}
+.faq-item{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:10px; overflow:hidden}
+.faq-item summary{
+  display:flex; align-items:center; gap:10px; padding:16px 18px; cursor:pointer; font-weight:700; font-size:14.5px;
+  list-style:none; color:var(--text);
+}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary .icon{width:15px; height:15px; color:var(--text-3); flex:0 0 auto; margin-inline-start:auto; transition:transform .15s ease}
+.faq-item[open] summary .icon{transform:rotate(180deg)}
+.faq-item summary .q-icon{width:17px; height:17px; color:var(--primary-solid); flex:0 0 auto}
+.faq-body{padding:0 18px 18px 46px; color:var(--text-2); font-size:13.5px; line-height:1.75}
+.faq-cat{font-size:12px; font-weight:700; color:var(--text-3); text-transform:uppercase; letter-spacing:.03em; margin:22px 0 10px}
+.faq-cat:first-child{margin-top:0}
+
+.error-banner{display:flex; align-items:flex-start; gap:12px; padding:14px 16px; border-radius:var(--radius-md); background:var(--danger-tint); border:1px solid color-mix(in srgb, var(--danger) 25%, transparent); color:var(--danger)}
+.error-banner .icon{width:18px;height:18px; flex:0 0 auto; margin-top:1px}
+.error-banner strong{display:block; color:var(--text); font-size:13.5px; margin-bottom:2px}
+.error-banner span{font-size:12.5px}
+
+/* ============================================================
+   CONFIRM / QUESTION DIALOG — centered icon variant of .modal
+   ============================================================ */
+.confirm-modal{max-width:360px; text-align:center; padding:28px 24px 22px}
+.confirm-modal .modal-icon-circle{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center; margin:0 auto 16px}
+.confirm-modal .modal-icon-circle .icon{width:26px;height:26px}
+.confirm-modal h3{font-size:16px; margin-bottom:6px}
+.confirm-modal p{font-size:13px; color:var(--text-2); margin-bottom:20px}
+.confirm-modal .confirm-actions{display:flex; gap:8px; justify-content:center}
+
+/* ============================================================
+   LISTS — infinite scroll / load-more, multi-select + bulk bar
+   ============================================================ */
+.scroll-list{max-height:280px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--surface)}
+.scroll-list .list-card{border:none; border-bottom:1px solid var(--border); border-radius:0; margin-bottom:0}
+.scroll-list .list-card:last-child{border-bottom:none}
+.load-more-row{padding:16px; text-align:center}
+
+.select-row{display:flex; align-items:center; gap:12px; padding:11px 14px; border-bottom:1px solid var(--border)}
+.select-row:last-child{border-bottom:none}
+.select-row input[type="checkbox"]{width:16px;height:16px; accent-color:var(--primary-solid); flex:0 0 auto}
+.bulk-bar{position:sticky; bottom:0; display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--surface); border-top:1px solid var(--border); box-shadow:0 -4px 12px rgba(0,0,0,.04)}
+.bulk-bar strong{font-size:13px}
+
+/* ============================================================
+   SEGMENTED TWO-STATE TOGGLE BUTTON
+   ============================================================ */
+.toggle-btn-group{display:inline-flex; border:1px solid var(--border-strong); border-radius:var(--radius-sm); overflow:hidden}
+.toggle-btn-group button{padding:8px 18px; border:none; background:var(--surface); color:var(--text-2); font-size:13px; font-weight:700; font-family:var(--font); cursor:pointer; border-inline-start:1px solid var(--border-strong)}
+.toggle-btn-group button:first-child{border-inline-start:none}
+.toggle-btn-group button.on{background:var(--success-tint); color:var(--success)}
+.toggle-btn-group button.off{background:var(--danger-tint); color:var(--danger)}
+
+/* ============================================================
+   AI CHAT — typing indicator + quick-reply suggestion chips
+   ============================================================ */
+@keyframes bounce-dot{0%,60%,100%{transform:translateY(0); opacity:.5}30%{transform:translateY(-4px); opacity:1}}
+.typing-indicator{display:inline-flex; align-items:center; gap:4px; padding:12px 16px}
+.typing-indicator span{width:6px;height:6px;border-radius:50%;background:var(--text-3); animation:bounce-dot 1.2s ease infinite}
+.typing-indicator span:nth-child(2){animation-delay:.15s}
+.typing-indicator span:nth-child(3){animation-delay:.3s}
+@media (prefers-reduced-motion: reduce){ .typing-indicator span{animation:none; opacity:.7} }
+.quick-reply-row{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px}
+.quick-reply-chip{padding:6px 13px; border-radius:var(--radius-full); border:1px solid var(--primary-tint-2); background:var(--primary-tint); color:var(--primary-solid); font-size:12px; font-weight:700; cursor:pointer; font-family:var(--font)}
+.quick-reply-chip:hover{background:var(--primary-tint-2)}
+
+/* ============================================================
+   TOAST variants + stack + connection banner
+   ============================================================ */
+.toast.error{border-inline-start:3px solid var(--danger)}
+.toast.error .icon{color:var(--danger)}
+.toast.warning{border-inline-start:3px solid var(--warning)}
+.toast.warning .icon{color:var(--warning)}
+.toast.info{border-inline-start:3px solid var(--info)}
+.toast.info .icon{color:var(--info)}
+.toast-stack{display:flex; flex-direction:column; gap:10px}
+.connection-banner{display:flex; align-items:center; gap:10px; justify-content:center; padding:9px; font-size:12.5px; font-weight:700; background:var(--warning-tint); color:var(--warning)}
+
+/* ============================================================
+   LIVE-SEARCH COMBOBOX — typeahead with sort-while-typing
+   ============================================================ */
+.combobox{position:relative}
+.combobox-results{position:absolute; top:calc(100% + 4px); inset-inline:0; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); box-shadow:var(--shadow-lg); z-index:40; max-height:240px; overflow-y:auto}
+.combobox-option{display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer; font-size:13px; border-bottom:1px solid var(--border)}
+.combobox-option:last-child{border-bottom:none}
+.combobox-option:hover, .combobox-option.highlighted{background:var(--surface-alt)}
+.combobox-option mark{background:var(--accent-tint); color:var(--accent-solid); border-radius:3px; padding:0 1px}
+.combobox-option .meta{margin-inline-start:auto; font-size:11.5px; color:var(--text-3)}
+
+/* NOTE: the customer kiosk screen ("אטלייה חמה") no longer uses the shared
+   design system at all — its full standalone skin lives in
+   app/customer-interface/kiosk.css (ka-* prefixed classes, scoped under
+   .katelier), ported 1:1 from kiosk-design-mockups/design-11-warm-atelier.html. */
+
+/* ============================================================
+   RESPONSIVE — adapts to window/device size, from ultra-wide
+   monitors down to phones; mobile menu banner + drawer at <900px
+   ============================================================ */
+.menu-toggle{display:none}
+@media (min-width:901px){ .menu-toggle{display:flex} }
+.sidebar-backdrop{display:none}
+
+/* ultra-wide monitors: keep content from stretching into
+   uncomfortably sparse rows. width:100% is required here - .content is a
+   flex item of .main (column flex, default align-items:stretch), and the
+   auto side-margins used for centering take priority over stretch per the
+   flexbox spec, so without an explicit width the item fell back to
+   shrink-to-fit sizing (hugging its narrowest content, e.g. a table's
+   natural column widths) instead of filling up to max-width - on very wide
+   screens this left the whole page looking mostly empty with a tiny table. */
+@media (min-width:1700px){
+  .content{max-width:1680px; width:100%; margin:0 auto}
+}
+
+@media (max-width:980px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .form-grid,.two-col{grid-template-columns:1fr}
+}
+@media (max-width:900px){
+  :root{--sidebar-current-w: 0px}
+  .menu-toggle{display:flex}
+  .sidebar{
+    position:fixed; top:0; right:0; height:100vh; width:280px; max-width:82vw;
+    transform:translateX(100%); transition:transform .25s ease; z-index:90; box-shadow:var(--shadow-lg);
+  }
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-backdrop{
+    position:fixed; inset:0; background:rgba(20,14,10,.45); z-index:85; display:none;
+  }
+  .sidebar-backdrop.open{display:block}
+  /* the AI widget's z-index (900) is above the drawer's (90), so without this
+     it would float on top of an open mobile drawer — hide it while open.
+     !important is required: the widget sets display via inline style, which
+     otherwise always wins over a stylesheet rule regardless of specificity. */
+  body:has(.sidebar.open) .ai-widget-fab,
+  body:has(.sidebar.open) .ai-widget-panel{display:none !important}
+  .search-box{width:auto; flex:1; min-width:0}
+  .topbar-title{font-size:15.5px}
+}
+/* small tablet / large phone */
+@media (max-width:640px){
+  .content{padding:14px 14px 40px}
+  .topbar{padding:10px 14px}
+  .page-head{flex-direction:column; align-items:stretch}
+  .page-actions{width:100%}
+  .page-actions .btn{flex:1}
+  .kpi-grid{grid-template-columns:1fr}
+  .modal-backdrop{padding:14px}
+  .modal{max-width:100%}
+  .datepicker{width:100%; max-width:320px}
+  .stepper{overflow-x:auto; padding-bottom:4px}
+  .theme-panel{width:calc(100vw - 32px); inset-inline-end:16px}
+  .search-box{display:none}
+}
+@media (prefers-reduced-motion: reduce){
+  .sidebar{transition:none}
+}

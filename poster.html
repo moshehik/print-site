@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מערכת פריסה מתקדמת</title>
+
+<link rel="stylesheet" href="css/design-system.css">
+
+<!-- Vendored locally (pdf.js 3.11.174 + jsPDF 2.5.1 — same versions the
+     original standalone tool loaded from cdnjs). No external CDN calls. -->
+<script src="libs/pdf.min.js"></script>
+<script src="libs/jspdf.umd.min.js"></script>
+
+<style>
+  /* ---- page-local styling. Layout/spacing only — colors come from the
+     design-system tokens (var(--...)), nothing new is invented here. ---- */
+  body{ padding:0; }
+  .pt-page{ max-width:1280px; margin:0 auto; padding:28px 24px 60px; }
+  .pt-head{ display:flex; align-items:center; gap:12px; margin-bottom:22px; }
+  .pt-head .brand-mark{ width:40px; height:40px; }
+  .pt-head h1{ font-size:20px; }
+  .pt-head p{ margin:2px 0 0; color:var(--text-2); font-size:13px; }
+
+  .pt-shell{ display:grid; grid-template-columns:350px 1fr; gap:20px; align-items:start; }
+  @media (max-width:860px){ .pt-shell{ grid-template-columns:1fr; } }
+
+  .pt-controls{ display:flex; flex-direction:column; gap:18px; position:sticky; top:16px; }
+  .pt-col-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .pt-section-title{ font-weight:700; font-size:13.5px; margin-bottom:2px; }
+  .pt-hint{ font-size:12px; color:var(--text-3); }
+
+  .upload-zone.dragover{ border-color:var(--primary-solid); background:var(--primary-tint); }
+
+  .pt-file-list{ margin-top:8px; max-height:170px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--surface); }
+  .file-item{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; border-bottom:1px solid var(--border); font-size:12.5px; }
+  .file-item:last-child{ border-bottom:none; }
+  .file-item span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:75%; }
+  .btn-edit{ background:none; border:none; cursor:pointer; color:var(--primary-solid); font-size:.95rem; padding:2px 6px; border-radius:var(--radius-sm); line-height:1; font-family:var(--font); flex:0 0 auto; }
+  .btn-edit:hover{ background:var(--primary-tint); }
+
+  .checkbox-row input[type="checkbox"]{ width:16px; height:16px; accent-color:var(--primary-solid); flex:0 0 auto; }
+  .pt-preview-wrap{ background:var(--surface); border:1px solid var(--border); display:flex; justify-content:center; padding:14px; border-radius:var(--radius-md); }
+  .pt-preview-wrap canvas{ max-width:100%; height:auto; max-height:55vh; }
+
+  /* full-screen overlays for the loader + the editor modal */
+  .pt-overlay{ position:fixed; inset:0; display:none; z-index:1000; align-items:center; justify-content:center; padding:20px; }
+  #loader.pt-overlay{ background:color-mix(in srgb, var(--bg) 85%, transparent); flex-direction:column; gap:14px; }
+  #editModal.pt-overlay{ background:rgba(20,14,10,.55); align-items:stretch; justify-content:stretch; }
+
+  .modal.pt-editor-modal{ width:100%; max-width:1000px; height:100%; margin:0 auto; display:flex; flex-direction:column; }
+  .pt-editor-toolbar{ padding:10px 18px; border-bottom:1px solid var(--border); display:flex; gap:8px; flex-wrap:wrap; align-items:center; background:var(--surface); }
+  .pt-editor-sep{ width:1px; height:24px; background:var(--border); margin:0 4px; flex:0 0 auto; }
+  .pt-editor-canvas-wrap{ flex:1; background:var(--surface-sunken); overflow:auto; display:flex; justify-content:center; align-items:flex-start; padding:20px; position:relative; }
+  #editorCanvas{ background:var(--surface); box-shadow:var(--shadow-md); cursor:crosshair; max-width:100%; }
+
+  .is-disabled{ opacity:.5; cursor:not-allowed; }
+  .pt-success-outline{ color:var(--success); border-color:var(--success); }
+  .pt-instructions ul{ padding-inline-start:20px; margin:0; color:var(--text-2); line-height:1.7; font-size:13px; }
+  .pt-instructions code{ background:var(--surface-alt); padding:2px 5px; border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div class="pt-page">
+
+  <div class="pt-head">
+    <div class="brand-mark">
+      <svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+    </div>
+    <div>
+      <h1>מערכת פריסה מתקדמת</h1>
+      <p>פיצול קבצים וסידור מרובה בעמוד אחד</p>
+    </div>
+  </div>
+
+  <div class="pt-shell">
+
+    <!-- Controls panel -->
+    <div class="pt-controls">
+
+      <div class="card card-pad">
+        <div class="pt-section-title">1. העלה קבצים</div>
+        <label class="upload-zone" id="dropZone" for="fileInput" style="margin-top:8px;">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+          <strong>גרור קבצים לכאן או לחץ</strong>
+          <span class="hint">תומך בקבצי PDF ותמונות מרובים</span>
+          <input type="file" id="fileInput" accept="application/pdf, image/*" multiple style="display:none;">
+        </label>
+        <div id="fileList" class="pt-file-list" style="display:none;"></div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="field" style="margin-bottom:10px;">
+          <label for="gridSelect">2. חיתוך המקור</label>
+          <select id="gridSelect" class="select">
+            <option value="1">ללא חיתוך (1 חלק שלם)</option>
+            <option value="2" selected>2x2 (4 חלקים)</option>
+            <option value="3">3x3 (9 חלקים)</option>
+            <option value="4">4x4 (16 חלקים)</option>
+            <option value="5">5x5 (25 חלקים)</option>
+          </select>
+          <div class="hint">כל תמונה/עמוד ייחתך לרשת זו.</div>
+        </div>
+
+        <div class="field" style="margin-bottom:0;">
+          <label for="pageSizeSelect">3. דף הפלט (הדפסה)</label>
+          <select id="pageSizeSelect" class="select">
+            <option value="a4">A4 (21 x 29.7 ס"מ)</option>
+            <option value="a3">A3 (29.7 x 42 ס"מ)</option>
+            <option value="letter">Letter (21.6 x 27.9 ס"מ)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="pt-section-title" style="margin-bottom:8px;">4. מידות כל חלק בפלט (ס"מ)</div>
+        <div class="pt-col-2">
+          <div class="field" style="margin-bottom:0;">
+            <label style="font-weight:400; color:var(--text-3); font-size:11.5px;">רוחב:</label>
+            <input type="number" id="partWidth" class="input" value="5" step="0.5" min="1">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label style="font-weight:400; color:var(--text-3); font-size:11.5px;">גובה:</label>
+            <input type="number" id="partHeight" class="input" value="5" step="0.5" min="1">
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="pt-section-title" style="margin-bottom:10px;">5. הגדרות תצוגה</div>
+
+        <label class="checkbox-row" style="cursor:pointer; margin-bottom:12px;">
+          <input type="checkbox" id="addNumbers" checked>
+          <span>הוסף מספור תמונה וחלק</span>
+        </label>
+
+        <div class="field" style="margin-bottom:12px;">
+          <label for="fontSizeInput" style="font-size:12px;">גודל גופן</label>
+          <input type="number" id="fontSizeInput" class="input" value="12" min="8" max="50">
+        </div>
+
+        <div class="callout callout-success" style="margin-bottom:0;">
+          <label class="checkbox-row" style="cursor:pointer;">
+            <input type="checkbox" id="autoFillPages" checked>
+            <span style="font-weight:700;">מילוי דפים אוטומטי (שכפול כדי למנוע בזבוז)</span>
+          </label>
+        </div>
+      </div>
+
+      <button id="processBtn" class="btn btn-primary btn-lg" style="width:100%;" disabled>חולל פריסה והורד PDF</button>
+    </div>
+
+    <!-- Preview panel -->
+    <div style="display:flex; flex-direction:column; gap:18px;">
+
+      <div class="card card-pad pt-instructions">
+        <h3 style="margin:0 0 10px; color:var(--primary-solid); font-size:14.5px;">איך זה עובד?</h3>
+        <ul>
+          <li><strong>העלאה:</strong> ניתן להעלות מספר קבצי PDF ותמונות יחד.</li>
+          <li><strong>פיצול:</strong> כל עמוד PDF וכל תמונה ייחתכו לפי רשת החיתוך שבחרת (לדוגמה 2x2 = 4 חלקים).</li>
+          <li><strong>פריסה חכמה:</strong> המערכת תיקח את כל החלקים שנוצרו (מכל הקבצים), ותסדר אותם בצפיפות על עמודי הפלט (כגון A4).</li>
+          <li><strong>מידות מדויקות:</strong> כל חלק שיונח על דף הפלט יהיה בדיוק בגודל הסנטימטרים שהגדרת. המערכת תחשב לבד כמה חלקים נכנסים בדף ותפתח דפים חדשים לפי הצורך.</li>
+          <li><strong>מספור סידורי:</strong> כל חלק יקבל מספר בתחתית המזהה מאיזו תמונה (מקור) הוא הגיע, ומה המספר של החלק בתוך אותה תמונה.<br>למשל: <code>1 (2)</code> משמעותו מקור מס' 1, חלק מס' 2.</li>
+        </ul>
+      </div>
+
+      <div id="previewContainer" style="display:none; flex-direction:column; gap:10px;">
+        <label style="font-weight:700; color:var(--primary-solid); font-size:13px;">תצוגה מקדימה של חיתוך המקור (קובץ ראשון):</label>
+        <div class="pt-preview-wrap">
+          <canvas id="previewCanvas"></canvas>
+        </div>
+      </div>
+
+      <div id="statusLog" class="card card-pad" style="display:none; font-weight:700; color:var(--primary-solid);"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Loader overlay -->
+<div class="pt-overlay" id="loader">
+  <div class="spinner lg"></div>
+  <div style="font-weight:700;" id="statusText">מתכונן לעיבוד...</div>
+</div>
+
+<!-- Editor Modal -->
+<div class="pt-overlay" id="editModal">
+  <div class="modal pt-editor-modal">
+    <div class="modal-head">
+      <strong>עורך חיתוך והחלפה</strong>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span id="editPdfControls" style="display:none; align-items:center; gap:6px;">
+          <button type="button" class="btn btn-secondary btn-sm" id="btnPrevPage">הקודם</button>
+          <span id="editPageIndicator" style="font-weight:700; font-size:.9rem; white-space:nowrap;">עמוד 1 מתוך 1</span>
+          <button type="button" class="btn btn-secondary btn-sm" id="btnNextPage">הבא</button>
+        </span>
+        <button type="button" class="btn btn-ghost btn-icon-only btn-sm" id="closeEditModalBtn" aria-label="סגור" style="font-size:1.3rem;">&times;</button>
+      </div>
+    </div>
+
+    <div class="pt-editor-toolbar">
+      <button type="button" class="pill-tab active" id="toolRect">חיתוך מרובע</button>
+      <button type="button" class="pill-tab" id="toolLasso">חיתוך חופשי</button>
+
+      <div class="pt-editor-sep"></div>
+
+      <button type="button" class="btn btn-secondary btn-sm" id="btnDownloadCrop" disabled>1. הורד חיתוך</button>
+      <label class="btn btn-secondary btn-sm is-disabled" id="btnUploadReplaceLabel">
+        2. העלה והחלף
+        <input type="file" id="replaceInput" accept="image/*" style="display:none;" disabled>
+      </label>
+
+      <div class="pt-editor-sep"></div>
+
+      <button type="button" class="btn btn-secondary btn-sm" id="btnUpscale">הגדל רזולוציה (x2)</button>
+      <button type="button" class="btn btn-secondary btn-sm" id="btnSharpen">חידוד עדין</button>
+      <button type="button" class="btn btn-secondary btn-sm" id="btnUndo" disabled>ביטול פעולה</button>
+
+      <div class="pt-editor-sep"></div>
+
+      <button type="button" class="btn btn-secondary btn-sm pt-success-outline" id="btnDownloadFull">הורדת התמונה</button>
+
+      <div style="flex:1;"></div>
+      <button type="button" class="btn btn-primary btn-sm" id="btnSaveEdit">שמור לעריכה נוכחית</button>
+    </div>
+
+    <div class="pt-editor-canvas-wrap" id="editorCanvasContainer">
+      <canvas id="editorCanvas"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="js/poster-tool.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    window.PosterTool.init({ workerSrc: 'libs/pdf.worker.min.js' });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מערכת שליחה להדפסה</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="app.css">
+
+<!-- PDF / image engine libs (shared with the rest of the site) -->
+<script src="../libs/pdf-lib.min.js"></script>
+<script src="../libs/fontkit.umd.min.js"></script>
+<script src="../libs/pdf.min.js"></script>
+<script src="../libs/jspdf.umd.min.js"></script>
+<script src="../opencv.js" async></script>
+
+<!-- Shared modules owned by other agents: PDF math + logo-hide detection -->
+<script src="../js/pdf-engine.js"></script>
+<script src="../js/logo-blur.js"></script>
+</head>
+<body>
+
+<div class="bsd-icon" id="bsdContainer" style="position:fixed; top:16px; inset-inline-end:20px; z-index:1000; opacity:.85; pointer-events:none; display:none; font-size:1.05rem; font-weight:800; color:var(--primary-solid);">בס"ד</div>
+<img class="top-logo" id="mainLogo" style="position:fixed; top:0; left:50%; transform:translateX(-50%); height:60px; width:auto; max-width:190px; z-index:1000; background:#fff; padding:5px 18px; border-radius:0 0 12px 12px; box-shadow:var(--shadow-md); display:none; object-fit:contain;">
+
+<!-- ============== LOADER / PROGRESS OVERLAY ============== -->
+<div class="loader-overlay" id="loader">
+  <div class="spinner lg"></div>
+  <div id="loaderTitle" style="margin-top:14px; font-weight:700; font-size:15px;">מתחיל...</div>
+  <div class="progress-log" id="progressLog"></div>
+</div>
+
+<!-- ============== MERGE GROUP SIDEBAR ============== -->
+<div id="mergeSidebar" class="side-panel">
+  <div class="side-panel-head">
+    <span class="side-panel-title" id="mergeSidebarTitle"><i class="fas fa-layer-group"></i> ניהול קבוצה</span>
+    <button class="modal-close-x" onclick="closeMergeSidebar()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="side-panel-body">
+    <div class="group-settings-box">
+      <div class="group-settings-title"><i class="fas fa-cog"></i> הגדרות לכל הקבוצה</div>
+      <div class="field" style="margin-bottom:9px;">
+        <label>החל סגנון על הקבוצה</label>
+        <select id="groupStyleSelect" class="select" onchange="applyStyleToGroup(this.value)"></select>
+      </div>
+      <div class="group-setting-row">
+        <div style="flex:1;"><label style="font-size:11.5px;">כמות</label><select id="groupQtySelect" class="select" onchange="applyGroupSetting('quantity', this.value)"></select></div>
+        <div style="flex:1;"><label style="font-size:11.5px;">פורמט</label><select id="groupFormatSelect" class="select" onchange="applyGroupSetting('format', this.value)"></select></div>
+      </div>
+      <div class="group-check-grid">
+        <label class="group-check-item"><input type="checkbox" id="groupPdfCheck" onchange="applyGroupSetting('convertToPdf', this.checked)"> המר ל-PDF</label>
+        <label class="group-check-item"><input type="checkbox" id="groupBsdCheck" onchange="applyGroupSetting('addBsd', this.checked)"> בס"ד</label>
+        <label class="group-check-item"><input type="checkbox" id="groupNumCheck" onchange="applyGroupSetting('addPageNumbers', this.checked)"> מספור</label>
+        <label class="group-check-item"><input type="checkbox" id="groupRevCheck" onchange="applyGroupSetting('reverseLastPage', this.checked)"> הפוך דף אחרון</label>
+        <label class="group-check-item"><input type="checkbox" id="groupArrowsCheck" onchange="applyGroupSetting('addArrows', this.checked)"> 9 בעמוד + חיצים</label>
+        <label class="group-check-item"><input type="checkbox" id="groupDupCheck" onchange="applyGroupSetting('duplicateTwoUp', this.checked)"> 2 משוכפל</label>
+        <label class="group-check-item"><input type="checkbox" id="groupBlankCheck" onchange="applyGroupSetting('addEvenBlankPage', this.checked)"> דף ריק זוגי</label>
+        <label class="group-check-item"><input type="checkbox" id="groupMarginCutCheck" onchange="applyGroupSetting('marginCut', this.checked)"> חיתוך שוליים</label>
+      </div>
+      <div class="field" style="margin-top:9px;">
+        <label>לוגו קבוצתי</label>
+        <select id="groupLogoSelect" class="select" onchange="applyGroupSetting('addLogo', this.value)">
+          <option value="">ללא לוגו</option>
+          <option value="1">לוגו 1</option>
+          <option value="2">לוגו 2</option>
+        </select>
+      </div>
+      <label class="group-check-item" style="margin-top:9px;"><input type="checkbox" id="groupSendSecondary" onchange="applyGroupSetting('sendSecondary', this.checked)"> שליחה משנית (+)</label>
+    </div>
+    <div style="margin-bottom:8px; font-weight:700; font-size:12.5px;">קבצים בקבוצה (לפי סדר מיזוג)</div>
+    <div id="mergeListContainer"></div>
+  </div>
+  <div class="side-panel-foot">
+    <button class="btn btn-secondary" style="width:100%;" onclick="openPageSorter()"><i class="fas fa-grip-horizontal"></i> סדר וערבב דפים</button>
+    <button class="btn btn-ghost" style="width:100%;" onclick="closeMergeSidebar()">סגור</button>
+  </div>
+</div>
+
+<!-- ============== EDIT STYLE SIDEBAR ============== -->
+<div id="editStyleSidebar" class="side-panel">
+  <div class="side-panel-head">
+    <span class="side-panel-title"><i class="fas fa-palette"></i> עריכת סגנון</span>
+    <button class="modal-close-x" onclick="closeEditStyleSidebar()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="side-panel-body">
+    <input type="hidden" id="editStyleOriginalName">
+    <div class="group-settings-box">
+      <div class="field" style="margin-bottom:9px;">
+        <label>שם הסגנון</label>
+        <input type="text" id="editStyleNameInput" class="input">
+      </div>
+      <div class="group-setting-row">
+        <div style="flex:1;"><label style="font-size:11.5px;">כמות</label><select id="editStyleQuantity" class="select"></select></div>
+        <div style="flex:1;"><label style="font-size:11.5px;">פורמט</label><select id="editStyleFormat" class="select"></select></div>
+      </div>
+      <div class="group-check-grid">
+        <label class="group-check-item"><input type="checkbox" id="editStyleConvertPdf"> המר ל-PDF</label>
+        <label class="group-check-item"><input type="checkbox" id="editStyleBsd"> בס"ד</label>
+        <label class="group-check-item"><input type="checkbox" id="editStylePageNumbers"> מספור</label>
+        <label class="group-check-item"><input type="checkbox" id="editStyleReverseLast"> היפוך סוף</label>
+        <label class="group-check-item"><input type="checkbox" id="editStyleArrows"> 9 בעמוד + חיצים</label>
+        <label class="group-check-item"><input type="checkbox" id="editStyleDuplicateTwoUp"> 2 משוכפל</label>
+        <label class="group-check-item"><input type="checkbox" id="editStyleAddEvenBlank"> דף ריק זוגי</label>
+        <label class="group-check-item"><input type="checkbox" id="editStyleMarginCut"> חיתוך שוליים</label>
+      </div>
+      <div class="field" style="margin-top:9px;">
+        <label>לוגו</label>
+        <select id="editStyleLogo" class="select">
+          <option value="">אין</option>
+          <option value="1">לוגו 1</option>
+          <option value="2">לוגו 2</option>
+        </select>
+      </div>
+      <label class="group-check-item" style="margin-top:9px;"><input type="checkbox" id="editStyleSendSecondary"> שליחה משנית (+)</label>
+      <label class="group-check-item" style="margin-top:5px;"><input type="checkbox" id="editStylePlusSelected"> סימון קובץ לשליחה משנית (⊕) כברירת מחדל</label>
+    </div>
+  </div>
+  <div class="side-panel-foot">
+    <button class="btn btn-primary" style="width:100%;" onclick="saveEditedStyle()"><i class="fas fa-check"></i> שמור</button>
+    <button class="btn btn-ghost" style="width:100%;" onclick="closeEditStyleSidebar()">ביטול</button>
+  </div>
+</div>
+
+<!-- ============== MODALS ============== -->
+<div id="formatManagerModal" class="modal-backdrop-wrap">
+  <div class="modal">
+    <div class="modal-head"><strong><i class="fas fa-list-ul"></i> ניהול רשימת פורמטים</strong><button class="modal-close-x" onclick="closeModal('formatManagerModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="manager-add-row">
+        <input type="text" id="newFormatInput" class="input" placeholder="שם פורמט חדש...">
+        <button class="btn btn-primary btn-icon-only" onclick="addFormatManual()"><i class="fas fa-plus"></i></button>
+      </div>
+      <label class="checkbox-row" style="background:var(--info-tint); padding:9px 10px; border-radius:var(--radius-sm); margin-bottom:12px;">
+        <input type="checkbox" id="newFormatAutoRev"> הפוך דף אחרון אוטומטית (אם מתחלק ב-4)
+      </label>
+      <div class="manager-list" id="modalFormatList"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" style="width:100%;" onclick="closeModal('formatManagerModal')">סגור ושמור</button></div>
+  </div>
+</div>
+
+<div id="quantityManagerModal" class="modal-backdrop-wrap">
+  <div class="modal">
+    <div class="modal-head"><strong><i class="fas fa-sort-numeric-up"></i> ניהול רשימת כמויות</strong><button class="modal-close-x" onclick="closeModal('quantityManagerModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="manager-add-row">
+        <input type="text" id="newQuantityInput" class="input" placeholder="כמות חדשה (לדוגמה: 100)...">
+        <button class="btn btn-primary btn-icon-only" onclick="addQuantityManual()"><i class="fas fa-plus"></i></button>
+      </div>
+      <div class="manager-list" id="modalQuantityList"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" style="width:100%;" onclick="closeModal('quantityManagerModal')">סגור ושמור</button></div>
+  </div>
+</div>
+
+<div id="contactsModal" class="modal-backdrop-wrap">
+  <div class="modal">
+    <div class="modal-head"><strong><i class="fas fa-address-book"></i> ניהול אנשי קשר</strong><button class="modal-close-x" onclick="closeModal('contactsModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="manager-add-row">
+        <input type="text" id="newContactName" class="input" placeholder="שם..." style="flex:1">
+        <input type="text" id="newContactEmail" class="input" placeholder="מייל..." style="flex:1">
+        <button class="btn btn-primary btn-icon-only" onclick="addContactManual()"><i class="fas fa-plus"></i></button>
+      </div>
+      <div class="manager-list" id="modalContactsList"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" style="width:100%;" onclick="closeModal('contactsModal')">סגור</button></div>
+  </div>
+</div>
+
+<div id="pageSelectionModal" class="modal-backdrop-wrap">
+  <div class="modal modal-wide">
+    <div class="modal-head"><strong><i class="fas fa-scissors"></i> בחירת עמודים להדפסה/הורדה</strong><button class="modal-close-x" onclick="closeModal('pageSelectionModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:10px;">הזן עמודים או טווחים מופרדים בפסיק (לדוגמה: 1, 3, 5-8). השאר ריק כדי לבחור הכל. לחיצה על הריבועים מעדכנת את הרשימה, והקלדה ידנית מעדכנת את הריבועים.</p>
+      <div class="manager-add-row">
+        <input type="text" id="pageSelectionInput" class="input" placeholder="לדוגמה: 1, 3, 5-8" dir="ltr" oninput="updatePageSelectionVisuals()">
+        <button class="btn btn-secondary" onclick="selectAllPages()" title="סמן הכל"><i class="fas fa-check-double"></i> הכל</button>
+      </div>
+      <div id="pageSelectionLoading" class="hidden" style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> טוען דפים...</div>
+      <div id="pageSelectionGrid" class="page-checkbox-grid"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" style="width:100%;" onclick="savePageSelection()">שמור בחירה</button></div>
+  </div>
+</div>
+
+<div id="brandingModal" class="modal-backdrop-wrap">
+  <div class="modal">
+    <div class="modal-head"><strong><i class="fas fa-stamp"></i> הגדרות מיתוג</strong><button class="modal-close-x" onclick="closeModal('brandingModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="branding-toggle-row"><span><i class="fas fa-star-of-david"></i> הוסף בס"ד (ברירת מחדל)</span><div class="switch" id="defaultBsdToggle" onclick="toggleSwitch('defaultBsdToggle', saveBrandingDefaults)"></div></div>
+      <div class="branding-toggle-row"><span><i class="fas fa-image"></i> הוסף לוגו (ברירת מחדל)</span><div class="tristate-logo" onclick="cycleDefaultLogo()" title="לחץ כדי להחליף: אין → לוגו 1 → לוגו 2 → אין"><span id="defaultLogoLabel">אין</span></div></div>
+      <hr style="margin:12px 0; border:0; border-top:1px solid var(--border);">
+
+      <div class="logo-blur-settings-box">
+        <div style="font-weight:800; font-size:12.5px;"><i class="fa-solid fa-eye-slash"></i> הגדרות הסתרת לוגו / תוכן</div>
+        <div class="branding-toggle-row" style="margin-bottom:0;"><span><i class="fa-solid fa-droplet"></i> הפעל הסתרה לכל הקבצים (ברירת מחדל)</span><div class="switch" id="defaultBlurToggle" onclick="toggleGlobalBlur()"></div></div>
+        <button type="button" class="btn btn-secondary" id="openCropBtn" style="width:100%;"><i class="fa-solid fa-crop-simple"></i> בחר לוגו להסתרה מתוך המסמך</button>
+        <div style="font-size:11.5px; font-weight:800;">אפקט ההסתרה</div>
+        <div class="options-list" id="blurEffectOptions">
+          <label class="option-item checked"><input type="radio" name="blurType" value="blur" checked><i class="fa-solid fa-droplet"></i> טשטוש</label>
+          <label class="option-item"><input type="radio" name="blurType" value="inpaint"><i class="fa-solid fa-wand-magic-sparkles" style="color:#8b5cf6;"></i> מילוי חכם</label>
+          <label class="option-item"><input type="radio" name="blurType" value="white"><i class="fa-solid fa-square" style="color:#ccc;"></i> מילוי לבן</label>
+        </div>
+        <div style="font-size:11.5px; font-weight:800;">שיטת פעולה</div>
+        <div class="options-list" id="blurMethodOptions">
+          <label class="option-item checked" title="מחפש את הלוגו לפי הצורה שלו"><input type="radio" name="blurMethod" value="pattern" checked><i class="fa-solid fa-brain" style="color:#10b981;"></i> חיפוש חכם</label>
+          <label class="option-item" title="מטשטש תמיד את אותו אזור יחסי"><input type="radio" name="blurMethod" value="fixed"><i class="fa-solid fa-crosshairs" style="color:#f59e0b;"></i> מיקום קבוע</label>
+        </div>
+        <div style="font-size:11.5px; font-weight:800;">כיוונון ידני (מ״מ)</div>
+        <div style="display:flex; gap:8px;">
+          <div style="flex:1;"><label style="font-size:10.5px;">למעלה/למטה</label><input type="number" id="blurOffsetY" value="0" step="1" class="input" style="padding:6px;"></div>
+          <div style="flex:1;"><label style="font-size:10.5px;">ימינה/שמאלה</label><input type="number" id="blurOffsetX" value="0" step="1" class="input" style="padding:6px;"></div>
+        </div>
+        <div id="logoPreviewContainerCrop" class="hidden" style="text-align:center;">
+          <img id="logoPreviewCrop" style="max-height:50px; border-radius:4px; border:1px solid var(--border);">
+          <button class="btn btn-danger-ghost btn-sm" style="width:100%; margin-top:6px;" onclick="clearCropLogo()">מחק לוגו מסתיר</button>
+        </div>
+      </div>
+
+      <hr style="margin:12px 0; border:0; border-top:1px solid var(--border);">
+      <label style="display:block; margin-bottom:5px; font-size:12.5px; font-weight:700;">לוגו 1 (נשמר בדפדפן)</label>
+      <div class="branding-preview" id="logo1PreviewContainer"><span class="hint">אין לוגו</span></div>
+      <input type="file" id="logo1UploadInput" accept="image/*" class="hidden" onchange="handleLogoUpload(1, this.files)">
+      <div style="display:flex; gap:6px; margin-bottom:15px;">
+        <button class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('logo1UploadInput').click()">בחר תמונה</button>
+        <button class="btn btn-danger-ghost" onclick="clearLogo(1)">הסר</button>
+      </div>
+      <label style="display:block; margin-bottom:5px; font-size:12.5px; font-weight:700;">לוגו 2 (נשמר בדפדפן)</label>
+      <div class="branding-preview" id="logo2PreviewContainer"><span class="hint">אין לוגו</span></div>
+      <input type="file" id="logo2UploadInput" accept="image/*" class="hidden" onchange="handleLogoUpload(2, this.files)">
+      <div style="display:flex; gap:6px;">
+        <button class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('logo2UploadInput').click()">בחר תמונה</button>
+        <button class="btn btn-danger-ghost" onclick="clearLogo(2)">הסר</button>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" style="width:100%;" onclick="closeModal('brandingModal')">סגור ושמור</button></div>
+  </div>
+</div>
+
+<div id="styleManagerModal" class="modal-backdrop-wrap">
+  <div class="modal">
+    <div class="modal-head"><strong><i class="fas fa-palette"></i> ניהול סגנונות שליחה</strong><button class="modal-close-x" onclick="closeModal('styleManagerModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:10px;">שמור והחל הגדרות (כמות, פורמט, המרה ל-PDF, בס"ד, לוגו, מספור וכו'). מיזוג לא נכלל.</p>
+      <div class="field">
+        <label>שמור מהקובץ</label>
+        <select id="styleSourceFileSelect" class="select"><option value="-1">ברירת מחדל (מיתוג)</option></select>
+      </div>
+      <div class="manager-add-row">
+        <input type="text" id="newStyleNameInput" class="input" placeholder="שם לסגנון...">
+        <button class="btn" style="background:var(--success-solid); color:var(--text-on-primary);" onclick="saveCurrentAsStyle()"><i class="fas fa-save"></i> שמור</button>
+      </div>
+      <div class="manager-list" id="modalStyleList"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" style="width:100%;" onclick="closeModal('styleManagerModal')">סגור</button></div>
+  </div>
+</div>
+
+<div id="pagePreviewModal" class="modal-backdrop-wrap" onclick="if(event.target===this) closeModal('pagePreviewModal')">
+  <div class="modal modal-xwide" style="height:88vh;" onclick="event.stopPropagation()">
+    <div class="modal-head"><strong>תצוגה מקדימה</strong><button class="modal-close-x" onclick="closeModal('pagePreviewModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" id="pagePreviewContent" style="flex:1; display:flex; align-items:center; justify-content:center; background:var(--surface-sunken); border-radius:var(--radius-md);">
+      <div class="spinner"></div>
+    </div>
+  </div>
+</div>
+
+<div id="pageSorterModal" class="modal-backdrop-wrap">
+  <div class="modal modal-xwide" style="height:90vh; display:flex; flex-direction:column;">
+    <div class="modal-head"><strong id="pageSorterTitle"><i class="fas fa-grip-horizontal"></i> סדרן דפים</strong><button class="modal-close-x" onclick="closeModal('pageSorterModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" style="display:flex; flex-direction:column; flex:1; min-height:0;">
+      <div class="page-sorter-toolbar">
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="addBlankPageToFinalOrder()"><i class="fas fa-plus-square"></i> הוסף דף ריק</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetFinalOrder()"><i class="fas fa-undo"></i> אפס סדר</button>
+        </div>
+        <span id="pageSorterInfo" class="hint"></span>
+      </div>
+      <div class="page-sorter-layout">
+        <div class="sorter-panel">
+          <div class="sorter-panel-head">קבצי מקור</div>
+          <div id="sourcePagesContainer" class="sorter-panel-body"></div>
+        </div>
+        <div class="sorter-panel">
+          <div class="sorter-panel-head">סדר הדפים הסופי</div>
+          <div id="finalPagesContainer" class="sorter-panel-body"></div>
+        </div>
+      </div>
+      <div class="page-sorter-footer">
+        <button class="btn btn-ghost" onclick="closeModal('pageSorterModal')">ביטול</button>
+        <button class="btn btn-secondary" onclick="downloadSortedFile()"><i class="fas fa-download"></i> הורד קובץ ערוך</button>
+        <button class="btn btn-primary" onclick="savePageOrder()"><i class="fas fa-check"></i> שמור סדר וסגור</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="cropModal" class="modal-backdrop-wrap">
+  <div class="modal modal-xwide">
+    <div class="modal-head"><strong>בחירת אזור להסתרה</strong><button class="modal-close-x" id="closeModalBtn"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body crop-modal-body" id="modalBody">
+      <div class="crop-canvas-wrapper hidden" id="cropCanvasWrapper">
+        <canvas id="cropCanvas"></canvas>
+        <canvas id="cropOverlay"></canvas>
+      </div>
+      <div id="cropLoader" class="hidden"><div class="spinner"></div></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="cancelCropBtn">ביטול</button>
+      <button class="btn btn-primary" id="confirmCropBtn">גזור ושמור אזור להסתרה</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== MAIN PAGE ============== -->
+<div class="page-wrap">
+
+  <div class="brand-row">
+    <div class="brand-mark"><i class="fas fa-print icon" style="width:22px;height:22px;font-size:20px;display:flex;align-items:center;justify-content:center;"></i></div>
+    <div>
+      <h1>מערכת שליחה להדפסה</h1>
+      <div class="page-desc">העלאת קבצים, תיוג הוראות הדפסה ושליחה במייל</div>
+    </div>
+  </div>
+
+  <div class="top-toolbar">
+    <div class="view-switcher">
+      <button id="btn-grid-view" class="active" title="תצוגת רשת"><i class="fas fa-th-large"></i></button>
+      <button id="btn-list-view" title="תצוגת רשימה"><i class="fas fa-list"></i></button>
+    </div>
+    <div class="spacer"></div>
+    <div class="dropdown-wrap" id="manageDropdown">
+      <button class="btn btn-secondary" onclick="toggleDropdown('manageDropdown')"><i class="fas fa-cog"></i> ניהול <i class="fas fa-chevron-down" style="font-size:.75em;"></i></button>
+      <div class="dropdown-panel">
+        <button class="dropdown-item" onclick="openModal('contactsModal')"><i class="fas fa-address-book"></i> אנשי קשר</button>
+        <button class="dropdown-item" onclick="openModal('formatManagerModal')"><i class="fas fa-list-ul"></i> ניהול פורמטים</button>
+        <button class="dropdown-item" onclick="openModal('quantityManagerModal')"><i class="fas fa-sort-numeric-up"></i> ניהול כמויות</button>
+        <button class="dropdown-item" onclick="openModal('brandingModal')"><i class="fas fa-stamp"></i> הגדרות מיתוג</button>
+        <button class="dropdown-item" onclick="openModal('styleManagerModal')"><i class="fas fa-palette"></i> סגנון שליחה</button>
+        <button class="dropdown-item" onclick="requestLogDirectoryAccess()"><i class="fas fa-folder"></i> הגדר תיקיית לוגים</button>
+      </div>
+    </div>
+    <a class="btn btn-secondary" href="../history.html"><i class="fas fa-history"></i> היסטוריה</a>
+  </div>
+
+  <div class="card card-pad send-form-card">
+    <div class="field">
+      <label>נמענים ראשיים (בחירה מרובה או כתיבה ידנית)</label>
+      <div class="recipient-row">
+        <div class="multiselect" id="mainEmailMultiselect"></div>
+        <input type="text" id="mainEmailManual" class="input" placeholder="הקלד מייל ידני..." list="contacts-datalist">
+      </div>
+    </div>
+    <div class="field">
+      <label>נמענים משניים (עבור קבצים שסומנו ב-⊕)</label>
+      <div class="recipient-row">
+        <div class="multiselect" id="secondaryEmailMultiselect"></div>
+        <input type="text" id="secondaryEmailManual" class="input" placeholder="הקלד מייל ידני..." list="contacts-datalist">
+      </div>
+      <datalist id="contacts-datalist"></datalist>
+    </div>
+    <div class="field" style="margin-bottom:0;">
+      <label>נושא ההודעה</label>
+      <input type="text" id="subject" class="input">
+    </div>
+  </div>
+
+  <label class="upload-zone" for="fileInput" id="dropZone">
+    <i class="fas fa-cloud-upload-alt icon" style="width:26px;height:26px;font-size:24px;"></i>
+    <strong>לחץ כאן לבחירת קבצים, או גרור ושחרר</strong>
+    <span class="hint">PDF, Word, JPG, PNG</span>
+  </label>
+  <input type="file" id="fileInput" multiple>
+
+  <div class="style-selector-row" id="styleSelectorRow">
+    <label style="font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px;"><i class="fas fa-palette"></i> סגנון שליחה גלובלי:</label>
+    <select id="styleSelect" class="select" onchange="onStyleSelectChange()"><option value="">-- בחר סגנון --</option></select>
+    <button class="btn btn-secondary" onclick="applySelectedStyle()" id="applyStyleBtn" disabled><i class="fas fa-check-double"></i> החל על כל הקבצים</button>
+  </div>
+
+  <div class="file-list" id="fileListContainer"></div>
+
+  <div id="sizeStatus" class="status-bar status-ok hidden">
+    <span><i class="fas fa-database"></i> סה"כ: <b id="totalSizeText">0 MB</b></span>
+    <span id="destMethod" style="font-weight:700;"></span>
+  </div>
+
+  <button class="btn btn-primary btn-lg btn-send" onclick="processAndSend()">
+    <i class="fas fa-paper-plane"></i> שלח הכל
+  </button>
+</div>
+
+<canvas id="bsdCanvas" width="100" height="50" class="hidden"></canvas>
+
+<!-- ============== APP SCRIPTS ============== -->
+<script src="js/state.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/contacts.js"></script>
+<script src="js/files.js"></script>
+<script src="js/modals.js"></script>
+<script src="js/groups.js"></script>
+<script src="js/pagesorter.js"></script>
+<script src="js/cropblur.js"></script>
+<script src="js/send.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
