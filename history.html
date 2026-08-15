@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>היסטוריית שליחות</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background-color: white;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .date-cell {
+            white-space: nowrap;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .subject-cell {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .recipients-cell {
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            background-color: #dbeafe;
+            color: #1e40af;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #cbd5e1;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .modal-header h2 { margin: 0; color: var(--primary); }
+        
+        .close-btn {
+            background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);
+        }
+
+        .detail-group { margin-bottom: 15px; }
+        .detail-label { font-weight: 600; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px; }
+        .detail-value { background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.95rem; white-space: pre-wrap;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-history"></i> היסטוריית שליחות</h1>
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-danger" onclick="clearHistory()"><i class="fas fa-trash"></i> נקה היסטוריה</button>
+            <a href="תכנת שליחה - עובד.HTML" class="btn btn-primary"><i class="fas fa-arrow-right"></i> חזרה למערכת</a>
+        </div>
+    </div>
+
+    <table id="historyTable">
+        <thead>
+            <tr>
+                <th>תאריך ושעה</th>
+                <th>נושא</th>
+                <th>נמענים</th>
+                <th>קבצים</th>
+                <th>פעולות</th>
+            </tr>
+        </thead>
+        <tbody id="historyBody">
+            <!-- Data will be loaded here -->
+        </tbody>
+    </table>
+    
+    <div id="emptyState" class="empty-state" style="display: none;">
+        <i class="fas fa-inbox"></i>
+        <h3>אין נתוני היסטוריה</h3>
+        <p>ברגע שתבצע שליחות, הן יופיעו כאן.</p>
+    </div>
+</div>
+
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>פרטי שליחה</h2>
+            <button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="modalDetails"></div>
+    </div>
+</div>
+
+<script>
+    let historyData = [];
+
+    function loadHistory() {
+        const data = localStorage.getItem('fullSendHistory');
+        historyData = data ? JSON.parse(data) : [];
+        renderTable();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('historyBody');
+        const emptyState = document.getElementById('emptyState');
+        const table = document.getElementById('historyTable');
+
+        tbody.innerHTML = '';
+
+        if (historyData.length === 0) {
+            table.style.display = 'none';
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        table.style.display = 'table';
+        emptyState.style.display = 'none';
+
+        historyData.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            
+            const date = new Date(item.date);
+            const dateStr = date.toLocaleDateString('he-IL') + ' ' + date.toLocaleTimeString('he-IL', {hour: '2-digit', minute:'2-digit'});
+            
+            const recipientsCount = (item.mainRecipients?.length || 0) + (item.secondaryRecipients?.length || 0);
+            const filesCount = item.files?.length || 0;
+
+            let recipientsPreview = (item.mainRecipients || []).slice(0, 2).join(', ');
+            if(recipientsCount > 2) recipientsPreview += ` (+עוד ${recipientsCount - 2})`;
+
+            tr.innerHTML = `
+                <td class="date-cell">${dateStr}</td>
+                <td class="subject-cell">${item.subject || '-'}</td>
+                <td class="recipients-cell" title="${(item.mainRecipients || []).join(', ')}">${recipientsPreview || 'אין'}</td>
+                <td><span class="badge">${filesCount} קבצים</span></td>
+                <td>
+                    <button class="btn" style="background:#e2e8f0; color:#475569; padding:5px 10px;" onclick="showDetails(${index})">
+                        <i class="fas fa-eye"></i> צפה
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function showDetails(index) {
+        const item = historyData[index];
+        const modal = document.getElementById('detailsModal');
+        const detailsContainer = document.getElementById('modalDetails');
+        
+        const date = new Date(item.date);
+        
+        let filesHtml = (item.files || []).map(f => `<li><b>${f.name}</b> - כמות: ${f.quantity}, פורמט: ${f.format}</li>`).join('');
+        if(!filesHtml) filesHtml = '<li>אין קבצים</li>';
+
+        detailsContainer.innerHTML = `
+            <div class="detail-group">
+                <div class="detail-label">תאריך ושעה:</div>
+                <div class="detail-value">${date.toLocaleString('he-IL')}</div>
+            </div>
+            <div class="detail-group">
+                <div class="detail-label">נושא:</div>
+                <div class="detail-value">${item.subject || '-'}</div>
+            </div>
+            <div class="detail-group">
+                <div class="detail-label">נמענים ראשיים:</div>
+                <div class="detail-value">${(item.mainRecipients || []).join('\n') || 'אין'}</div>
+            </div>
+            <div class="detail-group">
+                <div class="detail-label">נמענים משניים (קובץ +):</div>
+                <div class="detail-value">${(item.secondaryRecipients || []).join('\n') || 'אין'}</div>
+            </div>
+            <div class="detail-group">
+                <div class="detail-label">קבצים שנשלחו:</div>
+                <div class="detail-value"><ul style="margin:0; padding-right:20px;">${filesHtml}</ul></div>
+            </div>
+        `;
+        
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('detailsModal').style.display = 'none';
+    }
+
+    function clearHistory() {
+        if(confirm('האם אתה בטוח שברצונך למחוק את כל ההיסטוריה? לא ניתן לשחזר פעולה זו.')) {
+            localStorage.removeItem('fullSendHistory');
+            historyData = [];
+            renderTable();
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('detailsModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    // Initial load
+    loadHistory();
+</script>
+
+</body>
+</html>
