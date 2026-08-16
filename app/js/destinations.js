@@ -98,3 +98,24 @@ function fileDestBadgesHtml(item) {
     return fileDests(item).map(id => list.find(d => d.id === id)).filter(Boolean)
         .map(d => `<span class="badge dest-badge dest-${d.color}" title="יעד: ${escAttr(d.name)}">${destDotHtml(d, true)}${escHtml(d.name)}</span>`).join('');
 }
+
+// ---- אווטארים עגולים של היעדים בשורת האייקונים של הכרטיס: לחיצה = כלול/בטל ----
+// אות ראשונה; אם כמה יעדים מתחילים באותה אות - ראשי תיבות של שתי מילים
+// ("יעד ראשי" -> "יר", "יעד משני" -> "ימ") כדי שהעיגולים יהיו שונים זה מזה
+function destInitial(name, all) {
+    const t = (name || '').trim();
+    if (!t) return '?';
+    const first = t.charAt(0);
+    const clash = (all || []).filter(n => (n || '').trim().charAt(0) === first).length > 1;
+    if (!clash) return first;
+    const words = t.split(/\s+/).filter(Boolean);
+    return words.length > 1 ? words[0].charAt(0) + words[1].charAt(0) : t.slice(0, 2);
+}
+function destAvatarsHtml(item) {
+    const all = getDestinations().map(x => x.name);
+    return getDestinations().map((d, i) => {
+        const on = fileHasDest(item, d.id);
+        const noRecip = !(d.emails || []).length;
+        return `<button type="button" class="dest-avatar dest-${d.color}${on ? ' on' : ''}${noRecip ? ' empty' : ''}" onclick="toggleFileDest('${item.id}','${d.id}')" title="${escAttr(d.name)}${i === 0 ? ' (ברירת מחדל)' : ''}${noRecip ? ' — אין נמענים' : ''}: ${on ? 'נשלח' : 'לא נשלח'}">${escHtml(destInitial(d.name, all))}</button>`;
+    }).join('');
+}

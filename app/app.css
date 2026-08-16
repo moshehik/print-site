@@ -65,8 +65,14 @@ body{ background:var(--bg); }
 .dest-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--dest-c, var(--primary-solid)); flex:0 0 auto; box-shadow:0 0 0 2px var(--surface); }
 .dest-dot.sm{ width:7px; height:7px; box-shadow:none; margin-inline-end:4px; }
 .badge.dest-badge{ background:var(--dest-t); color:var(--dest-f); display:inline-flex; align-items:center; }
-.file-toolbar .tb-dest.active-toggle{ color:var(--primary-solid); background:var(--primary-tint); }
-.file-toolbar .tb-dest{ position:relative; }
+/* destination avatars in the toolbar: round, initial letter, on = filled in the destination color, off = hollow */
+.dest-avatars{ display:inline-flex; align-items:center; gap:3px; }
+.dest-avatar{ width:26px; height:26px; border-radius:50%; border:1.5px solid var(--dest-c); background:transparent; color:var(--dest-c); font-size:10.5px; letter-spacing:-.02em; font-weight:800; font-family:var(--font); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; line-height:1; opacity:.55; transition:opacity .12s ease, background .12s ease, color .12s ease, transform .08s ease; }
+.dest-avatar:hover{ opacity:.9; }
+.dest-avatar:active{ transform:scale(.94); }
+.dest-avatar.on{ background:var(--dest-c); color:var(--text-on-primary); opacity:1; box-shadow:0 0 0 2px var(--surface), 0 0 0 3px var(--dest-c); }
+.dest-avatar.empty{ border-style:dashed; }
+.dest-avatar:focus-visible{ outline:2px solid var(--primary-solid); outline-offset:2px; }
 .popover .menu-item .dest-dot{ margin-inline-end:2px; }
 
 /* manual-email row lives INSIDE the contacts dropdown */
@@ -154,7 +160,8 @@ body{ background:var(--bg); }
 .btn-edit-group:hover{ color:var(--primary-solid); background:var(--primary-tint); }
 .btn-edit-group .icon{ width:13px; height:13px; }
 .file-toolbar .tb-secondary.active-toggle{ color:var(--accent-solid); background:var(--accent-tint); }
-.file-toolbar .tb-bsd{ height:30px; padding:0 8px; font-size:11px; font-weight:800; letter-spacing:.02em; line-height:1; }
+.file-toolbar .tb-bsd{ height:30px; padding:0 7px; font-size:11px; font-weight:800; letter-spacing:.02em; line-height:1; border-color:transparent; box-shadow:none; }
+.file-toolbar .tb-bsd.active-toggle{ color:var(--primary-solid); background:var(--primary-tint); }
 .file-toolbar .tb-logo{ position:relative; }
 .file-toolbar .tb-logo-num{ position:absolute; top:-3px; inset-inline-end:-3px; min-width:14px; height:14px; padding:0 3px; border-radius:var(--radius-full); background:var(--primary-solid); color:var(--text-on-primary); font-size:9.5px; font-weight:800; line-height:14px; text-align:center; border:1.5px solid var(--surface); }
 .file-toolbar .tb-danger{ color:var(--danger); }

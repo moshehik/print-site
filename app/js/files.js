@@ -260,9 +260,9 @@ function renderFileCard(item) {
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm" data-pop="format" onclick="openCardMenu(this,'${item.id}','format')" title="פורמט">${SVG.format}</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.appliedStyleName)}" data-pop="style" onclick="openCardMenu(this,'${item.id}','style')" title="סגנון שליחה">${SVG.style}</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(activeOpts)}" data-pop="options" onclick="openCardMenu(this,'${item.id}','options')" title="אפשרויות הדפסה ועיצוב">${SVG.gear}</button>
-                <button type="button" class="btn btn-secondary btn-sm tb-bsd${on(item.addBsd)}" onclick="updateFileParam('${item.id}','addBsd',${item.addBsd ? 'false' : 'true'})" title="${item.addBsd ? 'הסר בס״ד' : 'הוסף בס״ד'}">בס״ד</button>
+                <button type="button" class="btn btn-ghost btn-sm tb-bsd${on(item.addBsd)}" onclick="updateFileParam('${item.id}','addBsd',${item.addBsd ? 'false' : 'true'})" title="${item.addBsd ? 'הסר בס״ד' : 'הוסף בס״ד'}">בס״ד</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-logo${on(logoVal)}" data-pop="logo" onclick="openCardMenu(this,'${item.id}','logo')" title="${logoVal ? 'לוגו ' + logoVal : 'לוגו'}">${SVG.logo}${logoVal ? `<span class="tb-logo-num">${logoVal}</span>` : ''}</button>
-                <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-dest${fileDests(item).length > 1 || fileDests(item)[0] !== defaultDestId() ? ' active-toggle' : ''}" data-pop="dest" onclick="openCardMenu(this,'${item.id}','dest')" title="יעדי שליחה">${SVG.dest}${fileDests(item).length > 1 ? `<span class="tb-logo-num">${fileDests(item).length}</span>` : ''}</button>
+                <div class="dest-avatars" title="יעדי שליחה - לחץ כדי לכלול/לבטל">${destAvatarsHtml(item)}</div>
                 <span class="tb-sep"></span>
                 <div class="group-tabs" title="קבוצת מיזוג">${getGroupTabsHTML(item)}${item.group > 0 ? `<button type="button" class="btn-edit-group" onclick="openMergeSidebar(${item.group})" title="ניהול קבוצה ${item.group}">${SVG.edit}</button>` : ''}</div>
                 <span class="tb-sep"></span>
