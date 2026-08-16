@@ -466,7 +466,7 @@ async function downloadSingleItem(id) {
         a.click();
     } catch (e) {
         console.error(e);
-        alert('שגיאה בעיבוד הקובץ: ' + e.message);
+        showError('שגיאה בעיבוד הקובץ: ' + e.message);
     }
 }
 async function getFileAsPdfBytesOrOriginal(item) {

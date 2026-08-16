@@ -510,14 +510,14 @@ async function initLogDirectory() {
     } catch (e) { console.error('Error init log dir:', e); }
 }
 async function requestLogDirectoryAccess() {
-    if (!window.showDirectoryPicker) { alert('הדפדפן שלך אינו תומך בשמירת קבצים לתיקייה מקומית בצורה זו.'); return; }
+    if (!window.showDirectoryPicker) { showError('הדפדפן שלך אינו תומך בשמירת קבצים לתיקייה מקומית בצורה זו.'); return; }
     try {
         logDirectoryHandle = await window.showDirectoryPicker();
         const db = await openLogDb();
         await db.put('logDir', 'handle', logDirectoryHandle);
-        alert('תיקיית הלוגים הוגדרה בהצלחה!');
+        showError('תיקיית הלוגים הוגדרה בהצלחה!');
     } catch (err) {
-        if (err.name !== 'AbortError') { console.error(err); alert('שגיאה: ' + err.message); }
+        if (err.name !== 'AbortError') { console.error(err); showError('שגיאה: ' + err.message); }
     }
 }
 async function writeLogFile(sendData) {

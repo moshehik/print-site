@@ -79,7 +79,7 @@ function clearCropLogo() {
 
 async function openCropTool() {
     const pdfItem = filesData.find(f => f.ext === 'pdf');
-    if (!pdfItem) { alert('העלה קודם לפחות קובץ PDF אחד כדי לבחור ממנו את אזור הלוגו.'); return; }
+    if (!pdfItem) { showError('העלה קודם לפחות קובץ PDF אחד כדי לבחור ממנו את אזור הלוגו.'); return; }
     openModalRaw('cropModal');
     const wrapper = document.getElementById('cropCanvasWrapper');
     const loader = document.getElementById('cropLoader');
@@ -131,7 +131,7 @@ function wireCropDrag(overlay) {
     overlay.ontouchstart = start; overlay.ontouchmove = move; overlay.ontouchend = end;
 }
 function confirmCrop() {
-    if (!cropState.rect || cropState.rect.width < 5 || cropState.rect.height < 5) { alert('סמן תחילה אזור על ידי גרירה עם העכבר.'); return; }
+    if (!cropState.rect || cropState.rect.width < 5 || cropState.rect.height < 5) { showError('סמן תחילה אזור על ידי גרירה עם העכבר.'); return; }
     try {
         const cropResult = window.LogoBlur.cropRegionFromCanvas(cropState.canvas, cropState.rect);
         window.LogoBlur.saveTemplate(cropResult);
@@ -139,7 +139,7 @@ function confirmCrop() {
         loadCropPreview();
     } catch (e) {
         console.error(e);
-        alert('שגיאה בשמירת האזור: ' + e.message);
+        showError('שגיאה בשמירת האזור: ' + e.message);
     }
 }
 

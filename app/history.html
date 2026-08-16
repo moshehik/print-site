@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>היסטוריית שליחות</title>
+<link rel="stylesheet" href="design-system.css">
+<style>
+  .hidden{ display:none !important; }
+  .site-tabbar{ max-width:1280px; margin:0 auto; padding:14px 20px 0; }
+  .site-tabbar .tabs{ margin-bottom:0; }
+  .page-wrap{ max-width:1080px; margin:0 auto; padding:26px 20px 80px; }
+  .recipients-cell{ max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .error-row{ display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:var(--radius-md); border:1px solid var(--border); background:var(--surface); margin-bottom:8px; }
+  .error-row .error-time{ font-size:11px; color:var(--text-3); white-space:nowrap; }
+  .error-row .error-page{ font-size:11px; color:var(--text-3); }
+  .error-row .error-msg{ flex:1; font-size:12.5px; word-break:break-word; }
+  .error-row .err-copy-btn{ position:static !important; transform:none !important; opacity:1 !important; }
+</style>
+
+<!-- שגיאות משותפות (toast + כפתור העתקה + לוג מתמיד) - אותו מודול שנטען
+     בכל עמודי print-site; כאן גם מציגים את הלוג המלא (getErrorLog). -->
+<script src="../js/errors.js"></script>
+</head>
+<body>
+
+<div class="site-tabbar">
+  <div class="tabs">
+    <a href="index.html" class="tab">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      שליחה להדפסה
+    </a>
+    <a href="../poster.html" class="tab">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+      פוסטרים ופריסה
+    </a>
+    <a href="history.html" class="tab active">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      היסטוריה
+    </a>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <div class="page-head">
+    <div>
+      <h1>היסטוריית שליחות</h1>
+      <div class="page-desc">כל השליחות שבוצעו מהמחשב הזה (נשמר בדפדפן בלבד)</div>
+    </div>
+    <div class="page-actions">
+      <button type="button" class="btn btn-danger-ghost" id="clearHistoryBtn">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg>
+        נקה היסטוריה
+      </button>
+    </div>
+  </div>
+
+  <div class="tabs" id="historyTabs" style="margin-top:22px;">
+    <div class="tab active" data-tab="sends">שליחות</div>
+    <div class="tab" data-tab="errors">שגיאות אחרונות</div>
+  </div>
+
+  <div class="tab-panel active" data-panel="sends">
+    <div class="table-wrap" id="historyTableWrap">
+      <table class="data" id="historyTable">
+        <thead>
+          <tr>
+            <th>תאריך ושעה</th>
+            <th>נושא</th>
+            <th>נמענים</th>
+            <th>קבצים</th>
+            <th>פעולות</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+    <div id="emptyState" class="empty-state hidden">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+      <h4>אין נתוני היסטוריה</h4>
+      <p>ברגע שתבצע שליחות, הן יופיעו כאן.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" data-panel="errors">
+    <div class="page-head" style="margin-bottom:14px;">
+      <h3 style="font-size:14px;">שגיאות אחרונות בכל עמודי המערכת</h3>
+      <button type="button" class="btn btn-secondary btn-sm" id="clearErrorsBtn">נקה רשימה</button>
+    </div>
+    <div id="errorsContainer"></div>
+  </div>
+
+</div>
+
+<!-- ---- Details modal ---- -->
+<div id="detailsModal" class="modal-backdrop-wrap hidden" style="position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(20,14,10,.5); z-index:1000;">
+  <div class="modal" style="max-width:600px; width:90%; max-height:85vh; display:flex; flex-direction:column;">
+    <div class="modal-head">
+      <strong>פרטי שליחה</strong>
+      <button type="button" class="btn btn-ghost btn-icon-only btn-sm" id="closeModalBtn">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalDetails" style="overflow-y:auto;"></div>
+  </div>
+</div>
+
+<script>
+let historyData = [];
+
+function loadHistory() {
+  const data = localStorage.getItem('fullSendHistory');
+  historyData = data ? JSON.parse(data) : [];
+  renderTable();
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : str;
+  return div.innerHTML;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('historyBody');
+  const emptyState = document.getElementById('emptyState');
+  const wrap = document.getElementById('historyTableWrap');
+
+  tbody.innerHTML = '';
+
+  if (historyData.length === 0) {
+    wrap.classList.add('hidden');
+    emptyState.classList.remove('hidden');
+    return;
+  }
+
+  wrap.classList.remove('hidden');
+  emptyState.classList.add('hidden');
+
+  historyData.forEach((item, index) => {
+    const tr = document.createElement('tr');
+    const date = new Date(item.date);
+    const dateStr = date.toLocaleDateString('he-IL') + ' ' + date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+
+    const recipientsCount = (item.mainRecipients?.length || 0) + (item.secondaryRecipients?.length || 0);
+    const filesCount = item.files?.length || 0;
+
+    let recipientsPreview = (item.mainRecipients || []).slice(0, 2).join(', ');
+    if (recipientsCount > 2) recipientsPreview += ` (+עוד ${recipientsCount - 2})`;
+
+    tr.innerHTML = `
+      <td class="cell-muted">${escapeHtml(dateStr)}</td>
+      <td class="cell-primary">${escapeHtml(item.subject) || '-'}</td>
+      <td class="recipients-cell" title="${escapeHtml((item.mainRecipients || []).join(', '))}">${escapeHtml(recipientsPreview) || 'אין'}</td>
+      <td><span class="badge badge-info">${filesCount} קבצים</span></td>
+      <td class="row-actions">
+        <button type="button" class="btn btn-secondary btn-sm view-btn" data-idx="${index}">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          צפה
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('.view-btn').forEach((btn) => {
+    btn.addEventListener('click', () => showDetails(parseInt(btn.dataset.idx, 10)));
+  });
+}
+
+function showDetails(index) {
+  const item = historyData[index];
+  const modal = document.getElementById('detailsModal');
+  const detailsContainer = document.getElementById('modalDetails');
+  const date = new Date(item.date);
+
+  let filesHtml = (item.files || []).map((f) => `<li><b>${escapeHtml(f.name)}</b> - כמות: ${escapeHtml(f.quantity)}, פורמט: ${escapeHtml(f.format)}</li>`).join('');
+  if (!filesHtml) filesHtml = '<li>אין קבצים</li>';
+
+  detailsContainer.innerHTML = `
+    <div class="field"><label>תאריך ושעה</label><div class="callout callout-info">${escapeHtml(date.toLocaleString('he-IL'))}</div></div>
+    <div class="field"><label>נושא</label><div class="callout callout-info">${escapeHtml(item.subject) || '-'}</div></div>
+    <div class="field"><label>נמענים ראשיים</label><div class="callout callout-info" style="white-space:pre-wrap;">${escapeHtml((item.mainRecipients || []).join('\n')) || 'אין'}</div></div>
+    <div class="field"><label>נמענים משניים (קובץ +)</label><div class="callout callout-info" style="white-space:pre-wrap;">${escapeHtml((item.secondaryRecipients || []).join('\n')) || 'אין'}</div></div>
+    <div class="field" style="margin-bottom:0;"><label>קבצים שנשלחו</label><ul style="margin:0; padding-inline-start:20px; color:var(--text-2); font-size:13px;">${filesHtml}</ul></div>
+  `;
+  modal.style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('detailsModal').style.display = 'none'; }
+document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+document.getElementById('detailsModal').addEventListener('click', (e) => { if (e.target.id === 'detailsModal') closeModal(); });
+
+document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+  if (confirm('האם אתה בטוח שברצונך למחוק את כל ההיסטוריה? לא ניתן לשחזר פעולה זו.')) {
+    localStorage.removeItem('fullSendHistory');
+    historyData = [];
+    renderTable();
+  }
+});
+
+// ---- טאבים (שליחות / שגיאות) ----
+document.getElementById('historyTabs').addEventListener('click', (e) => {
+  const tabEl = e.target.closest('.tab');
+  if (!tabEl) return;
+  const name = tabEl.dataset.tab;
+  document.querySelectorAll('#historyTabs .tab').forEach((t) => t.classList.toggle('active', t === tabEl));
+  document.querySelectorAll('.tab-panel').forEach((p) => p.classList.toggle('active', p.dataset.panel === name));
+  if (name === 'errors') renderErrors();
+});
+
+// ---- שגיאות אחרונות (מ-js/errors.js - משותף לכל עמודי print-site) ----
+function renderErrors() {
+  const container = document.getElementById('errorsContainer');
+  const errors = window.getErrorLog ? window.getErrorLog() : [];
+  if (!errors.length) {
+    container.innerHTML = '<div class="empty-state"><h4>אין שגיאות שמורות</h4></div>';
+    return;
+  }
+  container.innerHTML = '';
+  errors.forEach((err) => {
+    const row = document.createElement('div');
+    row.className = 'error-row';
+    const time = new Date(err.time).toLocaleString('he-IL');
+    row.innerHTML = `
+      <div>
+        <div class="error-time">${escapeHtml(time)}</div>
+        <div class="error-page">${escapeHtml(err.page || '')}</div>
+      </div>
+      <div class="error-msg">${escapeHtml(err.message)}</div>
+      <button type="button" class="err-copy-btn" title="העתק" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text-3);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+        <svg class="icon" viewBox="0 0 24 24" style="width:13px;height:13px;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+    `;
+    const btn = row.querySelector('.err-copy-btn');
+    btn.addEventListener('click', () => window.copyErrorText(`[${time}] ${err.message}`, btn));
+    container.appendChild(row);
+  });
+}
+
+document.getElementById('clearErrorsBtn').addEventListener('click', () => {
+  if (confirm('לנקות את כל רשימת השגיאות השמורות?')) {
+    window.clearErrorLog();
+    renderErrors();
+  }
+});
+
+loadHistory();
+</script>
+
+</body>
+</html>

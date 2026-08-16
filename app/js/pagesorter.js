@@ -13,7 +13,7 @@
 async function openPageSorter() {
     if (currentMergeGroup === 0) return;
     const filesInGroup = filesData.filter(f => f.group === currentMergeGroup && f.ext === 'pdf');
-    if (filesInGroup.length === 0) { alert('אין קבצי PDF בקבוצה זו. ניתן לסדר דפים רק לקבצי PDF.'); return; }
+    if (filesInGroup.length === 0) { showError('אין קבצי PDF בקבוצה זו. ניתן לסדר דפים רק לקבצי PDF.'); return; }
 
     pageSorterState.group = currentMergeGroup;
     pageSorterState.sourceFiles = filesInGroup.map(f => ({ fileItem: f, pages: null }));
@@ -184,7 +184,7 @@ function savePageOrder() {
     customPageOrders[currentMergeGroup] = pageSorterState.finalOrder.map(p =>
         p.type === 'blank' ? { type: 'blank' } : { type: 'page', fileId: p.fileId, pageIndex: p.pageIndex });
     closeModal('pageSorterModal');
-    alert('סדר הדפים נשמר. הוא ייושם בעת השליחה.');
+    showError('סדר הדפים נשמר. הוא ייושם בעת השליחה.');
 }
 
 async function downloadSortedFile() {
@@ -197,7 +197,7 @@ async function downloadSortedFile() {
         a.click();
     } catch (e) {
         console.error(e);
-        alert('שגיאה ביצירת הקובץ: ' + e.message);
+        showError('שגיאה ביצירת הקובץ: ' + e.message);
     }
 }
 

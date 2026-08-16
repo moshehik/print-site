@@ -532,7 +532,7 @@
 
             } catch (error) {
                 console.error(error);
-                alert(error && error.message ? error.message : 'אירעה שגיאה בעיבוד הקבצים.');
+                showError(error && error.message ? error.message : 'אירעה שגיאה בעיבוד הקבצים.');
                 els.statusLog.innerText = 'שגיאה בעיבוד.';
             } finally {
                 els.loader.style.display = 'none';
@@ -928,7 +928,7 @@
                 fileEdits.set(file, { type: 'image', canvas: finalCanvas });
             }
 
-            alert('השינויים נשמרו בהצלחה עבור קובץ זה! התצוגה תתעדכן בתהליך הפריסה.');
+            showError('השינויים נשמרו בהצלחה עבור קובץ זה! התצוגה תתעדכן בתהליך הפריסה.');
 
             if (editorFileIndex === 0 && (file.type !== 'application/pdf' || editorPdfPageNum === 1)) {
                 previewSourceCanvas = finalCanvas;

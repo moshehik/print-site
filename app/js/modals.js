@@ -70,7 +70,7 @@ function populateStyleSourceFile() {
 function saveCurrentAsStyle() {
     const nameInput = document.getElementById('newStyleNameInput');
     const name = (nameInput.value || '').trim();
-    if (!name) { alert('הכנס שם לסגנון'); return; }
+    if (!name) { showError('הכנס שם לסגנון'); return; }
     const srcVal = document.getElementById('styleSourceFileSelect').value;
     let styleData;
     if (srcVal && srcVal !== '-1') {
@@ -113,7 +113,7 @@ function deleteStyle(name) {
 }
 function openEditStyleSidebar(styleName) {
     const style = getStoredStyles().find(s => s.name === styleName);
-    if (!style) { alert('לא נמצא סגנון!'); return; }
+    if (!style) { showError('לא נמצא סגנון!'); return; }
     document.getElementById('editStyleOriginalName').value = style.name;
     document.getElementById('editStyleNameInput').value = style.name;
     document.getElementById('editStyleQuantity').innerHTML = getQuantityOptionsHTML(style.quantity);
@@ -136,11 +136,11 @@ function openEditStyleSidebar(styleName) {
 function saveEditedStyle() {
     const originalName = document.getElementById('editStyleOriginalName').value;
     const newName = document.getElementById('editStyleNameInput').value.trim();
-    if (!newName) { alert('שם הסגנון לא יכול להיות ריק.'); return; }
+    if (!newName) { showError('שם הסגנון לא יכול להיות ריק.'); return; }
     let styles = getStoredStyles();
-    if (newName !== originalName && styles.some(s => s.name === newName)) { alert('סגנון בשם זה כבר קיים.'); return; }
+    if (newName !== originalName && styles.some(s => s.name === newName)) { showError('סגנון בשם זה כבר קיים.'); return; }
     const idx = styles.findIndex(s => s.name === originalName);
-    if (idx === -1) { alert('שגיאה: לא נמצא סגנון מקורי לשמירה.'); return; }
+    if (idx === -1) { showError('שגיאה: לא נמצא סגנון מקורי לשמירה.'); return; }
     styles[idx] = {
         ...styles[idx],
         name: newName,

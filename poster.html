@@ -7,12 +7,18 @@
 
 <link rel="stylesheet" href="css/design-system.css">
 
+<!-- שגיאות משותפות (toast + כפתור העתקה + לוג מתמיד) - נטען מוקדם ככל
+     האפשר כדי לתפוס גם שגיאות מוקדמות. -->
+<script src="js/errors.js"></script>
+
 <!-- Vendored locally (pdf.js 3.11.174 + jsPDF 2.5.1 — same versions the
      original standalone tool loaded from cdnjs). No external CDN calls. -->
 <script src="libs/pdf.min.js"></script>
 <script src="libs/jspdf.umd.min.js"></script>
 
 <style>
+  .site-tabbar{ max-width:1280px; margin:0 auto; padding:14px 24px 0; }
+  .site-tabbar .tabs{ margin-bottom:0; }
   /* ---- page-local styling. Layout/spacing only — colors come from the
      design-system tokens (var(--...)), nothing new is invented here. ---- */
   body{ padding:0; }
@@ -61,6 +67,23 @@
 </style>
 </head>
 <body>
+
+<div class="site-tabbar">
+  <div class="tabs">
+    <a href="app/index.html" class="tab">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      שליחה להדפסה
+    </a>
+    <a href="poster.html" class="tab active">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+      פוסטרים ופריסה
+    </a>
+    <a href="app/history.html" class="tab">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      היסטוריה
+    </a>
+  </div>
+</div>
 
 <div class="pt-page">
 

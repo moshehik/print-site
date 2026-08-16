@@ -7,6 +7,14 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="design-system.css">
 <link rel="stylesheet" href="app.css">
+<style>
+  .site-tabbar{ max-width:1280px; margin:0 auto; padding:14px 20px 0; }
+  .site-tabbar .tabs{ margin-bottom:0; }
+</style>
+
+<!-- שגיאות משותפות (toast + כפתור העתקה + לוג מתמיד) - נטען מוקדם ככל
+     האפשר כדי לתפוס גם שגיאות מוקדמות. -->
+<script src="../js/errors.js"></script>
 
 <!-- PDF / image engine libs (shared with the rest of the site) -->
 <script src="../libs/pdf-lib.min.js"></script>
@@ -20,6 +28,23 @@
 <script src="../js/logo-blur.js"></script>
 </head>
 <body>
+
+<div class="site-tabbar">
+  <div class="tabs">
+    <a href="index.html" class="tab active">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      שליחה להדפסה
+    </a>
+    <a href="../poster.html" class="tab">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+      פוסטרים ופריסה
+    </a>
+    <a href="history.html" class="tab">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      היסטוריה
+    </a>
+  </div>
+</div>
 
 <div class="bsd-icon" id="bsdContainer" style="position:fixed; top:16px; inset-inline-end:20px; z-index:1000; opacity:.85; pointer-events:none; display:none; font-size:1.05rem; font-weight:800; color:var(--primary-solid);">בס"ד</div>
 <img class="top-logo" id="mainLogo" style="position:fixed; top:0; left:50%; transform:translateX(-50%); height:60px; width:auto; max-width:190px; z-index:1000; background:#fff; padding:5px 18px; border-radius:0 0 12px 12px; box-shadow:var(--shadow-md); display:none; object-fit:contain;">
@@ -342,7 +367,6 @@
         <button class="dropdown-item" onclick="requestLogDirectoryAccess()"><i class="fas fa-folder"></i> הגדר תיקיית לוגים</button>
       </div>
     </div>
-    <a class="btn btn-secondary" href="../history.html"><i class="fas fa-history"></i> היסטוריה</a>
   </div>
 
   <div class="card card-pad send-form-card">
