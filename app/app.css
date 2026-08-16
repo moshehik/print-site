@@ -82,12 +82,12 @@ body{ background:var(--bg); }
 .file-card.group-2{ border-color:var(--accent-solid);  box-shadow:inset 0 0 0 1px var(--accent-solid); }
 .file-card.group-3{ border-color:var(--success-solid); box-shadow:inset 0 0 0 1px var(--success-solid); }
 .file-card.group-4{ border-color:var(--info);          box-shadow:inset 0 0 0 1px var(--info); }
+.file-card.group-5{ border-color:var(--warning);       box-shadow:inset 0 0 0 1px var(--warning); }
 
 .file-thumb{ height:120px; background:var(--surface-sunken); display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
 .file-thumb img{ width:100%; height:100%; object-fit:contain; }
 .file-thumb .icon{ width:36px; height:36px; color:var(--text-3); }
 .file-thumb .file-ext{ position:absolute; top:8px; inset-inline-start:8px; }
-.file-thumb .btn-plus{ position:absolute; top:8px; inset-inline-end:8px; }
 
 .file-body{ padding:12px 14px 12px; display:flex; flex-direction:column; gap:6px; }
 .file-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
@@ -106,10 +106,8 @@ body{ background:var(--bg); }
 .file-toolbar .btn-icon-only{ width:30px; height:30px; }
 .file-toolbar .btn-icon-only.active-toggle{ color:var(--primary-solid); background:var(--primary-tint); }
 .file-toolbar .btn-icon-only.popover-open{ background:var(--surface-alt); color:var(--text); box-shadow:inset 0 0 0 1px var(--border-strong); }
-.file-toolbar .btn-icon-only.group-on-1{ color:var(--primary-solid); background:var(--primary-tint); }
-.file-toolbar .btn-icon-only.group-on-2{ color:var(--accent-solid);  background:var(--accent-tint); }
-.file-toolbar .btn-icon-only.group-on-3{ color:var(--success);       background:var(--success-tint); }
-.file-toolbar .btn-icon-only.group-on-4{ color:var(--info);          background:var(--info-tint); }
+.file-toolbar .group-tabs{ display:flex; gap:2px; align-items:center; }
+.file-toolbar .tb-secondary.active-toggle{ color:var(--accent-solid); background:var(--accent-tint); }
 .file-toolbar .tb-danger{ color:var(--danger); }
 .file-toolbar .tb-danger:hover{ background:var(--danger-tint); }
 .file-toolbar .tb-sep{ width:1px; height:18px; background:var(--border); margin:0 3px; }

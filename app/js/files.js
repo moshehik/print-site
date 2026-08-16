@@ -187,6 +187,7 @@ const SVG = {
     group: '<svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
     note:  '<svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
     plus:  '<svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    secondary: '<svg class="icon" viewBox="0 0 24 24"><path d="M22 12.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9"/><polyline points="22 6 12 13 2 6"/><line x1="19" y1="16" x2="19" y2="22"/><line x1="16" y1="19" x2="22" y2="19"/></svg>',
 };
 
 function previewContentFor(item) {
@@ -215,7 +216,6 @@ function renderFileCard(item) {
     ].filter(Boolean).join(' · ');
     const on = (v) => v ? ' active-toggle' : '';
     const activeOpts = countActiveOptions(item);
-    const groupClass = item.group > 0 ? ` group-on group-on-${item.group}` : '';
 
     // סיכום המצב הנוכחי - תגים קטנים מתחת לשם (כמות · פורמט · סגנון), כדי
     // שהמידע נראה גם בלי לפתוח שום תפריט
@@ -226,6 +226,7 @@ function renderFileCard(item) {
         item.group > 0 ? `<span class="badge badge-info" title="קבוצת מיזוג">שילוב ${item.group}</span>` : '',
         activeOpts ? `<span class="badge badge-neutral" title="אפשרויות פעילות">${activeOpts} אפשרויות</span>` : '',
         item.note ? `<span class="badge badge-warning" title="${escAttr(item.note)}">הערה</span>` : '',
+        item.isPlusSelected ? `<span class="badge badge-warning" title="נשלח גם לנמענים המשניים">⊕ משני</span>` : '',
     ].filter(Boolean).join('');
 
     return `
@@ -233,7 +234,6 @@ function renderFileCard(item) {
         <div class="file-thumb">
             ${previewContentFor(item)}
             ${extBadgeFor(item)}
-            <button type="button" class="btn-plus ${item.isPlusSelected ? 'active' : ''}" onclick="togglePlus('${item.id}')" title="סימון לשליחה משנית (⊕)">+</button>
         </div>
         <div class="file-body">
             <div class="file-name" title="${escAttr(item.fileObj.name)}">${escHtml(item.fileObj.name)}</div>
@@ -248,10 +248,12 @@ function renderFileCard(item) {
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm" data-pop="format" onclick="openCardMenu(this,'${item.id}','format')" title="פורמט">${SVG.format}</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.appliedStyleName)}" data-pop="style" onclick="openCardMenu(this,'${item.id}','style')" title="סגנון שליחה">${SVG.style}</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(activeOpts)}" data-pop="options" onclick="openCardMenu(this,'${item.id}','options')" title="אפשרויות הדפסה ועיצוב">${SVG.gear}</button>
-                <button type="button" class="btn btn-secondary btn-icon-only btn-sm${groupClass}" data-pop="group" onclick="openCardMenu(this,'${item.id}','group')" title="קבוצת מיזוג">${SVG.group}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-secondary${item.isPlusSelected ? ' active-toggle' : ''}" onclick="togglePlus('${item.id}')" title="שליחה גם לנמענים המשניים (⊕)">${SVG.secondary}</button>
+                <span class="tb-sep"></span>
+                <div class="group-tabs" title="קבוצת מיזוג">${getGroupTabsHTML(item)}${item.group > 0 ? `<button type="button" class="btn-edit-group" onclick="openMergeSidebar(${item.group})" title="ניהול קבוצה ${item.group}">${SVG.edit}</button>` : ''}</div>
                 <span class="tb-sep"></span>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.blurLogo)}" onclick="toggleBlurLogo('${item.id}')" title="הסתרת לוגו / טשטוש">${SVG.blur}</button>
-                <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.pageSelection)}" onclick="openPageSelectionPrompt('${item.id}')" title="בחירת עמודים">${SVG.pages}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.pageSelection)}" data-pop="pages" onclick="openPageSelectionPrompt('${item.id}', this)" title="בחירת עמודים">${SVG.pages}</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.note)}" data-pop="note" onclick="openCardMenu(this,'${item.id}','note')" title="הערה">${SVG.note}</button>
                 <span class="tb-sep"></span>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm" onclick="downloadSingleItem('${item.id}')" title="הורדת קובץ מעובד">${SVG.down}</button>
@@ -307,19 +309,6 @@ function openCardMenu(anchor, id, kind) {
         foot.querySelector('button').addEventListener('click', () => { closePopover(); saveAsStyleFromFile(id); });
         wrap.appendChild(foot);
         openPopover(anchor, wrap, { width: 260 });
-        return;
-    }
-    if (kind === 'group') {
-        const items = [0, 1, 2, 3, 4].map(g => ({ value: g, label: g === 0 ? 'ללא מיזוג' : `שילוב ${g}` }));
-        const wrap = document.createElement('div');
-        wrap.appendChild(pickerMenu('קבוצת מיזוג', items, item.group, v => set('group', v)));
-        if (item.group > 0) {
-            const foot = document.createElement('div'); foot.className = 'popover-foot';
-            foot.innerHTML = `<button type="button" class="btn btn-primary btn-sm">ניהול קבוצה ${item.group}</button>`;
-            foot.querySelector('button').addEventListener('click', () => { closePopover(); openMergeSidebar(item.group); });
-            wrap.appendChild(foot);
-        }
-        openPopover(anchor, wrap);
         return;
     }
     if (kind === 'note') {
@@ -381,7 +370,7 @@ function getStylesOptionsHTML(selectedStyleName) {
 }
 
 function getGroupTabsHTML(item) {
-    return [0, 1, 2, 3, 4].map(g => `<button type="button" class="group-tab ${item.group === g ? 'active' : ''}" data-g="${g}" onclick="updateFileParam('${item.id}','group',${g})" title="${g === 0 ? 'ללא מיזוג' : 'שילוב ' + g}">${g === 0 ? '−' : g}</button>`).join('');
+    return [0, 1, 2, 3, 4, 5].map(g => `<button type="button" class="group-tab ${item.group === g ? 'active' : ''}" data-g="${g}" onclick="updateFileParam('${item.id}','group',${g})" title="${g === 0 ? 'ללא מיזוג' : 'שילוב ' + g}">${g === 0 ? '−' : g}</button>`).join('');
 }
 
 function getLargeFileOptions(item, isLarge) {
@@ -481,12 +470,24 @@ async function saveAsStyleFromFile(fileId) {
 }
 
 // ---- page selection modal ----
-async function openPageSelectionPrompt(id) {
+async function openPageSelectionPrompt(id, anchor) {
     const item = filesData.find(f => f.id === id);
     if (!item) return;
     currentSelectionFileId = id;
+    // תפריט צף (כמו שאר האייקונים) - הפאנל נבנה מחדש בכל פתיחה, המזהים
+    // נשארים כדי ש-updatePageSelectionVisuals/selectAllPages ימשיכו לעבוד
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<div class="popover-title">בחירת עמודים להדפסה/הורדה</div>
+        <div class="hint" style="padding:0 6px 8px;">עמודים או טווחים מופרדים בפסיק (1, 3, 5-8). ריק = הכל.</div>
+        <div class="manager-add-row" style="padding:0 4px;">
+            <input type="text" id="pageSelectionInput" class="input" placeholder="לדוגמה: 1, 3, 5-8" dir="ltr" oninput="updatePageSelectionVisuals()">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllPages()" title="סמן הכל">הכל</button>
+        </div>
+        <div id="pageSelectionLoading" class="hidden" style="text-align:center; padding:14px;"><span class="spinner" style="display:inline-block;vertical-align:middle;"></span> טוען דפים...</div>
+        <div id="pageSelectionGrid" class="page-checkbox-grid" style="margin:0 4px 4px;"></div>
+        <div class="popover-foot"><button type="button" class="btn btn-primary btn-sm" onclick="savePageSelection()">שמור בחירה</button></div>`;
+    openPopover(anchor, wrap, { width: 340 });
     document.getElementById('pageSelectionInput').value = item.pageSelection || '';
-    openModalRaw('pageSelectionModal');
 
     const grid = document.getElementById('pageSelectionGrid');
     const loader = document.getElementById('pageSelectionLoading');
@@ -560,8 +561,9 @@ function updatePageSelectionVisuals() {
 }
 function savePageSelection() {
     if (!currentSelectionFileId) return;
-    updateFileParam(currentSelectionFileId, 'pageSelection', document.getElementById('pageSelectionInput').value.trim());
-    closeModal('pageSelectionModal');
+    const val = document.getElementById('pageSelectionInput').value.trim();
+    closePopover();
+    updateFileParam(currentSelectionFileId, 'pageSelection', val);
 }
 
 // ---- download a single processed file (uses the send-pipeline's per-file processor) ----
