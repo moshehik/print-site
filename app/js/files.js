@@ -187,6 +187,8 @@ const SVG = {
     group: '<svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
     note:  '<svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
     plus:  '<svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    bsd:   '<svg class="icon" viewBox="0 0 24 24"><text x="12" y="16.5" text-anchor="middle" font-size="11" font-weight="800" fill="currentColor" stroke="none" font-family="inherit">בס״ד</text></svg>',
+    logo:  '<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
     secondary: '<svg class="icon" viewBox="0 0 24 24"><path d="M22 12.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9"/><polyline points="22 6 12 13 2 6"/><line x1="19" y1="16" x2="19" y2="22"/><line x1="16" y1="19" x2="22" y2="19"/></svg>',
 };
 
@@ -228,6 +230,7 @@ function renderFileCard(item) {
         item.appliedStyleName ? badge('badge-primary', item.appliedStyleName, 'סגנון') : '',
         item.group > 0 ? badge('badge-info', `שילוב ${item.group}`, 'קבוצת מיזוג') : '',
         item.isPlusSelected ? badge('badge-warning', '⊕ משני', 'נשלח גם לנמענים המשניים') : '',
+        item.addBsd ? badge('badge-neutral', 'בס"ד') : '',
         ...CARD_OPTION_KEYS.filter(k => item[k]).map(k => badge('badge-neutral', OPT_LABELS[k])),
         logoVal ? badge('badge-neutral', `לוגו ${logoVal}`) : '',
         item.multiUpMode ? badge('badge-neutral', MULTI_LABELS[item.multiUpMode] || item.multiUpMode, 'מרובים בעמוד') : '',
@@ -255,6 +258,8 @@ function renderFileCard(item) {
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm" data-pop="format" onclick="openCardMenu(this,'${item.id}','format')" title="פורמט">${SVG.format}</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.appliedStyleName)}" data-pop="style" onclick="openCardMenu(this,'${item.id}','style')" title="סגנון שליחה">${SVG.style}</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(activeOpts)}" data-pop="options" onclick="openCardMenu(this,'${item.id}','options')" title="אפשרויות הדפסה ועיצוב">${SVG.gear}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-bsd${on(item.addBsd)}" onclick="updateFileParam('${item.id}','addBsd',${item.addBsd ? 'false' : 'true'})" title="${item.addBsd ? 'הסר בס״ד' : 'הוסף בס״ד'}">${SVG.bsd}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-logo${on(logoVal)}" onclick="cycleFileLogo('${item.id}')" title="${logoVal ? 'לוגו ' + logoVal + ' (לחץ להחלפה)' : 'הוסף לוגו'}">${SVG.logo}${logoVal ? `<span class="tb-logo-num">${logoVal}</span>` : ''}</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-secondary${item.isPlusSelected ? ' active-toggle' : ''}" onclick="togglePlus('${item.id}')" title="שליחה גם לנמענים המשניים (⊕)">${SVG.secondary}</button>
                 <span class="tb-sep"></span>
                 <div class="group-tabs" title="קבוצת מיזוג">${getGroupTabsHTML(item)}${item.group > 0 ? `<button type="button" class="btn-edit-group" onclick="openMergeSidebar(${item.group})" title="ניהול קבוצה ${item.group}">${SVG.edit}</button>` : ''}</div>
@@ -271,10 +276,9 @@ function renderFileCard(item) {
     </div>`;
 }
 
-const CARD_OPTION_KEYS = ['convertToPdf', 'addBsd', 'addPageNumbers', 'reverseLastPage', 'addArrows', 'duplicateTwoUp', 'addEvenBlankPage', 'marginCut'];
+const CARD_OPTION_KEYS = ['convertToPdf', 'addPageNumbers', 'reverseLastPage', 'addArrows', 'duplicateTwoUp', 'addEvenBlankPage', 'marginCut'];
 function countActiveOptions(item) {
     let n = CARD_OPTION_KEYS.filter(k => item[k]).length;
-    if (item.addLogo && item.addLogo !== '') n++;
     if (item.multiUpMode) n++;
     return n;
 }
@@ -337,15 +341,13 @@ function openCardMenu(anchor, id, kind) {
         wrap.innerHTML = `<div class="popover-title">אפשרויות הדפסה ועיצוב</div>
             <div class="opt-chips"></div>
             <div class="menu-divider"></div>
-            <div class="form-grid" style="gap:0 8px; padding:0 4px;">
-                <div class="field"><label>לוגו</label><select class="select" data-k="addLogo">
-                    <option value="">ללא</option><option value="1">לוגו 1</option><option value="2">לוגו 2</option></select></div>
+            <div class="form-grid" style="gap:0 8px; padding:0 4px; grid-template-columns:1fr;">
                 <div class="field"><label>מרובים בעמוד</label><select class="select" data-k="multiUpMode">
                     <option value="">ללא</option><option value="4">4 בעמוד</option><option value="4_dup">4 (משוכפל)</option>
                     <option value="9">9 בעמוד</option><option value="9_dup">9 (משוכפל)</option><option value="16">16 בעמוד</option><option value="16_dup">16 (משוכפל)</option></select></div>
             </div>`;
         const chipsEl = wrap.querySelector('.opt-chips');
-        const labels = { convertToPdf: 'המר ל-PDF', addBsd: 'בס"ד', addPageNumbers: 'מספור', reverseLastPage: 'הפוך דף אחרון', addArrows: '9 בעמוד + חיצים', duplicateTwoUp: '2 משוכפל', addEvenBlankPage: 'דף ריק זוגי', marginCut: 'חיתוך שוליים' };
+        const labels = { convertToPdf: 'המר ל-PDF', addPageNumbers: 'מספור', reverseLastPage: 'הפוך דף אחרון', addArrows: '9 בעמוד + חיצים', duplicateTwoUp: '2 משוכפל', addEvenBlankPage: 'דף ריק זוגי', marginCut: 'חיתוך שוליים' };
         CARD_OPTION_KEYS.forEach(k => {
             if (k === 'convertToPdf' && !item.canConvert) return;
             const lab = document.createElement('label'); lab.className = 'opt-chip';
@@ -353,7 +355,6 @@ function openCardMenu(anchor, id, kind) {
             lab.querySelector('input').addEventListener('change', e => set(k, e.target.checked, true));
             chipsEl.appendChild(lab);
         });
-        wrap.querySelector('[data-k="addLogo"]').value = logoVal;
         wrap.querySelector('[data-k="multiUpMode"]').value = item.multiUpMode || '';
         wrap.querySelectorAll('select').forEach(sel => sel.addEventListener('change', e => set(e.target.dataset.k, e.target.value, true)));
         openPopover(anchor, wrap, { width: 320 });
