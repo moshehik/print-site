@@ -4,6 +4,8 @@
 (function () {
   var THEME_KEY = 'printSiteTheme';
   var SIDEBAR_KEY = 'printSiteSidebar';
+  var PALETTE_KEY = 'printSitePalette';
+  var DENSITY_KEY = 'printSiteDensity';
 
   // ---- החלת העדפות שמורות מוקדם (לפני ציור הדף - נקרא מ-<head>) ----
   var savedTheme = localStorage.getItem(THEME_KEY);
@@ -14,6 +16,48 @@
   if (savedSidebar === 'collapsed' || savedSidebar === 'hidden') {
     document.documentElement.setAttribute('data-sidebar', savedSidebar);
   }
+  var savedPalette = localStorage.getItem(PALETTE_KEY);
+  if (savedPalette) document.documentElement.setAttribute('data-palette', savedPalette);
+  var savedDensity = localStorage.getItem(DENSITY_KEY);
+  if (savedDensity === 'compact') document.documentElement.setAttribute('data-density', 'compact');
+
+  // API לעמוד "עיצוב ותצוגה" (display-settings) - שינוי + שמירה במקום אחד
+  window.ShellPrefs = {
+    setTheme: function (mode) { // 'light' | 'dark' | 'auto'
+      if (mode === 'auto') {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.removeItem(THEME_KEY);
+      } else {
+        document.documentElement.setAttribute('data-theme', mode);
+        localStorage.setItem(THEME_KEY, mode);
+      }
+    },
+    setPalette: function (name) { // '' = ברירת המחדל (אריג)
+      if (name) {
+        document.documentElement.setAttribute('data-palette', name);
+        localStorage.setItem(PALETTE_KEY, name);
+      } else {
+        document.documentElement.removeAttribute('data-palette');
+        localStorage.removeItem(PALETTE_KEY);
+      }
+    },
+    setDensity: function (d) { // 'comfortable' | 'compact'
+      if (d === 'compact') {
+        document.documentElement.setAttribute('data-density', 'compact');
+        localStorage.setItem(DENSITY_KEY, 'compact');
+      } else {
+        document.documentElement.removeAttribute('data-density');
+        localStorage.removeItem(DENSITY_KEY);
+      }
+    },
+    get: function () {
+      return {
+        theme: localStorage.getItem(THEME_KEY) || 'auto',
+        palette: localStorage.getItem(PALETTE_KEY) || '',
+        density: localStorage.getItem(DENSITY_KEY) || 'comfortable',
+      };
+    },
+  };
 
   function isDarkNow() {
     var attr = document.documentElement.getAttribute('data-theme');

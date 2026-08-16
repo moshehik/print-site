@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עיצוב ותצוגה</title>
+<link rel="stylesheet" href="design-system.css">
+<style>
+  .hidden{ display:none !important; }
+  .page-wrap{ max-width:860px; margin:0 auto; }
+  .swatch-name{ font-size:10.5px; color:var(--text-3); text-align:center; margin-top:4px; }
+  .palette-opt{ display:flex; flex-direction:column; align-items:center; cursor:pointer; }
+</style>
+<script src="../js/shell.js"></script>
+<script src="../js/errors.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg class="icon" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18h12v3H6zM6 14h12M4 9h16a2 2 0 0 1 2 2v6h-4v-4H6v4H2v-6a2 2 0 0 1 2-2z"/></svg></div>
+      <div>
+        <div class="brand-text">מערכת הדפסה</div>
+        <div class="brand-sub">שליחה · פוסטרים · היסטוריה</div>
+      </div>
+    </div>
+    <nav class="nav-group">
+      <div class="nav-group-label">כלים</div>
+      <a class="nav-link" href="index.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        <span class="nav-label">שליחה להדפסה</span>
+      </a>
+      <a class="nav-link" href="../poster.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+        <span class="nav-label">פוסטרים ופריסה</span>
+      </a>
+      <a class="nav-link" href="history.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        <span class="nav-label">היסטוריה</span>
+      </a>
+      <div class="nav-group-label">העדפות</div>
+      <a class="nav-link active" href="display-settings.html">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+        <span class="nav-label">עיצוב ותצוגה</span>
+      </a>
+    </nav>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <button type="button" class="icon-btn menu-toggle" id="menuToggle" title="תפריט">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div>
+        <div class="topbar-title">עיצוב ותצוגה</div>
+        <div class="crumb">פלטת צבעים, מצב תצוגה וצפיפות - נשמר בדפדפן ותקף לכל עמודי המערכת</div>
+      </div>
+      <span style="flex:1"></span>
+      <button type="button" class="icon-btn" id="themeToggle" title="מצב כהה/בהיר">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+
+    <div class="content">
+<div class="page-wrap">
+
+  <div class="card" style="margin-bottom:18px;">
+    <div class="card-head">
+      <div class="card-title-row">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <h3>מצב תצוגה</h3>
+      </div>
+    </div>
+    <div class="card-pad">
+      <div class="mode-row" style="grid-template-columns:repeat(3,1fr); max-width:420px;">
+        <button type="button" class="mode-btn" data-mode="light">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          בהיר
+        </button>
+        <button type="button" class="mode-btn" data-mode="dark">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          כהה
+        </button>
+        <button type="button" class="mode-btn" data-mode="auto">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          לפי המחשב
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div class="card-head">
+      <div class="card-title-row">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+        <h3>פלטת צבעים</h3>
+      </div>
+    </div>
+    <div class="card-pad">
+      <div class="swatch-row" id="paletteRow" style="gap:14px;"></div>
+      <div class="hint" style="margin-top:12px;">הפלטה חלה על כל עמודי המערכת - כפתורים, תפריטים, תגים וטבלאות.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title-row">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+        <h3>צפיפות תצוגה</h3>
+      </div>
+    </div>
+    <div class="card-pad">
+      <div class="density-row" style="max-width:280px;">
+        <button type="button" class="density-btn" data-density="comfortable">מרווח</button>
+        <button type="button" class="density-btn" data-density="compact">קומפקטי</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+    </div><!-- /.content -->
+  </div><!-- /.main -->
+</div><!-- /.app-shell -->
+
+<script>
+// הפלטות מוגדרות ב-design-system.css (:root[data-palette=...]) - כאן רק
+// הצבעים לתצוגת העיגולים (primary/accent של מצב בהיר) ושמות בעברית.
+const PALETTES = [
+  { id: '',          name: 'אריג',     c1: '#7C2E4D', c2: '#96661F' },
+  { id: 'forest',    name: 'יער',      c1: '#2E5C40', c2: '#9C5423' },
+  { id: 'ocean',     name: 'אוקיינוס', c1: '#1F5C66', c2: '#8A661F' },
+  { id: 'plum',      name: 'שזיף',     c1: '#5B3A73', c2: '#3F6E6E' },
+  { id: 'amber',     name: 'ענבר',     c1: '#A85A1E', c2: '#2E6B6B' },
+  { id: 'slate',     name: 'צפחה',     c1: '#3E5266', c2: '#A8622E' },
+  { id: 'rose',      name: 'ורד',      c1: '#A03A54', c2: '#6E7A3A' },
+  { id: 'indigo',    name: 'אינדיגו',  c1: '#3E4E8C', c2: '#B8862E' },
+  { id: 'turquoise', name: 'טורקיז',   c1: '#1E7A7A', c2: '#B85A42' },
+  { id: 'mustard',   name: 'חרדל',     c1: '#8C7A1E', c2: '#6E3A5C' },
+  { id: 'fuchsia',   name: 'פוקסיה',   c1: '#A02E8C', c2: '#2E7A5C' },
+  { id: 'coffee',    name: 'קפה',      c1: '#6B4A2E', c2: '#2E6B7A' },
+  { id: 'mint',      name: 'מנטה',     c1: '#2E7A5C', c2: '#B8622E' },
+  { id: 'burgundy',  name: 'בורדו',    c1: '#5C1E28', c2: '#8C6E1E' },
+];
+
+function renderPalettes() {
+  const row = document.getElementById('paletteRow');
+  const current = window.ShellPrefs.get().palette;
+  row.innerHTML = '';
+  PALETTES.forEach((p) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'palette-opt';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'swatch-btn' + (current === p.id ? ' active' : '');
+    btn.title = p.name;
+    btn.style.background = `linear-gradient(135deg, ${p.c1} 50%, ${p.c2} 50%)`;
+    btn.addEventListener('click', () => {
+      window.ShellPrefs.setPalette(p.id);
+      renderPalettes();
+    });
+    const label = document.createElement('div');
+    label.className = 'swatch-name';
+    label.textContent = p.name;
+    wrap.appendChild(btn);
+    wrap.appendChild(label);
+    row.appendChild(wrap);
+  });
+}
+
+function renderModes() {
+  const current = window.ShellPrefs.get().theme;
+  document.querySelectorAll('.mode-btn').forEach((b) => b.classList.toggle('active', b.dataset.mode === current));
+}
+
+function renderDensity() {
+  const current = window.ShellPrefs.get().density;
+  document.querySelectorAll('.density-btn').forEach((b) => b.classList.toggle('active', b.dataset.density === current));
+}
+
+document.querySelectorAll('.mode-btn').forEach((b) => b.addEventListener('click', () => {
+  window.ShellPrefs.setTheme(b.dataset.mode);
+  renderModes();
+}));
+document.querySelectorAll('.density-btn').forEach((b) => b.addEventListener('click', () => {
+  window.ShellPrefs.setDensity(b.dataset.density);
+  renderDensity();
+}));
+
+renderPalettes();
+renderModes();
+renderDensity();
+</script>
+
+</body>
+</html>

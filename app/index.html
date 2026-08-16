@@ -25,9 +25,6 @@
 </head>
 <body>
 
-<div class="bsd-icon" id="bsdContainer" style="position:fixed; top:16px; inset-inline-end:20px; z-index:1000; opacity:.85; pointer-events:none; display:none; font-size:1.05rem; font-weight:800; color:var(--primary-solid);">בס"ד</div>
-<img class="top-logo" id="mainLogo" style="position:fixed; top:0; left:50%; transform:translateX(-50%); height:60px; width:auto; max-width:190px; z-index:1000; background:#fff; padding:5px 18px; border-radius:0 0 12px 12px; box-shadow:var(--shadow-md); display:none; object-fit:contain;">
-
 <!-- ============== LOADER / PROGRESS OVERLAY ============== -->
 <div class="loader-overlay" id="loader">
   <div class="spinner lg"></div>
@@ -343,6 +340,11 @@
         <svg class="icon" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
         <span class="nav-label">היסטוריה</span>
       </a>
+      <div class="nav-group-label">העדפות</div>
+      <a class="nav-link" href="display-settings.html">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+        <span class="nav-label">עיצוב ותצוגה</span>
+      </a>
     </nav>
   </aside>
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
@@ -365,70 +367,95 @@
     <div class="content">
 <div class="page-wrap" style="padding-top:0;">
 
-  <div class="top-toolbar">
-    <div class="view-switcher">
-      <button id="btn-grid-view" class="active" title="תצוגת רשת"><i class="fas fa-th-large"></i></button>
-      <button id="btn-list-view" title="תצוגת רשימה"><i class="fas fa-list"></i></button>
+  <div class="page-head">
+    <div>
+      <h1>שליחה להדפסה</h1>
+      <div class="page-desc">מלא נמענים, העלה קבצים, תייג הוראות הדפסה - ושלח</div>
     </div>
-    <div class="spacer"></div>
-    <div class="dropdown-wrap" id="manageDropdown">
-      <button class="btn btn-secondary" onclick="toggleDropdown('manageDropdown')"><i class="fas fa-cog"></i> ניהול <i class="fas fa-chevron-down" style="font-size:.75em;"></i></button>
-      <div class="dropdown-panel">
-        <button class="dropdown-item" onclick="openModal('contactsModal')"><i class="fas fa-address-book"></i> אנשי קשר</button>
-        <button class="dropdown-item" onclick="openModal('formatManagerModal')"><i class="fas fa-list-ul"></i> ניהול פורמטים</button>
-        <button class="dropdown-item" onclick="openModal('quantityManagerModal')"><i class="fas fa-sort-numeric-up"></i> ניהול כמויות</button>
-        <button class="dropdown-item" onclick="openModal('brandingModal')"><i class="fas fa-stamp"></i> הגדרות מיתוג</button>
-        <button class="dropdown-item" onclick="openModal('styleManagerModal')"><i class="fas fa-palette"></i> סגנון שליחה</button>
-        <button class="dropdown-item" onclick="requestLogDirectoryAccess()"><i class="fas fa-folder"></i> הגדר תיקיית לוגים</button>
+    <div class="page-actions">
+      <div class="dropdown-wrap" id="manageDropdown">
+        <button class="btn btn-secondary" onclick="toggleDropdown('manageDropdown')"><i class="fas fa-cog"></i> ניהול <i class="fas fa-chevron-down" style="font-size:.75em;"></i></button>
+        <div class="dropdown-panel">
+          <button class="dropdown-item" onclick="openModal('contactsModal')"><i class="fas fa-address-book"></i> אנשי קשר</button>
+          <button class="dropdown-item" onclick="openModal('formatManagerModal')"><i class="fas fa-list-ul"></i> ניהול פורמטים</button>
+          <button class="dropdown-item" onclick="openModal('quantityManagerModal')"><i class="fas fa-sort-numeric-up"></i> ניהול כמויות</button>
+          <button class="dropdown-item" onclick="openModal('brandingModal')"><i class="fas fa-stamp"></i> הגדרות מיתוג</button>
+          <button class="dropdown-item" onclick="openModal('styleManagerModal')"><i class="fas fa-palette"></i> סגנון שליחה</button>
+          <button class="dropdown-item" onclick="requestLogDirectoryAccess()"><i class="fas fa-folder"></i> הגדר תיקיית לוגים</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="card card-pad send-form-card">
-    <div class="field">
-      <label>נמענים ראשיים (בחירה מרובה או כתיבה ידנית)</label>
-      <div class="recipient-row">
-        <div class="multiselect" id="mainEmailMultiselect"></div>
-        <input type="text" id="mainEmailManual" class="input" placeholder="הקלד מייל ידני..." list="contacts-datalist">
+  <div class="card send-form-card">
+    <div class="card-head">
+      <div class="card-title-row">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <h3>נמענים ונושא</h3>
       </div>
     </div>
-    <div class="field">
-      <label>נמענים משניים (עבור קבצים שסומנו ב-⊕)</label>
-      <div class="recipient-row">
-        <div class="multiselect" id="secondaryEmailMultiselect"></div>
-        <input type="text" id="secondaryEmailManual" class="input" placeholder="הקלד מייל ידני..." list="contacts-datalist">
+    <div class="card-pad">
+      <div class="field">
+        <label>נמענים ראשיים (בחירה מרובה או כתיבה ידנית)</label>
+        <div class="recipient-row">
+          <div class="multiselect" id="mainEmailMultiselect"></div>
+          <input type="text" id="mainEmailManual" class="input" placeholder="הקלד מייל ידני..." list="contacts-datalist">
+        </div>
       </div>
-      <datalist id="contacts-datalist"></datalist>
+      <div class="field">
+        <label>נמענים משניים (עבור קבצים שסומנו ב-⊕)</label>
+        <div class="recipient-row">
+          <div class="multiselect" id="secondaryEmailMultiselect"></div>
+          <input type="text" id="secondaryEmailManual" class="input" placeholder="הקלד מייל ידני..." list="contacts-datalist">
+        </div>
+        <datalist id="contacts-datalist"></datalist>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>נושא ההודעה</label>
+        <input type="text" id="subject" class="input">
+      </div>
     </div>
-    <div class="field" style="margin-bottom:0;">
-      <label>נושא ההודעה</label>
-      <input type="text" id="subject" class="input">
+  </div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div class="card-head">
+      <div class="card-title-row">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <h3>קבצים</h3>
+      </div>
+      <div class="view-switcher">
+        <button id="btn-grid-view" class="active" title="תצוגת רשת"><i class="fas fa-th-large"></i></button>
+        <button id="btn-list-view" title="תצוגת רשימה"><i class="fas fa-list"></i></button>
+      </div>
+    </div>
+    <div class="card-pad">
+      <label class="upload-zone" for="fileInput" id="dropZone">
+        <i class="fas fa-cloud-upload-alt icon" style="width:26px;height:26px;font-size:24px;"></i>
+        <strong>לחץ כאן לבחירת קבצים, או גרור ושחרר</strong>
+        <span class="hint">PDF, Word, JPG, PNG</span>
+      </label>
+      <input type="file" id="fileInput" multiple>
+
+      <div class="style-selector-row" id="styleSelectorRow" style="margin-top:14px;">
+        <label style="font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px;"><i class="fas fa-palette"></i> סגנון שליחה גלובלי:</label>
+        <select id="styleSelect" class="select" onchange="onStyleSelectChange()"><option value="">-- בחר סגנון --</option></select>
+        <button class="btn btn-secondary" onclick="applySelectedStyle()" id="applyStyleBtn" disabled><i class="fas fa-check-double"></i> החל על כל הקבצים</button>
+      </div>
+
+      <div class="file-list" id="fileListContainer"></div>
     </div>
   </div>
 
-  <label class="upload-zone" for="fileInput" id="dropZone">
-    <i class="fas fa-cloud-upload-alt icon" style="width:26px;height:26px;font-size:24px;"></i>
-    <strong>לחץ כאן לבחירת קבצים, או גרור ושחרר</strong>
-    <span class="hint">PDF, Word, JPG, PNG</span>
-  </label>
-  <input type="file" id="fileInput" multiple>
-
-  <div class="style-selector-row" id="styleSelectorRow">
-    <label style="font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px;"><i class="fas fa-palette"></i> סגנון שליחה גלובלי:</label>
-    <select id="styleSelect" class="select" onchange="onStyleSelectChange()"><option value="">-- בחר סגנון --</option></select>
-    <button class="btn btn-secondary" onclick="applySelectedStyle()" id="applyStyleBtn" disabled><i class="fas fa-check-double"></i> החל על כל הקבצים</button>
+  <div class="bulk-bar" style="border:1px solid var(--border); border-radius:var(--radius-lg); gap:14px;">
+    <div id="sizeStatus" class="status-bar status-ok hidden" style="margin:0; padding:8px 14px; flex:1;">
+      <span><i class="fas fa-database"></i> סה"כ: <b id="totalSizeText">0 MB</b></span>
+      <span id="destMethod" style="font-weight:700;"></span>
+    </div>
+    <span class="spacer" style="flex:1;"></span>
+    <button class="btn btn-primary btn-lg" onclick="processAndSend()" style="min-width:200px;">
+      <i class="fas fa-paper-plane"></i> שלח הכל
+    </button>
   </div>
-
-  <div class="file-list" id="fileListContainer"></div>
-
-  <div id="sizeStatus" class="status-bar status-ok hidden">
-    <span><i class="fas fa-database"></i> סה"כ: <b id="totalSizeText">0 MB</b></span>
-    <span id="destMethod" style="font-weight:700;"></span>
-  </div>
-
-  <button class="btn btn-primary btn-lg btn-send" onclick="processAndSend()">
-    <i class="fas fa-paper-plane"></i> שלח הכל
-  </button>
 </div>
     </div><!-- /.content -->
   </div><!-- /.main -->
