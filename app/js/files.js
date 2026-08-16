@@ -261,7 +261,7 @@ function renderFileCard(item) {
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.appliedStyleName)}" data-pop="style" onclick="openCardMenu(this,'${item.id}','style')" title="סגנון שליחה">${SVG.style}</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(activeOpts)}" data-pop="options" onclick="openCardMenu(this,'${item.id}','options')" title="אפשרויות הדפסה ועיצוב">${SVG.gear}</button>
                 <button type="button" class="btn btn-secondary btn-sm tb-bsd${on(item.addBsd)}" onclick="updateFileParam('${item.id}','addBsd',${item.addBsd ? 'false' : 'true'})" title="${item.addBsd ? 'הסר בס״ד' : 'הוסף בס״ד'}">בס״ד</button>
-                <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-logo${on(logoVal)}" onclick="cycleFileLogo('${item.id}')" title="${logoVal ? 'לוגו ' + logoVal + ' (לחץ להחלפה)' : 'הוסף לוגו'}">${SVG.logo}${logoVal ? `<span class="tb-logo-num">${logoVal}</span>` : ''}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-logo${on(logoVal)}" data-pop="logo" onclick="openCardMenu(this,'${item.id}','logo')" title="${logoVal ? 'לוגו ' + logoVal : 'לוגו'}">${SVG.logo}${logoVal ? `<span class="tb-logo-num">${logoVal}</span>` : ''}</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-dest${fileDests(item).length > 1 || fileDests(item)[0] !== defaultDestId() ? ' active-toggle' : ''}" data-pop="dest" onclick="openCardMenu(this,'${item.id}','dest')" title="יעדי שליחה">${SVG.dest}${fileDests(item).length > 1 ? `<span class="tb-logo-num">${fileDests(item).length}</span>` : ''}</button>
                 <span class="tb-sep"></span>
                 <div class="group-tabs" title="קבוצת מיזוג">${getGroupTabsHTML(item)}${item.group > 0 ? `<button type="button" class="btn-edit-group" onclick="openMergeSidebar(${item.group})" title="ניהול קבוצה ${item.group}">${SVG.edit}</button>` : ''}</div>
@@ -325,6 +325,32 @@ function openCardMenu(anchor, id, kind) {
         openPopover(anchor, wrap, { width: 260 });
         return;
     }
+    if (kind === 'logo') {
+        const cur = item.addLogo === true || item.addLogo === '1' ? '1' : (item.addLogo === '2' ? '2' : '');
+        const wrap = document.createElement('div');
+        wrap.innerHTML = '<div class="popover-title">לוגו על הקובץ</div>';
+        const opts = [
+            { v: '',  label: 'ללא לוגו', sub: 'הקובץ נשלח כמו שהוא' },
+            { v: '1', label: 'לוגו 1',   sub: getLogoBase64(1) ? '' : 'לא הועלה עדיין', img: getLogoBase64(1) },
+            { v: '2', label: 'לוגו 2',   sub: getLogoBase64(2) ? '' : 'לא הועלה עדיין', img: getLogoBase64(2) },
+        ];
+        opts.forEach(o => {
+            const b = document.createElement('button'); b.type = 'button';
+            b.className = 'menu-item logo-menu-item' + (cur === o.v ? ' selected' : '');
+            b.innerHTML = `<span class="logo-menu-thumb">${o.img ? `<img src="${o.img}" alt="">` : SVG.logo}</span><span class="dest-menu-text"><span class="dest-menu-name"></span><span class="dest-menu-sub"></span></span><svg class="icon check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+            b.querySelector('.dest-menu-name').textContent = o.label;
+            b.querySelector('.dest-menu-sub').textContent = o.sub;
+            if (o.v && !o.img) b.querySelector('.dest-menu-sub').style.color = 'var(--warning)';
+            b.addEventListener('click', () => set('addLogo', o.v));
+            wrap.appendChild(b);
+        });
+        const foot = document.createElement('div'); foot.className = 'popover-foot';
+        foot.innerHTML = '<button type="button" class="btn btn-secondary btn-sm">העלאה / ניהול לוגואים</button>';
+        foot.querySelector('button').addEventListener('click', () => { closePopover(); openModal('brandingModal'); });
+        wrap.appendChild(foot);
+        openPopover(anchor, wrap, { width: 260 });
+        return;
+    }
     if (kind === 'dest') {
         const list = getDestinations();
         const wrap = document.createElement('div');
@@ -332,9 +358,12 @@ function openCardMenu(anchor, id, kind) {
         list.forEach((d, i) => {
             const b = document.createElement('button'); b.type = 'button';
             const has = fileHasDest(item, d.id);
-            b.className = 'menu-item' + (has ? ' selected' : '');
-            b.innerHTML = `${destDotHtml(d)}<span></span>${i === 0 ? '<span class="hint" style="margin-inline-start:6px;">(ברירת מחדל)</span>' : ''}<svg class="icon check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
-            b.querySelector('span').textContent = d.name + ((d.emails || []).length ? '' : ' — אין נמענים');
+            const n = (d.emails || []).length;
+            b.className = 'menu-item dest-menu-item' + (has ? ' selected' : '');
+            b.innerHTML = `${destDotHtml(d)}<span class="dest-menu-text"><span class="dest-menu-name"></span><span class="dest-menu-sub"></span></span><svg class="icon check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+            b.querySelector('.dest-menu-name').textContent = d.name + (i === 0 ? ' · ברירת מחדל' : '');
+            b.querySelector('.dest-menu-sub').textContent = n ? `${n} נמענים` : 'אין נמענים';
+            if (!n) b.querySelector('.dest-menu-sub').style.color = 'var(--danger)';
             b.addEventListener('click', () => { closePopover(); toggleFileDest(id, d.id); setTimeout(() => reopen('dest'), 0); });
             wrap.appendChild(b);
         });

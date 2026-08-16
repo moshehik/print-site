@@ -192,8 +192,8 @@ function renderTable() {
   historyData.forEach((item, index) => {
     const tr = document.createElement('tr');
     const date = new Date(item.date);
-    const dateStr = window.formatHebrewAndGregorian ? window.formatHebrewAndGregorian(date, true)
-      : (date.toLocaleDateString('he-IL') + ' ' + date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }));
+    const hebDate = window.formatHebrewDate ? window.formatHebrewDate(date) : date.toLocaleDateString('he-IL');
+    const timeStr = date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
 
     const filesCount = item.files?.length || 0;
     let recipientsPreview, recipientsTitle;
@@ -207,7 +207,7 @@ function renderTable() {
     }
 
     tr.innerHTML = `
-      <td><div style="font-weight:700; font-size:12.5px;">${escapeHtml(dateStr.split(' · ')[0])}</div><div class="cell-muted" style="font-size:11.5px;">${escapeHtml(dateStr.split(' · ')[1] || '')}</div></td>
+      <td><div style="font-weight:700; font-size:12.5px;">${escapeHtml(hebDate)}</div><div class="cell-muted" style="font-size:11.5px;">${escapeHtml(timeStr)}</div></td>
       <td class="cell-primary">${escapeHtml(item.subject) || '-'}</td>
       <td class="recipients-cell" title="${escapeHtml(recipientsTitle)}">${recipientsPreview || 'אין'}</td>
       <td><span class="badge badge-info">${filesCount} קבצים</span></td>
@@ -240,7 +240,7 @@ function showDetails(index) {
        <div class="field"><label>נמענים משניים (קובץ +)</label><div class="callout callout-info" style="white-space:pre-wrap;">${escapeHtml((item.secondaryRecipients || []).join('\n')) || 'אין'}</div></div>`;
 
   detailsContainer.innerHTML = `
-    <div class="field"><label>תאריך ושעה</label><div class="callout callout-info">${escapeHtml(window.formatHebrewAndGregorian ? window.formatHebrewAndGregorian(date, true) : date.toLocaleString('he-IL'))}</div></div>
+    <div class="field"><label>תאריך ושעה</label><div class="callout callout-info">${escapeHtml(window.formatHebrewDateTime ? window.formatHebrewDateTime(date) : date.toLocaleString('he-IL'))}</div></div>
     <div class="field"><label>נושא</label><div class="callout callout-info">${escapeHtml(item.subject) || '-'}</div></div>
     ${destsHtml}
     <div class="field" style="margin-bottom:0;"><label>קבצים שנשלחו</label><ul style="margin:0; padding-inline-start:20px; color:var(--text-2); font-size:13px;">${filesHtml}</ul></div>
@@ -283,7 +283,7 @@ function renderLogs() {
   withLogs.forEach((h) => {
     const det = document.createElement('details');
     det.className = 'faq-item';
-    const when = window.formatHebrewAndGregorian ? window.formatHebrewAndGregorian(new Date(h.date), true) : new Date(h.date).toLocaleString('he-IL');
+    const when = window.formatHebrewDateTime ? window.formatHebrewDateTime(new Date(h.date)) : new Date(h.date).toLocaleString('he-IL');
     const hasErr = h.logs.some((l) => /שגיאה/.test(l));
     det.innerHTML = `
       <summary>
@@ -322,7 +322,7 @@ function renderErrors() {
   errors.forEach((err) => {
     const row = document.createElement('div');
     row.className = 'error-row';
-    const time = new Date(err.time).toLocaleString('he-IL');
+    const time = window.formatHebrewDateTime ? window.formatHebrewDateTime(new Date(err.time)) : new Date(err.time).toLocaleString('he-IL');
     row.innerHTML = `
       <div>
         <div class="error-time">${escapeHtml(time)}</div>

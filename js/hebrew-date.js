@@ -47,6 +47,14 @@
     }
   };
 
+  // "כ״ז באב תשפ״ו, 23:47" - תאריך עברי + שעה בלבד (ההיסטוריה משתמשת בזה)
+  window.formatHebrewDateTime = function (date) {
+    var d = date instanceof Date ? date : new Date(date);
+    if (isNaN(d.getTime())) return '';
+    var heb = window.formatHebrewDate(d) || d.toLocaleDateString('he-IL');
+    return heb + ', ' + d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+  };
+
   // "כ״ז באב תשפ״ו · 16.8.2026 23:47" - הפורמט המשולב שמוצג בטבלאות
   window.formatHebrewAndGregorian = function (date, withTime) {
     var d = date instanceof Date ? date : new Date(date);
