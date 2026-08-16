@@ -239,9 +239,16 @@ function renderFileCard(item) {
                 <select class="select ${item.appliedStyleName ? 'has-style' : ''}" onchange="applyStyleToFile('${item.id}', this.value)">${stylesOptions}</select>
             </div>
 
-            <button type="button" class="toggle-more-btn" onclick="toggleExpand('${item.id}')">
-                ${item.isExpanded ? SVG.up + ' סגור אפשרויות' : SVG.gear + ' אפשרויות הדפסה ועיצוב'}
-            </button>
+            <div class="file-actions">
+                <div class="group-tabs">${editGroupBtn}${groupTabs}</div>
+                <div class="file-icon-actions">
+                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm ${item.isExpanded ? 'active-toggle' : ''}" onclick="toggleExpand('${item.id}')" title="${item.isExpanded ? 'סגור אפשרויות' : 'אפשרויות הדפסה ועיצוב'}">${SVG.gear}</button>
+                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm ${item.blurLogo ? 'active-toggle' : ''}" onclick="toggleBlurLogo('${item.id}')" title="הסתרת לוגו / טשטוש">${SVG.blur}</button>
+                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm ${item.pageSelection ? 'active-toggle' : ''}" onclick="openPageSelectionPrompt('${item.id}')" title="בחירת עמודים">${SVG.pages}</button>
+                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm" onclick="downloadSingleItem('${item.id}')" title="הורדת קובץ מעובד">${SVG.down}</button>
+                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm" style="color:var(--danger);" onclick="removeFile('${item.id}')" title="הסר">${SVG.trash}</button>
+                </div>
+            </div>
             <div class="advanced-controls ${item.isExpanded ? 'show' : ''}">
                 ${getOptionChips(item)}
                 ${getLargeFileOptions(item, isLarge)}
@@ -249,15 +256,6 @@ function renderFileCard(item) {
                 <button type="button" class="btn btn-ghost btn-sm" style="align-self:flex-start;" onclick="saveAsStyleFromFile('${item.id}')">שמור הגדרות אלו כסגנון</button>
             </div>
 
-            <div class="file-actions">
-                <div class="group-tabs">${editGroupBtn}${groupTabs}</div>
-                <div class="file-icon-actions">
-                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm ${item.blurLogo ? 'active-toggle' : ''}" onclick="toggleBlurLogo('${item.id}')" title="הסתרת לוגו / טשטוש">${SVG.blur}</button>
-                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm ${item.pageSelection ? 'active-toggle' : ''}" onclick="openPageSelectionPrompt('${item.id}')" title="בחירת עמודים">${SVG.pages}</button>
-                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm" onclick="downloadSingleItem('${item.id}')" title="הורדת קובץ מעובד">${SVG.down}</button>
-                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm" style="color:var(--danger);" onclick="removeFile('${item.id}')" title="הסר">${SVG.trash}</button>
-                </div>
-            </div>
         </div>
     </div>`;
 }

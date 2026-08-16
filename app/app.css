@@ -126,10 +126,8 @@ body{ background:var(--bg); }
 /* per-file style select + "more" toggle */
 .style-select-row .select{ padding:7px 9px; font-size:12.5px; }
 .style-select-row .select.has-style{ border-color:var(--primary-tint-2); background:var(--primary-tint); color:var(--primary-solid); font-weight:700; }
-.toggle-more-btn{ width:100%; background:none; border:1px dashed var(--border-strong); color:var(--text-2); padding:6px; font-size:12px; cursor:pointer; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; gap:6px; font-family:var(--font); }
-.toggle-more-btn:hover{ background:var(--surface-alt); color:var(--primary-solid); border-color:var(--primary-solid); }
-
-.advanced-controls{ display:none; flex-direction:column; gap:8px; }
+/* advanced options: opened from the gear icon in the bottom row, expands beneath it */
+.advanced-controls{ display:none; flex-direction:column; gap:8px; padding-top:10px; border-top:1px dashed var(--border); }
 .advanced-controls.show{ display:flex; }
 .multiselect-content .file-opt-select{ padding:2px 4px; height:28px; font-size:12px; margin-inline-start:auto; }
 .multiselect-footer-btn{ padding:6px 9px; }
