@@ -17,7 +17,7 @@ async function openPageSorter() {
 
     pageSorterState.group = currentMergeGroup;
     pageSorterState.sourceFiles = filesInGroup.map(f => ({ fileItem: f, pages: null }));
-    document.getElementById('pageSorterTitle').innerHTML = `<i class="fas fa-grip-horizontal"></i> סדרן דפים — קבוצה ${currentMergeGroup}`;
+    document.getElementById('pageSorterTitle').innerHTML = `<svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg> סדרן דפים — קבוצה ${currentMergeGroup}`;
     openModalRaw('pageSorterModal');
 
     renderSourcePanel();
@@ -48,7 +48,7 @@ function renderSourcePanel() {
         <div class="source-file-block" data-idx="${idx}">
             <div class="source-file-head" onclick="toggleSourceFileView(${idx})">
                 <span>${escHtml(sf.fileItem.fileObj.name)}</span>
-                <i class="fas fa-chevron-down"></i>
+                <svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="source-pages-grid" id="sourceGrid_${idx}"></div>
         </div>`).join('');
@@ -93,7 +93,7 @@ function renderSourceGrid(idx) {
         return `<div class="source-page-item ${added ? 'added' : ''}" data-page="${p.pageIndex}">
             <div class="source-page-preview">${p.thumbnail ? `<img src="${p.thumbnail}">` : '<div class="spinner"></div>'}</div>
             <div class="source-page-info">עמ׳ ${p.pageIndex + 1}</div>
-            <button class="btn-page-action" style="width:100%; margin-top:3px;" onclick="addPageToFinalOrder('${sf.fileItem.id}', ${p.pageIndex})"><i class="fas fa-plus"></i></button>
+            <button class="btn-page-action" style="width:100%; margin-top:3px;" onclick="addPageToFinalOrder('${sf.fileItem.id}', ${p.pageIndex})"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
         </div>`;
     }).join('');
 }
@@ -118,7 +118,7 @@ function renderFinalOrderPanel() {
         if (p.type === 'blank') {
             return `<div class="final-page-item">
                 <div class="final-page-number">${i + 1}</div>
-                <div class="final-page-preview"><i class="fas fa-file icon" style="color:var(--text-3);"></i></div>
+                <div class="final-page-preview"><svg class="icon" style="color:var(--text-3);" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></div>
                 <div class="final-page-info">דף ריק</div>
                 ${finalPageControls(i)}
             </div>`;
@@ -133,9 +133,9 @@ function renderFinalOrderPanel() {
 }
 function finalPageControls(i) {
     return `<div class="final-page-controls">
-        <button class="btn-page-action" onclick="movePageInFinalOrder(${i}, -1)" ${i === 0 ? 'disabled' : ''}><i class="fas fa-chevron-up"></i></button>
-        <button class="btn-page-action" onclick="movePageInFinalOrder(${i}, 1)" ${i === pageSorterState.finalOrder.length - 1 ? 'disabled' : ''}><i class="fas fa-chevron-down"></i></button>
-        <button class="btn-page-action" style="color:var(--danger); border-color:var(--danger);" onclick="removePageFromFinalOrder(${i})"><i class="fas fa-trash-alt"></i></button>
+        <button class="btn-page-action" onclick="movePageInFinalOrder(${i}, -1)" ${i === 0 ? 'disabled' : ''}><svg class="icon" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></button>
+        <button class="btn-page-action" onclick="movePageInFinalOrder(${i}, 1)" ${i === pageSorterState.finalOrder.length - 1 ? 'disabled' : ''}><svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <button class="btn-page-action" style="color:var(--danger); border-color:var(--danger);" onclick="removePageFromFinalOrder(${i})"><svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg></button>
     </div>`;
 }
 

@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>מערכת שליחה להדפסה</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="design-system.css">
 <link rel="stylesheet" href="app.css">
 <!-- מעטפת משותפת (sidebar/topbar/מצב כהה) + שגיאות משותפות (toast +
@@ -35,12 +34,12 @@
 <!-- ============== MERGE GROUP SIDEBAR ============== -->
 <div id="mergeSidebar" class="side-panel">
   <div class="side-panel-head">
-    <span class="side-panel-title" id="mergeSidebarTitle"><i class="fas fa-layer-group"></i> ניהול קבוצה</span>
-    <button class="modal-close-x" onclick="closeMergeSidebar()"><i class="fas fa-times"></i></button>
+    <span class="side-panel-title" id="mergeSidebarTitle"><svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> ניהול קבוצה</span>
+    <button class="modal-close-x" onclick="closeMergeSidebar()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
   <div class="side-panel-body">
     <div class="group-settings-box">
-      <div class="group-settings-title"><i class="fas fa-cog"></i> הגדרות לכל הקבוצה</div>
+      <div class="group-settings-title"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> הגדרות לכל הקבוצה</div>
       <div class="field" style="margin-bottom:9px;">
         <label>החל סגנון על הקבוצה</label>
         <select id="groupStyleSelect" class="select" onchange="applyStyleToGroup(this.value)"></select>
@@ -73,7 +72,7 @@
     <div id="mergeListContainer"></div>
   </div>
   <div class="side-panel-foot">
-    <button class="btn btn-secondary" style="width:100%;" onclick="openPageSorter()"><i class="fas fa-grip-horizontal"></i> סדר וערבב דפים</button>
+    <button class="btn btn-secondary" style="width:100%;" onclick="openPageSorter()"><svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg> סדר וערבב דפים</button>
     <button class="btn btn-ghost" style="width:100%;" onclick="closeMergeSidebar()">סגור</button>
   </div>
 </div>
@@ -81,8 +80,8 @@
 <!-- ============== EDIT STYLE SIDEBAR ============== -->
 <div id="editStyleSidebar" class="side-panel">
   <div class="side-panel-head">
-    <span class="side-panel-title"><i class="fas fa-palette"></i> עריכת סגנון</span>
-    <button class="modal-close-x" onclick="closeEditStyleSidebar()"><i class="fas fa-times"></i></button>
+    <span class="side-panel-title"><svg class="icon" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg> עריכת סגנון</span>
+    <button class="modal-close-x" onclick="closeEditStyleSidebar()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
   <div class="side-panel-body">
     <input type="hidden" id="editStyleOriginalName">
@@ -118,7 +117,7 @@
     </div>
   </div>
   <div class="side-panel-foot">
-    <button class="btn btn-primary" style="width:100%;" onclick="saveEditedStyle()"><i class="fas fa-check"></i> שמור</button>
+    <button class="btn btn-primary" style="width:100%;" onclick="saveEditedStyle()"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> שמור</button>
     <button class="btn btn-ghost" style="width:100%;" onclick="closeEditStyleSidebar()">ביטול</button>
   </div>
 </div>
@@ -126,11 +125,11 @@
 <!-- ============== MODALS ============== -->
 <div id="formatManagerModal" class="modal-backdrop-wrap">
   <div class="modal">
-    <div class="modal-head"><strong><i class="fas fa-list-ul"></i> ניהול רשימת פורמטים</strong><button class="modal-close-x" onclick="closeModal('formatManagerModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-head"><strong><svg class="icon" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> ניהול רשימת פורמטים</strong><button class="modal-close-x" onclick="closeModal('formatManagerModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
       <div class="manager-add-row">
         <input type="text" id="newFormatInput" class="input" placeholder="שם פורמט חדש...">
-        <button class="btn btn-primary btn-icon-only" onclick="addFormatManual()"><i class="fas fa-plus"></i></button>
+        <button class="btn btn-primary btn-icon-only" onclick="addFormatManual()"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
       </div>
       <label class="checkbox-row" style="background:var(--info-tint); padding:9px 10px; border-radius:var(--radius-sm); margin-bottom:12px;">
         <input type="checkbox" id="newFormatAutoRev"> הפוך דף אחרון אוטומטית (אם מתחלק ב-4)
@@ -143,11 +142,11 @@
 
 <div id="quantityManagerModal" class="modal-backdrop-wrap">
   <div class="modal">
-    <div class="modal-head"><strong><i class="fas fa-sort-numeric-up"></i> ניהול רשימת כמויות</strong><button class="modal-close-x" onclick="closeModal('quantityManagerModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-head"><strong><svg class="icon" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/></svg> ניהול רשימת כמויות</strong><button class="modal-close-x" onclick="closeModal('quantityManagerModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
       <div class="manager-add-row">
         <input type="text" id="newQuantityInput" class="input" placeholder="כמות חדשה (לדוגמה: 100)...">
-        <button class="btn btn-primary btn-icon-only" onclick="addQuantityManual()"><i class="fas fa-plus"></i></button>
+        <button class="btn btn-primary btn-icon-only" onclick="addQuantityManual()"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
       </div>
       <div class="manager-list" id="modalQuantityList"></div>
     </div>
@@ -157,12 +156,12 @@
 
 <div id="contactsModal" class="modal-backdrop-wrap">
   <div class="modal">
-    <div class="modal-head"><strong><i class="fas fa-address-book"></i> ניהול אנשי קשר</strong><button class="modal-close-x" onclick="closeModal('contactsModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-head"><strong><svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> ניהול אנשי קשר</strong><button class="modal-close-x" onclick="closeModal('contactsModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
       <div class="manager-add-row">
         <input type="text" id="newContactName" class="input" placeholder="שם..." style="flex:1">
         <input type="text" id="newContactEmail" class="input" placeholder="מייל..." style="flex:1">
-        <button class="btn btn-primary btn-icon-only" onclick="addContactManual()"><i class="fas fa-plus"></i></button>
+        <button class="btn btn-primary btn-icon-only" onclick="addContactManual()"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
       </div>
       <div class="manager-list" id="modalContactsList"></div>
     </div>
@@ -172,14 +171,14 @@
 
 <div id="pageSelectionModal" class="modal-backdrop-wrap">
   <div class="modal modal-wide">
-    <div class="modal-head"><strong><i class="fas fa-scissors"></i> בחירת עמודים להדפסה/הורדה</strong><button class="modal-close-x" onclick="closeModal('pageSelectionModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-head"><strong><svg class="icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg> בחירת עמודים להדפסה/הורדה</strong><button class="modal-close-x" onclick="closeModal('pageSelectionModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
       <p class="hint" style="margin-bottom:10px;">הזן עמודים או טווחים מופרדים בפסיק (לדוגמה: 1, 3, 5-8). השאר ריק כדי לבחור הכל. לחיצה על הריבועים מעדכנת את הרשימה, והקלדה ידנית מעדכנת את הריבועים.</p>
       <div class="manager-add-row">
         <input type="text" id="pageSelectionInput" class="input" placeholder="לדוגמה: 1, 3, 5-8" dir="ltr" oninput="updatePageSelectionVisuals()">
-        <button class="btn btn-secondary" onclick="selectAllPages()" title="סמן הכל"><i class="fas fa-check-double"></i> הכל</button>
+        <button class="btn btn-secondary" onclick="selectAllPages()" title="סמן הכל"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> הכל</button>
       </div>
-      <div id="pageSelectionLoading" class="hidden" style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> טוען דפים...</div>
+      <div id="pageSelectionLoading" class="hidden" style="text-align:center; padding:20px;"><span class="spinner" style="display:inline-block;vertical-align:middle;"></span> טוען דפים...</div>
       <div id="pageSelectionGrid" class="page-checkbox-grid"></div>
     </div>
     <div class="modal-foot"><button class="btn btn-primary" style="width:100%;" onclick="savePageSelection()">שמור בחירה</button></div>
@@ -188,26 +187,26 @@
 
 <div id="brandingModal" class="modal-backdrop-wrap">
   <div class="modal">
-    <div class="modal-head"><strong><i class="fas fa-stamp"></i> הגדרות מיתוג</strong><button class="modal-close-x" onclick="closeModal('brandingModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-head"><strong><svg class="icon" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5 2 7.5-6.5-4.5L5.5 21l2-7.5L2 9h7z"/></svg> הגדרות מיתוג</strong><button class="modal-close-x" onclick="closeModal('brandingModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
-      <div class="branding-toggle-row"><span><i class="fas fa-star-of-david"></i> הוסף בס"ד (ברירת מחדל)</span><div class="switch" id="defaultBsdToggle" onclick="toggleSwitch('defaultBsdToggle', saveBrandingDefaults)"></div></div>
-      <div class="branding-toggle-row"><span><i class="fas fa-image"></i> הוסף לוגו (ברירת מחדל)</span><div class="tristate-logo" onclick="cycleDefaultLogo()" title="לחץ כדי להחליף: אין → לוגו 1 → לוגו 2 → אין"><span id="defaultLogoLabel">אין</span></div></div>
+      <div class="branding-toggle-row"><span><svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 20 16 4 16"/><polygon points="12 22 4 8 20 8"/></svg> הוסף בס"ד (ברירת מחדל)</span><div class="switch" id="defaultBsdToggle" onclick="toggleSwitch('defaultBsdToggle', saveBrandingDefaults)"></div></div>
+      <div class="branding-toggle-row"><span><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> הוסף לוגו (ברירת מחדל)</span><div class="tristate-logo" onclick="cycleDefaultLogo()" title="לחץ כדי להחליף: אין → לוגו 1 → לוגו 2 → אין"><span id="defaultLogoLabel">אין</span></div></div>
       <hr style="margin:12px 0; border:0; border-top:1px solid var(--border);">
 
       <div class="logo-blur-settings-box">
-        <div style="font-weight:800; font-size:12.5px;"><i class="fa-solid fa-eye-slash"></i> הגדרות הסתרת לוגו / תוכן</div>
-        <div class="branding-toggle-row" style="margin-bottom:0;"><span><i class="fa-solid fa-droplet"></i> הפעל הסתרה לכל הקבצים (ברירת מחדל)</span><div class="switch" id="defaultBlurToggle" onclick="toggleGlobalBlur()"></div></div>
-        <button type="button" class="btn btn-secondary" id="openCropBtn" style="width:100%;"><i class="fa-solid fa-crop-simple"></i> בחר לוגו להסתרה מתוך המסמך</button>
+        <div style="font-weight:800; font-size:12.5px;"><svg class="icon" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg> הגדרות הסתרת לוגו / תוכן</div>
+        <div class="branding-toggle-row" style="margin-bottom:0;"><span><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> הפעל הסתרה לכל הקבצים (ברירת מחדל)</span><div class="switch" id="defaultBlurToggle" onclick="toggleGlobalBlur()"></div></div>
+        <button type="button" class="btn btn-secondary" id="openCropBtn" style="width:100%;"><svg class="icon" viewBox="0 0 24 24"><path d="M6.13 1L6 16a2 2 0 0 0 2 2h15"/><path d="M1 6.13L16 6a2 2 0 0 1 2 2v15"/></svg> בחר לוגו להסתרה מתוך המסמך</button>
         <div style="font-size:11.5px; font-weight:800;">אפקט ההסתרה</div>
         <div class="options-list" id="blurEffectOptions">
-          <label class="option-item checked"><input type="radio" name="blurType" value="blur" checked><i class="fa-solid fa-droplet"></i> טשטוש</label>
-          <label class="option-item"><input type="radio" name="blurType" value="inpaint"><i class="fa-solid fa-wand-magic-sparkles" style="color:#8b5cf6;"></i> מילוי חכם</label>
-          <label class="option-item"><input type="radio" name="blurType" value="white"><i class="fa-solid fa-square" style="color:#ccc;"></i> מילוי לבן</label>
+          <label class="option-item checked"><input type="radio" name="blurType" value="blur" checked><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> טשטוש</label>
+          <label class="option-item"><input type="radio" name="blurType" value="inpaint"><svg class="icon" style="color:#8b5cf6;" viewBox="0 0 24 24"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M15 9h0M17.8 6.2L19 5M3 21l9-9M12.2 6.2L11 5"/></svg> מילוי חכם</label>
+          <label class="option-item"><input type="radio" name="blurType" value="white"><svg class="icon" style="color:#ccc;" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg> מילוי לבן</label>
         </div>
         <div style="font-size:11.5px; font-weight:800;">שיטת פעולה</div>
         <div class="options-list" id="blurMethodOptions">
-          <label class="option-item checked" title="מחפש את הלוגו לפי הצורה שלו"><input type="radio" name="blurMethod" value="pattern" checked><i class="fa-solid fa-brain" style="color:#10b981;"></i> חיפוש חכם</label>
-          <label class="option-item" title="מטשטש תמיד את אותו אזור יחסי"><input type="radio" name="blurMethod" value="fixed"><i class="fa-solid fa-crosshairs" style="color:#f59e0b;"></i> מיקום קבוע</label>
+          <label class="option-item checked" title="מחפש את הלוגו לפי הצורה שלו"><input type="radio" name="blurMethod" value="pattern" checked><svg class="icon" style="color:#10b981;" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v1a4 4 0 0 0-3 3.87A4 4 0 0 0 5 19a4 4 0 0 0 7 2.65A4 4 0 0 0 19 19a4 4 0 0 0 1-7.13V11a4 4 0 0 0-3-3.87V7a5 5 0 0 0-5-5z"/></svg> חיפוש חכם</label>
+          <label class="option-item" title="מטשטש תמיד את אותו אזור יחסי"><input type="radio" name="blurMethod" value="fixed"><svg class="icon" style="color:#f59e0b;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg> מיקום קבוע</label>
         </div>
         <div style="font-size:11.5px; font-weight:800;">כיוונון ידני (מ״מ)</div>
         <div style="display:flex; gap:8px;">
@@ -242,7 +241,7 @@
 
 <div id="styleManagerModal" class="modal-backdrop-wrap">
   <div class="modal">
-    <div class="modal-head"><strong><i class="fas fa-palette"></i> ניהול סגנונות שליחה</strong><button class="modal-close-x" onclick="closeModal('styleManagerModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-head"><strong><svg class="icon" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg> ניהול סגנונות שליחה</strong><button class="modal-close-x" onclick="closeModal('styleManagerModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
       <p class="hint" style="margin-bottom:10px;">שמור והחל הגדרות (כמות, פורמט, המרה ל-PDF, בס"ד, לוגו, מספור וכו'). מיזוג לא נכלל.</p>
       <div class="field">
@@ -251,7 +250,7 @@
       </div>
       <div class="manager-add-row">
         <input type="text" id="newStyleNameInput" class="input" placeholder="שם לסגנון...">
-        <button class="btn" style="background:var(--success-solid); color:var(--text-on-primary);" onclick="saveCurrentAsStyle()"><i class="fas fa-save"></i> שמור</button>
+        <button class="btn" style="background:var(--success-solid); color:var(--text-on-primary);" onclick="saveCurrentAsStyle()"><svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> שמור</button>
       </div>
       <div class="manager-list" id="modalStyleList"></div>
     </div>
@@ -261,7 +260,7 @@
 
 <div id="pagePreviewModal" class="modal-backdrop-wrap" onclick="if(event.target===this) closeModal('pagePreviewModal')">
   <div class="modal modal-xwide" style="height:88vh;" onclick="event.stopPropagation()">
-    <div class="modal-head"><strong>תצוגה מקדימה</strong><button class="modal-close-x" onclick="closeModal('pagePreviewModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-head"><strong>תצוגה מקדימה</strong><button class="modal-close-x" onclick="closeModal('pagePreviewModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body" id="pagePreviewContent" style="flex:1; display:flex; align-items:center; justify-content:center; background:var(--surface-sunken); border-radius:var(--radius-md);">
       <div class="spinner"></div>
     </div>
@@ -270,12 +269,12 @@
 
 <div id="pageSorterModal" class="modal-backdrop-wrap">
   <div class="modal modal-xwide" style="height:90vh; display:flex; flex-direction:column;">
-    <div class="modal-head"><strong id="pageSorterTitle"><i class="fas fa-grip-horizontal"></i> סדרן דפים</strong><button class="modal-close-x" onclick="closeModal('pageSorterModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-head"><strong id="pageSorterTitle"><svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg> סדרן דפים</strong><button class="modal-close-x" onclick="closeModal('pageSorterModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body" style="display:flex; flex-direction:column; flex:1; min-height:0;">
       <div class="page-sorter-toolbar">
         <div style="display:flex; gap:8px;">
-          <button class="btn btn-secondary btn-sm" onclick="addBlankPageToFinalOrder()"><i class="fas fa-plus-square"></i> הוסף דף ריק</button>
-          <button class="btn btn-ghost btn-sm" onclick="resetFinalOrder()"><i class="fas fa-undo"></i> אפס סדר</button>
+          <button class="btn btn-secondary btn-sm" onclick="addBlankPageToFinalOrder()"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> הוסף דף ריק</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetFinalOrder()"><svg class="icon" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg> אפס סדר</button>
         </div>
         <span id="pageSorterInfo" class="hint"></span>
       </div>
@@ -291,8 +290,8 @@
       </div>
       <div class="page-sorter-footer">
         <button class="btn btn-ghost" onclick="closeModal('pageSorterModal')">ביטול</button>
-        <button class="btn btn-secondary" onclick="downloadSortedFile()"><i class="fas fa-download"></i> הורד קובץ ערוך</button>
-        <button class="btn btn-primary" onclick="savePageOrder()"><i class="fas fa-check"></i> שמור סדר וסגור</button>
+        <button class="btn btn-secondary" onclick="downloadSortedFile()"><svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> הורד קובץ ערוך</button>
+        <button class="btn btn-primary" onclick="savePageOrder()"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> שמור סדר וסגור</button>
       </div>
     </div>
   </div>
@@ -300,7 +299,7 @@
 
 <div id="cropModal" class="modal-backdrop-wrap">
   <div class="modal modal-xwide">
-    <div class="modal-head"><strong>בחירת אזור להסתרה</strong><button class="modal-close-x" id="closeModalBtn"><i class="fas fa-times"></i></button></div>
+    <div class="modal-head"><strong>בחירת אזור להסתרה</strong><button class="modal-close-x" id="closeModalBtn"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body crop-modal-body" id="modalBody">
       <div class="crop-canvas-wrapper hidden" id="cropCanvasWrapper">
         <canvas id="cropCanvas"></canvas>
@@ -365,98 +364,108 @@
     </div>
 
     <div class="content">
-<div class="page-wrap" style="padding-top:0;">
 
-  <div class="page-head">
-    <div>
-      <h1>שליחה להדפסה</h1>
-      <div class="page-desc">מלא נמענים, העלה קבצים, תייג הוראות הדפסה - ושלח</div>
-    </div>
-    <div class="page-actions">
-      <div class="dropdown-wrap" id="manageDropdown">
-        <button class="btn btn-secondary" onclick="toggleDropdown('manageDropdown')"><i class="fas fa-cog"></i> ניהול <i class="fas fa-chevron-down" style="font-size:.75em;"></i></button>
-        <div class="dropdown-panel">
-          <button class="dropdown-item" onclick="openModal('contactsModal')"><i class="fas fa-address-book"></i> אנשי קשר</button>
-          <button class="dropdown-item" onclick="openModal('formatManagerModal')"><i class="fas fa-list-ul"></i> ניהול פורמטים</button>
-          <button class="dropdown-item" onclick="openModal('quantityManagerModal')"><i class="fas fa-sort-numeric-up"></i> ניהול כמויות</button>
-          <button class="dropdown-item" onclick="openModal('brandingModal')"><i class="fas fa-stamp"></i> הגדרות מיתוג</button>
-          <button class="dropdown-item" onclick="openModal('styleManagerModal')"><i class="fas fa-palette"></i> סגנון שליחה</button>
-          <button class="dropdown-item" onclick="requestLogDirectoryAccess()"><i class="fas fa-folder"></i> הגדר תיקיית לוגים</button>
+      <!-- ============ SEND WORKSPACE (built from scratch on the אריג system) ============ -->
+      <div class="send-workspace">
+
+        <!-- ---- שלב 1: יעד ---- -->
+        <section class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <span class="step-num current">1</span>
+              <h3>למי שולחים</h3>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="openModal('contactsModal')">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              אנשי קשר
+            </button>
+          </div>
+          <div class="card-pad">
+            <div class="form-grid">
+              <div class="field">
+                <label>נמענים ראשיים</label>
+                <div class="recipient-row">
+                  <div class="multiselect" id="mainEmailMultiselect"></div>
+                  <input type="text" id="mainEmailManual" class="input" placeholder="או הקלד מייל…" list="contacts-datalist">
+                </div>
+              </div>
+              <div class="field">
+                <label>נמענים משניים <span class="hint">(לקבצים שסומנו ⊕)</span></label>
+                <div class="recipient-row">
+                  <div class="multiselect" id="secondaryEmailMultiselect"></div>
+                  <input type="text" id="secondaryEmailManual" class="input" placeholder="או הקלד מייל…" list="contacts-datalist">
+                </div>
+                <datalist id="contacts-datalist"></datalist>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>נושא ההודעה</label>
+              <input type="text" id="subject" class="input">
+            </div>
+          </div>
+        </section>
+
+        <!-- ---- שלב 2: קבצים ---- -->
+        <section class="card">
+          <div class="card-head">
+            <div class="card-title-row">
+              <span class="step-num current">2</span>
+              <h3>קבצים <span class="badge badge-neutral" id="fileCountBadge">0</span></h3>
+            </div>
+            <div class="send-files-tools">
+              <div class="style-selector-row" id="styleSelectorRow">
+                <select id="styleSelect" class="select" onchange="onStyleSelectChange()"><option value="">סגנון לכל הקבצים…</option></select>
+                <button class="btn btn-secondary btn-sm" onclick="applySelectedStyle()" id="applyStyleBtn" disabled>החל</button>
+              </div>
+              <div class="toggle-btn-group view-switcher">
+                <button type="button" id="btn-grid-view" class="active" title="תצוגת רשת"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
+                <button type="button" id="btn-list-view" title="תצוגת רשימה"><svg class="icon" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+              </div>
+              <div class="dropdown-wrap" id="manageDropdown">
+                <button type="button" class="btn btn-secondary btn-sm btn-icon-only" onclick="toggleDropdown('manageDropdown')" title="ניהול">
+                  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                </button>
+                <div class="dropdown-panel">
+                  <button class="dropdown-item" onclick="openModal('formatManagerModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg> ניהול פורמטים</button>
+                  <button class="dropdown-item" onclick="openModal('quantityManagerModal')"><svg class="icon" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/></svg> ניהול כמויות</button>
+                  <button class="dropdown-item" onclick="openModal('styleManagerModal')"><svg class="icon" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg> סגנונות שליחה</button>
+                  <button class="dropdown-item" onclick="openModal('brandingModal')"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5 2 7.5-6.5-4.5L5.5 21l2-7.5L2 9h7z"/></svg> מיתוג והסתרת לוגו</button>
+                  <div class="user-menu-divider"></div>
+                  <button class="dropdown-item" onclick="requestLogDirectoryAccess()"><svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> תיקיית לוגים</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-pad">
+            <label class="upload-zone" for="fileInput" id="dropZone">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <strong>גרור קבצים לכאן, או לחץ לבחירה</strong>
+              <span class="hint">PDF · Word · JPG · PNG — אפשר כמה יחד</span>
+            </label>
+            <input type="file" id="fileInput" multiple>
+            <div class="file-list" id="fileListContainer"></div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ---- שלב 3: שליחה (פס תחתון דביק) ---- -->
+      <div class="send-bar">
+        <div class="send-bar-inner">
+          <div class="send-bar-status" id="sizeStatus">
+            <span class="step-num current">3</span>
+            <div>
+              <div class="send-bar-title"><b id="totalSizeText">0 MB</b> · <span id="destMethod"></span></div>
+              <div class="hint" id="sendBarHint">העלה קבצים כדי לשלוח</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary btn-lg" onclick="processAndSend()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            שלח הכל
+          </button>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="card send-form-card">
-    <div class="card-head">
-      <div class="card-title-row">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <h3>נמענים ונושא</h3>
-      </div>
-    </div>
-    <div class="card-pad">
-      <div class="field">
-        <label>נמענים ראשיים (בחירה מרובה או כתיבה ידנית)</label>
-        <div class="recipient-row">
-          <div class="multiselect" id="mainEmailMultiselect"></div>
-          <input type="text" id="mainEmailManual" class="input" placeholder="הקלד מייל ידני..." list="contacts-datalist">
-        </div>
-      </div>
-      <div class="field">
-        <label>נמענים משניים (עבור קבצים שסומנו ב-⊕)</label>
-        <div class="recipient-row">
-          <div class="multiselect" id="secondaryEmailMultiselect"></div>
-          <input type="text" id="secondaryEmailManual" class="input" placeholder="הקלד מייל ידני..." list="contacts-datalist">
-        </div>
-        <datalist id="contacts-datalist"></datalist>
-      </div>
-      <div class="field" style="margin-bottom:0;">
-        <label>נושא ההודעה</label>
-        <input type="text" id="subject" class="input">
-      </div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-bottom:18px;">
-    <div class="card-head">
-      <div class="card-title-row">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
-        <h3>קבצים</h3>
-      </div>
-      <div class="view-switcher">
-        <button id="btn-grid-view" class="active" title="תצוגת רשת"><i class="fas fa-th-large"></i></button>
-        <button id="btn-list-view" title="תצוגת רשימה"><i class="fas fa-list"></i></button>
-      </div>
-    </div>
-    <div class="card-pad">
-      <label class="upload-zone" for="fileInput" id="dropZone">
-        <i class="fas fa-cloud-upload-alt icon" style="width:26px;height:26px;font-size:24px;"></i>
-        <strong>לחץ כאן לבחירת קבצים, או גרור ושחרר</strong>
-        <span class="hint">PDF, Word, JPG, PNG</span>
-      </label>
-      <input type="file" id="fileInput" multiple>
-
-      <div class="style-selector-row" id="styleSelectorRow" style="margin-top:14px;">
-        <label style="font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px;"><i class="fas fa-palette"></i> סגנון שליחה גלובלי:</label>
-        <select id="styleSelect" class="select" onchange="onStyleSelectChange()"><option value="">-- בחר סגנון --</option></select>
-        <button class="btn btn-secondary" onclick="applySelectedStyle()" id="applyStyleBtn" disabled><i class="fas fa-check-double"></i> החל על כל הקבצים</button>
-      </div>
-
-      <div class="file-list" id="fileListContainer"></div>
-    </div>
-  </div>
-
-  <div class="bulk-bar" style="border:1px solid var(--border); border-radius:var(--radius-lg); gap:14px;">
-    <div id="sizeStatus" class="status-bar status-ok hidden" style="margin:0; padding:8px 14px; flex:1;">
-      <span><i class="fas fa-database"></i> סה"כ: <b id="totalSizeText">0 MB</b></span>
-      <span id="destMethod" style="font-weight:700;"></span>
-    </div>
-    <span class="spacer" style="flex:1;"></span>
-    <button class="btn btn-primary btn-lg" onclick="processAndSend()" style="min-width:200px;">
-      <i class="fas fa-paper-plane"></i> שלח הכל
-    </button>
-  </div>
-</div>
     </div><!-- /.content -->
   </div><!-- /.main -->
 </div><!-- /.app-shell -->

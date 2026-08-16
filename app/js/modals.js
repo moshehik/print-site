@@ -12,7 +12,7 @@ function renderManagerList() {
     if (formats.length === 0) { container.innerHTML = '<div class="manager-list-empty">הרשימה ריקה</div>'; return; }
     container.innerHTML = formats.map(fmt => {
         const badge = fmt.autoReverse ? `<span class="badge badge-info" title="הפוך אוטומטית אם כמות הדפים מתחלקת ב-4" style="margin-inline-end:6px;">היפוך</span>` : '';
-        return `<div class="manager-list-item"><span>${badge}${escHtml(fmt.name)}</span><button class="btn-delete-item" onclick="deleteFormat('${escAttr(fmt.name)}')"><i class="fas fa-trash-alt"></i></button></div>`;
+        return `<div class="manager-list-item"><span>${badge}${escHtml(fmt.name)}</span><button class="btn-delete-item" onclick="deleteFormat('${escAttr(fmt.name)}')"><svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg></button></div>`;
     }).join('');
 }
 function addFormatManual() {
@@ -36,7 +36,7 @@ function renderQuantityManagerList() {
     const container = document.getElementById('modalQuantityList');
     const list = getStoredQuantities();
     if (list.length === 0) { container.innerHTML = '<div class="manager-list-empty">הרשימה ריקה</div>'; return; }
-    container.innerHTML = list.map(q => `<div class="manager-list-item"><span>${escHtml(q)}</span><button class="btn-delete-item" onclick="deleteQuantity('${escAttr(q)}')"><i class="fas fa-trash-alt"></i></button></div>`).join('');
+    container.innerHTML = list.map(q => `<div class="manager-list-item"><span>${escHtml(q)}</span><button class="btn-delete-item" onclick="deleteQuantity('${escAttr(q)}')"><svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg></button></div>`).join('');
 }
 function addQuantityManual() {
     const input = document.getElementById('newQuantityInput');
@@ -100,8 +100,8 @@ function renderStyleList() {
         <div class="manager-list-item">
             <span>${escHtml(s.name)}</span>
             <div style="display:flex; gap:4px;">
-                <button class="btn-delete-item" style="color:var(--primary-solid);" title="ערוך" onclick="openEditStyleSidebar('${escAttr(s.name)}')"><i class="fas fa-pencil-alt"></i></button>
-                <button class="btn-delete-item" title="מחק" onclick="deleteStyle('${escAttr(s.name)}')"><i class="fas fa-trash-alt"></i></button>
+                <button class="btn-delete-item" style="color:var(--primary-solid);" title="ערוך" onclick="openEditStyleSidebar('${escAttr(s.name)}')"><svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
+                <button class="btn-delete-item" title="מחק" onclick="deleteStyle('${escAttr(s.name)}')"><svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg></button>
             </div>
         </div>`).join('');
 }

@@ -109,7 +109,7 @@ function renderContactsList() {
     container.innerHTML = list.map((c, i) => `
         <div class="manager-list-item">
             <span><b>${escHtml(c.name)}</b> (${escHtml(c.email)})</span>
-            <button class="btn-delete-item" onclick="deleteContact(${i})"><i class="fas fa-trash-alt"></i></button>
+            <button class="btn-delete-item" onclick="deleteContact(${i})"><svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg></button>
         </div>`).join('');
 }
 function renderContactsDatalist() {
@@ -136,7 +136,7 @@ function renderEmailMultiselect(containerId, type) {
 
     const selectedNames = contacts.filter(c => selected.includes(c.email)).map(c => c.name);
     const displayText = selectedNames.length ? selectedNames.join(', ') : 'בחר אנשי קשר';
-    let html = `<div class="multiselect-btn" onclick="toggleEmailMultiselect('${containerId}')"><span class="${selectedNames.length ? '' : 'placeholder'}">${escHtml(displayText)}</span><i class="fas fa-caret-down"></i></div>`;
+    let html = `<div class="multiselect-btn" onclick="toggleEmailMultiselect('${containerId}')"><span class="${selectedNames.length ? '' : 'placeholder'}">${escHtml(displayText)}</span><svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>`;
     html += `<div id="${dropdownId}" class="multiselect-content ${wasOpen ? 'show' : ''}">`;
     if (contacts.length === 0) html += `<div class="manager-list-empty">אין אנשי קשר שמורים</div>`;
     contacts.forEach(c => {

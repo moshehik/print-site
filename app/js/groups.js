@@ -6,7 +6,7 @@
 function openMergeSidebar(groupId) {
     if (groupId === 0) return;
     currentMergeGroup = groupId;
-    document.getElementById('mergeSidebarTitle').innerHTML = `<i class="fas fa-layer-group"></i> ניהול קבוצה ${groupId}`;
+    document.getElementById('mergeSidebarTitle').innerHTML = `<svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> ניהול קבוצה ${groupId}`;
     document.getElementById('mergeSidebar').classList.add('open');
     document.getElementById('groupStyleSelect').innerHTML = getStylesOptionsHTML('');
 
@@ -48,8 +48,8 @@ function renderMergeList() {
                 <div class="merge-item-details">${escHtml(file.format)}, ${escHtml(file.quantity)}</div>
             </div>
             <div class="reorder-controls">
-                <button class="btn-reorder" onclick="moveFileInGroup('${file.id}', -1)" ${idx === 0 ? 'disabled' : ''}><i class="fas fa-chevron-up"></i></button>
-                <button class="btn-reorder" onclick="moveFileInGroup('${file.id}', 1)" ${idx === groupFiles.length - 1 ? 'disabled' : ''}><i class="fas fa-chevron-down"></i></button>
+                <button class="btn-reorder" onclick="moveFileInGroup('${file.id}', -1)" ${idx === 0 ? 'disabled' : ''}><svg class="icon" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></button>
+                <button class="btn-reorder" onclick="moveFileInGroup('${file.id}', 1)" ${idx === groupFiles.length - 1 ? 'disabled' : ''}><svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
             </div>
         </div>`).join('');
 }

@@ -169,61 +169,97 @@ function renderFiles() {
     if (mergeSidebar && mergeSidebar.classList.contains('open') && currentMergeGroup > 0) renderMergeList();
 }
 
+const SVG = {
+    pdf:   '<svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+    word:  '<svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+    image: '<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+    file:  '<svg class="icon" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>',
+    blur:  '<svg class="icon" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
+    pages: '<svg class="icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
+    down:  '<svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+    trash: '<svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg>',
+    edit:  '<svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>',
+    gear:  '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+    up:    '<svg class="icon" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>',
+};
+
 function previewContentFor(item) {
-    if (item.ext === 'pdf') {
-        return item.previewUrl ? `<img src="${item.previewUrl}" alt="">` : `<i class="fas fa-file-pdf icon" style="color:#dc2626;font-size:2.2rem;"></i>`;
-    }
     if (item.previewUrl) return `<img src="${item.previewUrl}" alt="" onerror="this.style.display='none';">`;
-    let iconClass = 'fa-file';
-    if (item.ext.includes('doc')) iconClass = 'fa-file-word';
-    if (item.fileObj.type.includes('video')) iconClass = 'fa-file-video';
-    return `<i class="fas ${iconClass} icon" style="font-size:2.2rem;"></i>`;
+    if (item.ext === 'pdf') return SVG.pdf;
+    if (item.ext.includes('doc')) return SVG.word;
+    if (item.fileObj.type.startsWith('image/')) return SVG.image;
+    return SVG.file;
 }
 
+function extBadgeFor(item) {
+    const ext = (item.ext || '').toUpperCase();
+    const cls = ext === 'PDF' ? 'badge-danger' : (ext.startsWith('DOC') ? 'badge-info' : 'badge-neutral');
+    return `<span class="badge ${cls} file-ext">${escHtml(ext || '?')}</span>`;
+}
+
+// כרטיס קובץ - נבנה מחדש על מרכיבי design-system בלבד: תמונה ממוזערת עם
+// תג סיומת + כפתור ⊕, גוף עם שם/מטא, "כמות" ו"פורמט" זמינים תמיד, סגנון
+// מהיר, ושורת פעולות (קבוצות מיזוג + אייקונים). האפשרויות המתקדמות
+// מתקפלות בלחיצה - אותו מודל נתונים בדיוק (updateFileParam וכו').
 function renderFileCard(item) {
     const isLarge = item.fileObj.size > LARGE_FILE_THRESHOLD_MB * 1024 * 1024;
-    const sizeClass = isLarge ? 'file-size-line large' : 'file-size-line';
-    const plusActive = item.isPlusSelected ? 'active' : '';
-    const modifiedShow = item.isModified ? 'show' : '';
     const groupTabs = getGroupTabsHTML(item);
     const stylesOptions = getStylesOptionsHTML(item.appliedStyleName);
-    const editGroupBtn = item.group > 0 ? `<button class="btn-edit-group" onclick="openMergeSidebar(${item.group})" title="ערוך קבוצה ${item.group}"><i class="fas fa-pencil-alt"></i></button>` : '';
+    const editGroupBtn = item.group > 0
+        ? `<button type="button" class="btn-edit-group" onclick="openMergeSidebar(${item.group})" title="ערוך קבוצה ${item.group}">${SVG.edit}</button>` : '';
+    const meta = [
+        formatSize(item.fileObj.size) + (isLarge ? ' (גדול)' : ''),
+        item.pageCount ? item.pageCount + ' עמ׳' : '',
+    ].filter(Boolean).join(' · ');
 
     return `
     <div class="file-card group-${item.group}" data-id="${item.id}">
-        <div class="file-top">
-            <div class="file-name-wrap">
-                <button class="btn-plus ${plusActive}" onclick="togglePlus('${item.id}')" title="סימון לשליחה משנית (⊕)"><i class="fas fa-plus"></i></button>
-                <div style="min-width:0;">
-                    <div class="file-name" title="${escAttr(item.fileObj.name)}">${escHtml(item.fileObj.name)} <span class="file-modified-dot ${modifiedShow}" title="הוגדר"></span></div>
-                    <div class="${sizeClass}">${formatSize(item.fileObj.size)}${isLarge ? ' (גדול)' : ''}${item.pageCount ? ' · ' + item.pageCount + ' עמ׳' : ''}</div>
+        <div class="file-thumb">
+            ${previewContentFor(item)}
+            ${extBadgeFor(item)}
+            <button type="button" class="btn-plus ${item.isPlusSelected ? 'active' : ''}" onclick="togglePlus('${item.id}')" title="סימון לשליחה משנית (⊕)">+</button>
+        </div>
+        <div class="file-body">
+            <div class="file-head">
+                <div style="min-width:0; flex:1;">
+                    <div class="file-name" title="${escAttr(item.fileObj.name)}">${escHtml(item.fileObj.name)}</div>
+                    <div class="file-meta ${isLarge ? 'large' : ''}">
+                        <span class="file-modified-dot ${item.isModified ? 'show' : ''}" title="הוגדר"></span>
+                        <span>${meta}</span>
+                    </div>
                 </div>
             </div>
-            <div class="file-icon-actions">
-                ${editGroupBtn}
-                ${groupTabs}
-                <button class="btn-icon-only btn-sm btn-secondary ${item.blurLogo ? 'active-toggle' : ''}" onclick="toggleBlurLogo('${item.id}')" title="הסתרת לוגו / טשטוש"><i class="fa-solid fa-droplet"></i></button>
-                <button class="btn-icon-only btn-sm btn-secondary ${item.pageSelection ? 'active-toggle' : ''}" onclick="openPageSelectionPrompt('${item.id}')" title="בחירת עמודים"><i class="fa-solid fa-scissors"></i></button>
-                <button class="btn-icon-only btn-sm btn-secondary" onclick="downloadSingleItem('${item.id}')" title="הורדת קובץ מעובד"><i class="fa-solid fa-download"></i></button>
-                <button class="btn-icon-only btn-sm btn-danger-ghost" onclick="removeFile('${item.id}')" title="הסר"><i class="fas fa-trash-alt"></i></button>
-            </div>
-        </div>
-        <div class="file-thumb">${previewContentFor(item)}</div>
-        <div class="style-select-row">
-            <select class="select" onchange="applyStyleToFile('${item.id}', this.value)">${stylesOptions}</select>
-        </div>
-        <button class="toggle-more-btn" onclick="toggleExpand('${item.id}')">${item.isExpanded ? '<i class="fas fa-chevron-up"></i> סגור אפשרויות' : '<i class="fas fa-cog"></i> הגדרות נוספות'}</button>
-        <div class="advanced-controls ${item.isExpanded ? 'show' : ''}">
-            <div class="moved-controls">
+
+            <div class="file-quick">
                 <div><label>כמות</label><select class="select" onchange="updateFileParam('${item.id}', 'quantity', this.value)">${getQuantityOptionsHTML(item.quantity)}</select></div>
                 <div><label>פורמט</label><select class="select" onchange="updateFileParam('${item.id}', 'format', this.value)">${getFormatOptionsHTML(item.format)}</select></div>
             </div>
-            <div class="multiselect">
-                <div class="multiselect-btn" onclick="toggleFileOptionsMultiselect('${item.id}')"><span>אפשרויות הדפסה ועיצוב</span><i class="fas fa-caret-down"></i></div>
-                <div id="dropdown_${item.id}" class="multiselect-content">${getDropdownItems(item)}</div>
+
+            <div class="style-select-row">
+                <select class="select ${item.appliedStyleName ? 'has-style' : ''}" onchange="applyStyleToFile('${item.id}', this.value)">${stylesOptions}</select>
             </div>
-            ${getLargeFileOptions(item, isLarge)}
-            <div class="opt-note"><input type="text" class="input" placeholder="הערה לקובץ..." value="${escAttr(item.note)}" onchange="updateFileParam('${item.id}', 'note', this.value)"></div>
+
+            <button type="button" class="toggle-more-btn" onclick="toggleExpand('${item.id}')">
+                ${item.isExpanded ? SVG.up + ' סגור אפשרויות' : SVG.gear + ' אפשרויות הדפסה ועיצוב'}
+            </button>
+            <div class="advanced-controls ${item.isExpanded ? 'show' : ''}">
+                <div class="multiselect">
+                    <div class="multiselect-btn" onclick="toggleFileOptionsMultiselect('${item.id}')"><span>בחר אפשרויות…</span><span class="hint">▾</span></div>
+                    <div id="dropdown_${item.id}" class="multiselect-content">${getDropdownItems(item)}</div>
+                </div>
+                ${getLargeFileOptions(item, isLarge)}
+                <div class="opt-note"><input type="text" class="input" placeholder="הערה לקובץ…" value="${escAttr(item.note)}" onchange="updateFileParam('${item.id}', 'note', this.value)"></div>
+            </div>
+
+            <div class="file-actions">
+                <div class="group-tabs">${editGroupBtn}${groupTabs}</div>
+                <div class="file-icon-actions">
+                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm ${item.blurLogo ? 'active-toggle' : ''}" onclick="toggleBlurLogo('${item.id}')" title="הסתרת לוגו / טשטוש">${SVG.blur}</button>
+                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm ${item.pageSelection ? 'active-toggle' : ''}" onclick="openPageSelectionPrompt('${item.id}')" title="בחירת עמודים">${SVG.pages}</button>
+                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm" onclick="downloadSingleItem('${item.id}')" title="הורדת קובץ מעובד">${SVG.down}</button>
+                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm" style="color:var(--danger);" onclick="removeFile('${item.id}')" title="הסר">${SVG.trash}</button>
+                </div>
+            </div>
         </div>
     </div>`;
 }
@@ -245,9 +281,7 @@ function getStylesOptionsHTML(selectedStyleName) {
 }
 
 function getGroupTabsHTML(item) {
-    return `<div class="group-tabs">
-        ${[0, 1, 2, 3, 4].map(g => `<button class="group-tab ${item.group === g ? 'active' : ''}" data-g="${g}" onclick="updateFileParam('${item.id}','group',${g})" title="${g === 0 ? 'ללא מיזוג' : 'שילוב ' + g}">${g === 0 ? '−' : g}</button>`).join('')}
-    </div>`;
+    return [0, 1, 2, 3, 4].map(g => `<button type="button" class="group-tab ${item.group === g ? 'active' : ''}" data-g="${g}" onclick="updateFileParam('${item.id}','group',${g})" title="${g === 0 ? 'ללא מיזוג' : 'שילוב ' + g}">${g === 0 ? '−' : g}</button>`).join('');
 }
 
 function getDropdownItems(item) {
@@ -273,7 +307,7 @@ function getDropdownItems(item) {
         <option value="16_dup" ${item.multiUpMode === '16_dup' ? 'selected' : ''}>16 (משוכפל)</option>
     </select></div>`;
     items += `<div class="multiselect-item"><input type="text" class="input" style="height:32px;" placeholder="הערה..." value="${escAttr(item.note)}" onchange="updateFileParam('${item.id}', 'note', this.value)"></div>`;
-    items += `<div class="multiselect-item"><button class="btn btn-secondary btn-sm multiselect-footer-btn" style="width:100%;" onclick="saveAsStyleFromFile('${item.id}')"><i class="fas fa-save"></i> שמור כסגנון</button></div>`;
+    items += `<div class="multiselect-item"><button class="btn btn-secondary btn-sm multiselect-footer-btn" style="width:100%;" onclick="saveAsStyleFromFile('${item.id}')">שמור כסגנון</button></div>`;
     return items;
 }
 function chkItem(id, key, checked, label) {
@@ -283,8 +317,8 @@ function chkItem(id, key, checked, label) {
 function getLargeFileOptions(item, isLarge) {
     if (!isLarge) return '';
     const compress = (item.ext === 'pdf' || item.convertToPdf)
-        ? `<label class="checkbox-row"><input type="checkbox" ${item.compressPdf ? 'checked' : ''} onchange="updateFileParam('${item.id}', 'compressPdf', this.checked)"><i class="fas fa-compress-arrows-alt"></i> דחיסה</label>` : '';
-    const split = `<label class="checkbox-row"><input type="checkbox" ${item.splitFile ? 'checked' : ''} onchange="updateFileParam('${item.id}', 'splitFile', this.checked)"><i class="fas fa-cut"></i> פצל</label>`;
+        ? `<label class="checkbox-row"><input type="checkbox" ${item.compressPdf ? 'checked' : ''} onchange="updateFileParam('${item.id}', 'compressPdf', this.checked)">דחיסה</label>` : '';
+    const split = `<label class="checkbox-row"><input type="checkbox" ${item.splitFile ? 'checked' : ''} onchange="updateFileParam('${item.id}', 'splitFile', this.checked)">פצל</label>`;
     return `<div class="large-file-options">${compress}${split}</div>`;
 }
 
@@ -293,13 +327,21 @@ function updateStatusBar(bytes, hasHugeFile) {
     const el = document.getElementById('sizeStatus');
     const txt = document.getElementById('totalSizeText');
     const method = document.getElementById('destMethod');
+    const hint = document.getElementById('sendBarHint');
+    const countBadge = document.getElementById('fileCountBadge');
+    if (countBadge) countBadge.textContent = filesData.length;
     if (!el) return;
-    if (bytes === 0) { el.classList.add('hidden'); return; }
-    el.classList.remove('hidden');
+    if (bytes === 0) {
+        el.className = 'send-bar-status';
+        txt.innerText = '0 MB'; method.innerText = '';
+        if (hint) hint.innerText = 'העלה קבצים כדי לשלוח';
+        return;
+    }
     txt.innerText = mb.toFixed(2) + ' MB';
-    if (hasHugeFile) { el.className = 'status-bar status-drive'; method.innerHTML = 'שילוב מייל + דרייב <i class="fab fa-google-drive"></i>'; }
-    else if (mb > MAX_BATCH_SIZE_MB) { el.className = 'status-bar status-heavy'; method.innerHTML = 'מפוצל למספר מיילים <i class="fas fa-boxes"></i>'; }
-    else { el.className = 'status-bar status-ok'; method.innerHTML = 'מייל בודד <i class="fas fa-envelope"></i>'; }
+    if (hasHugeFile)                  { el.className = 'send-bar-status status-drive'; method.innerText = 'שילוב מייל + דרייב'; }
+    else if (mb > MAX_BATCH_SIZE_MB)  { el.className = 'send-bar-status status-heavy'; method.innerText = 'מפוצל למספר מיילים'; }
+    else                              { el.className = 'send-bar-status status-ok';    method.innerText = 'מייל בודד'; }
+    if (hint) hint.innerText = `${filesData.length} קבצים מוכנים לשליחה`;
 }
 
 function setView(view) {
