@@ -50,9 +50,12 @@
   function onKey(e) { if (e.key === 'Escape') closePopover(); }
   function onScroll() { if (current) place(current.el, current.anchor); }
 
+  window.repositionPopover = function () { if (current) place(current.el, current.anchor); };
+
   window.closePopover = function () {
     if (!current) return;
     var c = current; current = null;
+    if (c.ro) c.ro.disconnect();
     c.el.remove();
     c.anchor.classList.remove('popover-open');
     document.removeEventListener('mousedown', onDocClick, true);
@@ -75,6 +78,13 @@
     place(el, anchor);
     anchor.classList.add('popover-open');
     current = { el: el, anchor: anchor, onClose: opts.onClose };
+    // תוכן שנטען מאוחר (רשת עמודים, רשימות) משנה את הגובה - ממקמים מחדש
+    // אוטומטית כדי שהפאנל יישאר צמוד לאייקון ולא "יברח" למעלה/למטה
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(function () { if (current && current.el === el) place(el, anchor); });
+      ro.observe(el);
+      current.ro = ro;
+    }
     // defer so the opening click doesn't immediately close it
     setTimeout(function () {
       document.addEventListener('mousedown', onDocClick, true);

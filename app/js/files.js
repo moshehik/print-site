@@ -519,6 +519,7 @@ async function openPageSelectionPrompt(id, anchor) {
         grid.classList.remove('hidden');
         grid.innerHTML = '<div class="manager-list-empty">לא ניתן לטעון תצוגת דפים עבור קובץ זה.</div>';
     }
+    if (window.repositionPopover) repositionPopover();
 }
 function openModalRaw(id) { const el = document.getElementById(id); if (el) el.classList.add('open'); }
 
