@@ -124,6 +124,7 @@ function updateFileParam(id, key, value) {
         if (existing) {
             STYLE_KEYS.forEach(k => { if (!(k === 'convertToPdf' && !item.canConvert)) item[k] = existing[k]; });
         }
+        syncDestsToGroup(item);
     }
 
     renderFiles();
@@ -189,6 +190,7 @@ const SVG = {
     plus:  '<svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
     bsd:   '<svg class="icon" viewBox="0 0 24 24"><text x="12" y="16.5" text-anchor="middle" font-size="11" font-weight="800" fill="currentColor" stroke="none" font-family="inherit">בס״ד</text></svg>',
     logo:  '<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+    dest:  '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
     secondary: '<svg class="icon" viewBox="0 0 24 24"><path d="M22 12.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9"/><polyline points="22 6 12 13 2 6"/><line x1="19" y1="16" x2="19" y2="22"/><line x1="16" y1="19" x2="22" y2="19"/></svg>',
 };
 
@@ -229,7 +231,7 @@ function renderFileCard(item) {
         badge('badge-neutral', item.format || '', 'פורמט'),
         item.appliedStyleName ? badge('badge-primary', item.appliedStyleName, 'סגנון') : '',
         item.group > 0 ? badge('badge-info', `שילוב ${item.group}`, 'קבוצת מיזוג') : '',
-        item.isPlusSelected ? badge('badge-warning', '⊕ משני', 'נשלח גם לנמענים המשניים') : '',
+        fileDestBadgesHtml(item),
         item.addBsd ? badge('badge-neutral', 'בס"ד') : '',
         ...CARD_OPTION_KEYS.filter(k => item[k]).map(k => badge('badge-neutral', OPT_LABELS[k])),
         logoVal ? badge('badge-neutral', `לוגו ${logoVal}`) : '',
@@ -260,7 +262,7 @@ function renderFileCard(item) {
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(activeOpts)}" data-pop="options" onclick="openCardMenu(this,'${item.id}','options')" title="אפשרויות הדפסה ועיצוב">${SVG.gear}</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-bsd${on(item.addBsd)}" onclick="updateFileParam('${item.id}','addBsd',${item.addBsd ? 'false' : 'true'})" title="${item.addBsd ? 'הסר בס״ד' : 'הוסף בס״ד'}">${SVG.bsd}</button>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-logo${on(logoVal)}" onclick="cycleFileLogo('${item.id}')" title="${logoVal ? 'לוגו ' + logoVal + ' (לחץ להחלפה)' : 'הוסף לוגו'}">${SVG.logo}${logoVal ? `<span class="tb-logo-num">${logoVal}</span>` : ''}</button>
-                <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-secondary${item.isPlusSelected ? ' active-toggle' : ''}" onclick="togglePlus('${item.id}')" title="שליחה גם לנמענים המשניים (⊕)">${SVG.secondary}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-dest${fileDests(item).length > 1 || fileDests(item)[0] !== defaultDestId() ? ' active-toggle' : ''}" data-pop="dest" onclick="openCardMenu(this,'${item.id}','dest')" title="יעדי שליחה">${SVG.dest}${fileDests(item).length > 1 ? `<span class="tb-logo-num">${fileDests(item).length}</span>` : ''}</button>
                 <span class="tb-sep"></span>
                 <div class="group-tabs" title="קבוצת מיזוג">${getGroupTabsHTML(item)}${item.group > 0 ? `<button type="button" class="btn-edit-group" onclick="openMergeSidebar(${item.group})" title="ניהול קבוצה ${item.group}">${SVG.edit}</button>` : ''}</div>
                 <span class="tb-sep"></span>
@@ -319,6 +321,26 @@ function openCardMenu(anchor, id, kind) {
         const foot = document.createElement('div'); foot.className = 'popover-foot';
         foot.innerHTML = '<button type="button" class="btn btn-secondary btn-sm">שמור הגדרות נוכחיות כסגנון</button>';
         foot.querySelector('button').addEventListener('click', () => { closePopover(); saveAsStyleFromFile(id); });
+        wrap.appendChild(foot);
+        openPopover(anchor, wrap, { width: 260 });
+        return;
+    }
+    if (kind === 'dest') {
+        const list = getDestinations();
+        const wrap = document.createElement('div');
+        wrap.innerHTML = `<div class="popover-title">יעדי שליחה${item.group > 0 ? ` <span class="badge badge-info">חל על כל קבוצה ${item.group}</span>` : ''}</div>`;
+        list.forEach((d, i) => {
+            const b = document.createElement('button'); b.type = 'button';
+            const has = fileHasDest(item, d.id);
+            b.className = 'menu-item' + (has ? ' selected' : '');
+            b.innerHTML = `${destDotHtml(d)}<span></span>${i === 0 ? '<span class="hint" style="margin-inline-start:6px;">(ברירת מחדל)</span>' : ''}<svg class="icon check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+            b.querySelector('span').textContent = d.name + ((d.emails || []).length ? '' : ' — אין נמענים');
+            b.addEventListener('click', () => { closePopover(); toggleFileDest(id, d.id); setTimeout(() => reopen('dest'), 0); });
+            wrap.appendChild(b);
+        });
+        const foot = document.createElement('div'); foot.className = 'popover-foot';
+        foot.innerHTML = '<button type="button" class="btn btn-secondary btn-sm">+ יעד חדש</button>';
+        foot.querySelector('button').addEventListener('click', () => { closePopover(); setDestEditing(true); askAddDestination(); });
         wrap.appendChild(foot);
         openPopover(anchor, wrap, { width: 260 });
         return;

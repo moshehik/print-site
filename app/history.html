@@ -104,7 +104,7 @@
           <tr>
             <th>תאריך ושעה</th>
             <th>נושא</th>
-            <th>נמענים</th>
+            <th>יעדים / נמענים</th>
             <th>קבצים</th>
             <th>פעולות</th>
           </tr>
@@ -195,16 +195,21 @@ function renderTable() {
     const dateStr = window.formatHebrewAndGregorian ? window.formatHebrewAndGregorian(date, true)
       : (date.toLocaleDateString('he-IL') + ' ' + date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }));
 
-    const recipientsCount = (item.mainRecipients?.length || 0) + (item.secondaryRecipients?.length || 0);
     const filesCount = item.files?.length || 0;
-
-    let recipientsPreview = (item.mainRecipients || []).slice(0, 2).join(', ');
-    if (recipientsCount > 2) recipientsPreview += ` (+עוד ${recipientsCount - 2})`;
+    let recipientsPreview, recipientsTitle;
+    if (Array.isArray(item.destinations) && item.destinations.length) {
+      recipientsPreview = item.destinations.map(d => `<span class="badge badge-neutral" style="margin-inline-end:4px;">${escapeHtml(d.name)} · ${d.fileCount}</span>`).join('');
+      recipientsTitle = item.destinations.map(d => `${d.name}: ${d.recipients.join(', ')}`).join('\n');
+    } else {
+      const recipientsCount = (item.mainRecipients?.length || 0) + (item.secondaryRecipients?.length || 0);
+      recipientsPreview = escapeHtml((item.mainRecipients || []).slice(0, 2).join(', ')) + (recipientsCount > 2 ? ` (+עוד ${recipientsCount - 2})` : '');
+      recipientsTitle = (item.mainRecipients || []).join(', ');
+    }
 
     tr.innerHTML = `
       <td><div style="font-weight:700; font-size:12.5px;">${escapeHtml(dateStr.split(' · ')[0])}</div><div class="cell-muted" style="font-size:11.5px;">${escapeHtml(dateStr.split(' · ')[1] || '')}</div></td>
       <td class="cell-primary">${escapeHtml(item.subject) || '-'}</td>
-      <td class="recipients-cell" title="${escapeHtml((item.mainRecipients || []).join(', '))}">${escapeHtml(recipientsPreview) || 'אין'}</td>
+      <td class="recipients-cell" title="${escapeHtml(recipientsTitle)}">${recipientsPreview || 'אין'}</td>
       <td><span class="badge badge-info">${filesCount} קבצים</span></td>
       <td class="row-actions">
         <button type="button" class="btn btn-secondary btn-sm view-btn" data-idx="${index}">
@@ -227,14 +232,17 @@ function showDetails(index) {
   const detailsContainer = document.getElementById('modalDetails');
   const date = new Date(item.date);
 
-  let filesHtml = (item.files || []).map((f) => `<li><b>${escapeHtml(f.name)}</b> - כמות: ${escapeHtml(f.quantity)}, פורמט: ${escapeHtml(f.format)}</li>`).join('');
+  let filesHtml = (item.files || []).map((f) => `<li><b>${escapeHtml(f.name)}</b> - כמות: ${escapeHtml(f.quantity)}, פורמט: ${escapeHtml(f.format)}${Array.isArray(f.dests) && f.dests.length ? ` <span class="hint">→ ${escapeHtml(f.dests.join(', '))}</span>` : ''}</li>`).join('');
   if (!filesHtml) filesHtml = '<li>אין קבצים</li>';
+  const destsHtml = Array.isArray(item.destinations) && item.destinations.length
+    ? item.destinations.map(d => `<div class="field"><label>יעד: ${escapeHtml(d.name)} <span class="hint">(${d.fileCount} קבצים)</span></label><div class="callout callout-info" style="white-space:pre-wrap;">${escapeHtml(d.recipients.join('\n')) || 'אין'}</div></div>`).join('')
+    : `<div class="field"><label>נמענים ראשיים</label><div class="callout callout-info" style="white-space:pre-wrap;">${escapeHtml((item.mainRecipients || []).join('\n')) || 'אין'}</div></div>
+       <div class="field"><label>נמענים משניים (קובץ +)</label><div class="callout callout-info" style="white-space:pre-wrap;">${escapeHtml((item.secondaryRecipients || []).join('\n')) || 'אין'}</div></div>`;
 
   detailsContainer.innerHTML = `
     <div class="field"><label>תאריך ושעה</label><div class="callout callout-info">${escapeHtml(window.formatHebrewAndGregorian ? window.formatHebrewAndGregorian(date, true) : date.toLocaleString('he-IL'))}</div></div>
     <div class="field"><label>נושא</label><div class="callout callout-info">${escapeHtml(item.subject) || '-'}</div></div>
-    <div class="field"><label>נמענים ראשיים</label><div class="callout callout-info" style="white-space:pre-wrap;">${escapeHtml((item.mainRecipients || []).join('\n')) || 'אין'}</div></div>
-    <div class="field"><label>נמענים משניים (קובץ +)</label><div class="callout callout-info" style="white-space:pre-wrap;">${escapeHtml((item.secondaryRecipients || []).join('\n')) || 'אין'}</div></div>
+    ${destsHtml}
     <div class="field" style="margin-bottom:0;"><label>קבצים שנשלחו</label><ul style="margin:0; padding-inline-start:20px; color:var(--text-2); font-size:13px;">${filesHtml}</ul></div>
   `;
   modal.style.display = 'flex';

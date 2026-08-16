@@ -121,22 +121,46 @@ function renderContactsDatalist() {
     if (dl) dl.innerHTML = html;
 }
 
-// ---- recipient multiselects (checkbox dropdown of saved contacts + manual free text) ----
+// ---- recipient pickers - one per destination (checkbox dropdown of saved contacts + manual email row) ----
 function renderEmailMultiselects() {
-    renderEmailMultiselect('mainEmailMultiselect', 'main');
-    renderEmailMultiselect('secondaryEmailMultiselect', 'secondary');
+    const host = document.getElementById('destList');
+    if (!host) return;
+    const list = getDestinations();
+    host.innerHTML = list.map((d, i) => `
+        <div class="dest-item dest-${d.color}" data-dest="${d.id}">
+            <div class="dest-item-head">
+                ${destDotHtml(d)}
+                <input class="dest-name" value="${escAttr(d.name)}" title="שם היעד (לחץ לעריכה)" onchange="renameDestination('${d.id}', this.value.trim() || 'יעד'); updateDestSummary(); renderFiles();">
+                ${i === 0 ? '<span class="badge badge-neutral" title="כל קובץ נשלח ליעד זה אלא אם הוסר">ברירת מחדל</span>' : `<button type="button" class="btn btn-ghost btn-icon-only btn-sm" title="הפוך לברירת מחדל" onclick="setDefaultDestination('${d.id}'); renderEmailMultiselects(); renderFiles(); updateDestSummary();"><svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>`}
+                ${list.length > 1 && i > 0 ? `<button type="button" class="btn btn-ghost btn-icon-only btn-sm dest-remove" title="הסר יעד" onclick="askRemoveDestination('${d.id}')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>` : ''}
+            </div>
+            <div class="multiselect" id="ms_${d.id}"></div>
+        </div>`).join('');
+    list.forEach(d => renderEmailMultiselect('ms_' + d.id, d.id));
 }
-function renderEmailMultiselect(containerId, type) {
+async function askRemoveDestination(id) {
+    const d = getDestination(id); if (!d) return;
+    if (!await askConfirm({ title: 'להסיר יעד?', message: `היעד "${d.name}" יוסר. קבצים שסומנו רק אליו יחזרו ליעד ברירת המחדל.`, danger: true, confirmText: 'הסר' })) return;
+    if (removeDestination(id)) { renderEmailMultiselects(); renderFiles(); updateDestSummary(); }
+}
+async function askAddDestination() {
+    const name = await askPrompt({ title: 'יעד חדש', message: 'שם ליעד (למשל: מדפסת משרד, בית דפוס, ארכיון).', placeholder: 'שם היעד…', confirmText: 'הוסף' });
+    if (!name) return;
+    const id = addDestination(name);
+    if (id) { renderEmailMultiselects(); renderFiles(); updateDestSummary(); setTimeout(() => toggleEmailMultiselect('ms_' + id), 50); }
+}
+
+function renderEmailMultiselect(containerId, destId) {
     const contacts = getSavedContacts();
-    const selected = type === 'main' ? getSelectedMainEmailsRaw() : getSelectedSecondaryEmailsRaw();
+    const dest = getDestination(destId); if (!dest) return;
+    const selected = dest.emails || [];
     const container = document.getElementById(containerId);
     if (!container) return;
     const dropdownId = `dropdown_${containerId}`;
     const wasOpen = document.getElementById(dropdownId) ? document.getElementById(dropdownId).classList.contains('show') : false;
-    const manualId = type === 'main' ? 'mainEmailManual' : 'secondaryEmailManual';
+    const manualId = `manual_${containerId}`;
     const prevManual = document.getElementById(manualId) ? document.getElementById(manualId).value : '';
 
-    // תווית הכפתור: שמות אנשי קשר שנבחרו + כתובות ידניות (שאינן ברשימה)
     const knownEmails = new Set(contacts.map(c => c.email));
     const labels = selected.map(e => { const c = contacts.find(x => x.email === e); return c ? c.name : e; });
     const displayText = labels.length ? labels.join(', ') : 'בחר אנשי קשר או הקלד מייל…';
@@ -146,67 +170,53 @@ function renderEmailMultiselect(containerId, type) {
     if (contacts.length === 0) html += `<div class="manager-list-empty">אין אנשי קשר שמורים</div>`;
     contacts.forEach(c => {
         const checked = selected.includes(c.email) ? 'checked' : '';
-        html += `<label class="multiselect-item"><input type="checkbox" value="${escAttr(c.email)}" ${checked} onchange="onEmailMultiselectChange('${containerId}', '${type}', this)"><span>${escHtml(c.name)} <span class="hint">&lt;${escHtml(c.email)}&gt;</span></span></label>`;
+        html += `<label class="multiselect-item"><input type="checkbox" value="${escAttr(c.email)}" ${checked} onchange="onEmailMultiselectChange('${containerId}', '${destId}', this)"><span>${escHtml(c.name)} <span class="hint">&lt;${escHtml(c.email)}&gt;</span></span></label>`;
     });
-    // כתובות ידניות שכבר נוספו (לא באנשי הקשר) - עם אפשרות הסרה
     selected.filter(e => !knownEmails.has(e)).forEach(e => {
-        html += `<label class="multiselect-item"><input type="checkbox" value="${escAttr(e)}" checked onchange="onEmailMultiselectChange('${containerId}', '${type}', this)"><span>${escHtml(e)} <span class="badge badge-neutral" style="margin-inline-start:6px;">ידני</span></span></label>`;
+        html += `<label class="multiselect-item"><input type="checkbox" value="${escAttr(e)}" checked onchange="onEmailMultiselectChange('${containerId}', '${destId}', this)"><span>${escHtml(e)} <span class="badge badge-neutral" style="margin-inline-start:6px;">ידני</span></span></label>`;
     });
-    // שורת הקלדה ידנית - חלק מהרשימה הנגללת, לא שדה נפרד בטופס
     html += `<div class="multiselect-manual" onclick="event.stopPropagation()">
         <input type="text" id="${manualId}" class="input" placeholder="הקלד מייל ולחץ Enter…" list="contacts-datalist" dir="ltr" value="${escAttr(prevManual)}"
-               onkeydown="if(event.key==='Enter'){event.preventDefault();addManualEmail('${containerId}','${type}');}">
-        <button type="button" class="btn btn-primary btn-sm btn-icon-only" title="הוסף" onclick="addManualEmail('${containerId}','${type}')"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+               onkeydown="if(event.key==='Enter'){event.preventDefault();addManualEmail('${containerId}','${destId}');}">
+        <button type="button" class="btn btn-primary btn-sm btn-icon-only" title="הוסף" onclick="addManualEmail('${containerId}','${destId}')"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
     </div>`;
     html += `</div>`;
     container.innerHTML = html;
 }
-// מוסיף כתובת שהוקלדה ידנית לרשימת הנבחרים (נשמר יחד עם אנשי הקשר המסומנים)
-function addManualEmail(containerId, type) {
-    const input = document.getElementById(type === 'main' ? 'mainEmailManual' : 'secondaryEmailManual');
+function addManualEmail(containerId, destId) {
+    const input = document.getElementById(`manual_${containerId}`);
     if (!input) return;
     const email = input.value.trim();
     if (!email) return;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('כתובת מייל לא תקינה: ' + email); return; }
-    const storageKey = type === 'main' ? 'selectedMainEmails' : 'selectedSecondaryEmails';
-    const arr = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    const dest = getDestination(destId); if (!dest) return;
+    const arr = [...(dest.emails || [])];
     if (!arr.includes(email)) arr.push(email);
-    localStorage.setItem(storageKey, JSON.stringify(arr));
+    setDestinationEmails(destId, arr);
     input.value = '';
-    renderEmailMultiselects();
+    renderEmailMultiselect(containerId, destId);
     if (typeof updateDestSummary === 'function') updateDestSummary();
 }
 function toggleEmailMultiselect(containerId) {
     document.querySelectorAll('.multiselect-content.show').forEach(d => { if (d.id !== `dropdown_${containerId}`) d.classList.remove('show'); });
-    document.getElementById(`dropdown_${containerId}`).classList.toggle('show');
+    const dd = document.getElementById(`dropdown_${containerId}`);
+    if (dd) dd.classList.toggle('show');
 }
-function onEmailMultiselectChange(containerId, type, el) {
+function onEmailMultiselectChange(containerId, destId, el) {
     const email = el.value;
-    const storageKey = type === 'main' ? 'selectedMainEmails' : 'selectedSecondaryEmails';
-    let arr = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    if (el.checked) {
-        if (!arr.includes(email)) arr.push(email);
-    } else {
-        arr = arr.filter(e => e !== email);
-        const manualInput = document.getElementById(type === 'main' ? 'mainEmailManual' : 'secondaryEmailManual');
-        if (manualInput && manualInput.value.trim() === email) manualInput.value = '';
-    }
-    localStorage.setItem(storageKey, JSON.stringify(arr));
-    renderEmailMultiselects();
+    const dest = getDestination(destId); if (!dest) return;
+    let arr = [...(dest.emails || [])];
+    if (el.checked) { if (!arr.includes(email)) arr.push(email); }
+    else arr = arr.filter(e => e !== email);
+    setDestinationEmails(destId, arr);
+    renderEmailMultiselect(containerId, destId);
     if (typeof updateDestSummary === 'function') updateDestSummary();
 }
-function getSelectedMainEmails() {
-    let arr = getSelectedMainEmailsRaw();
-    const manual = document.getElementById('mainEmailManual') ? document.getElementById('mainEmailManual').value.trim() : '';
-    if (manual && !arr.includes(manual)) arr.push(manual);
-    return arr.filter(Boolean);
-}
-function getSelectedSecondaryEmails() {
-    let arr = getSelectedSecondaryEmailsRaw();
-    const manual = document.getElementById('secondaryEmailManual') ? document.getElementById('secondaryEmailManual').value.trim() : '';
-    if (manual && !arr.includes(manual)) arr.push(manual);
-    return arr.filter(Boolean);
-}
+// תאימות: הקוד הישן קרא ל"ראשי/משני" - עכשיו זה יעד ברירת המחדל / השני
+function getSelectedMainEmailsRaw() { return getDestinations()[0].emails || []; }
+function getSelectedSecondaryEmailsRaw() { const l = getDestinations(); return l[1] ? (l[1].emails || []) : []; }
+function getSelectedMainEmails() { return getSelectedMainEmailsRaw().filter(Boolean); }
+function getSelectedSecondaryEmails() { return getSelectedSecondaryEmailsRaw().filter(Boolean); }
 
 // ---- subject auto-generation (day of week + parasha + Hebrew date, via hebcal) ----
 async function generateAutoSubject() {

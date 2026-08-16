@@ -23,7 +23,7 @@ function openMergeSidebar(groupId) {
         document.getElementById('groupDupCheck').checked = !!first.duplicateTwoUp;
         document.getElementById('groupBlankCheck').checked = !!first.addEvenBlankPage;
         document.getElementById('groupMarginCutCheck').checked = !!first.marginCut;
-        document.getElementById('groupSendSecondary').checked = !!first.sendSecondary;
+        renderGroupDestChips(first);
         let lVal = first.addLogo === '1' || first.addLogo === true ? '1' : (first.addLogo === '2' ? '2' : '');
         document.getElementById('groupLogoSelect').value = lVal;
     } else {
@@ -90,4 +90,13 @@ function applyGroupSetting(key, value) {
         }
     });
     renderFiles();
+}
+
+
+// צ'יפים של יעדי השליחה בפאנל הקבוצה - toggleFileDest מסנכרן את כל הקבוצה
+function renderGroupDestChips(first) {
+    const host = document.getElementById('groupDestChips');
+    if (!host || !first) return;
+    host.innerHTML = getDestinations().map((d, i) => `
+        <label class="opt-chip dest-${d.color}"><input type="checkbox" ${fileHasDest(first, d.id) ? 'checked' : ''} onchange="toggleFileDest('${first.id}', '${d.id}'); renderMergeList();"><span>${destDotHtml(d, true)}${escHtml(d.name)}${i === 0 ? ' <span class="hint">(ברירת מחדל)</span>' : ''}</span></label>`).join('');
 }

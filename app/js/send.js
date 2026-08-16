@@ -383,21 +383,30 @@ async function processAndSend() {
         addLog('מתחיל תהליך שליחה...', 'info');
         createInstructionFile();
 
-        const mainEmailsRaw = getSelectedMainEmails();
-        const secondaryEmailsRaw = getSelectedSecondaryEmails();
-        if (mainEmailsRaw.length === 0) throw new Error('לא נבחרו נמענים ראשיים.');
-
+        // ---- יעדים: מייל אחד לכל יעד, עם הקבצים שסומנו אליו בלבד ----
+        const destinations = getDestinations().map(d => ({ ...d, recipients: (d.emails || []).map(extractEmail).filter(Boolean) }));
+        const defaultDest = destinations[0];
+        if (!defaultDest.recipients.length) throw new Error(`ליעד ברירת המחדל "${defaultDest.name}" אין נמענים.`);
         const subject = document.getElementById('subject').value || 'קבצים להדפסה';
-        const mainRecipients = mainEmailsRaw.map(extractEmail).filter(Boolean);
-        const secondaryRecipients = secondaryEmailsRaw.map(extractEmail).filter(Boolean);
 
+        // קבצים ששייכים ליעד בלי נמענים - מזהירים ומדלגים על היעד הזה (לא נכשלים)
+        destinations.filter(d => !d.recipients.length).forEach(d => {
+            const n = filesData.filter(f => fileHasDest(f, d.id)).length;
+            if (n) addLog(`ליעד "${d.name}" אין נמענים - ${n} קבצים שסומנו אליו לא יישלחו לשם.`, 'warning');
+        });
+
+        // קיבוץ: קבוצת מיזוג = יחידה אחת; יעדיה = יעדי הקובץ הראשון (כולם מסונכרנים)
         const fileGroups = {};
         filesData.forEach(item => {
             const key = item.group || `file_${item.id}`;
             (fileGroups[key] = fileGroups[key] || []).push(item);
         });
 
-        const primaryAttachments = [], primaryDriveLinks = [], secondaryAttachments = [], secondaryDriveLinks = [];
+        // תוצרים לפי יעד: { destId: { attachments:[], driveLinks:[] } }
+        const perDest = {};
+        destinations.forEach(d => { perDest[d.id] = { attachments: [], driveLinks: [] }; });
+        const producedFiles = []; // להיסטוריה: { name, quantity, format, dests:[names] }
+
         setSendStep('process');
         setSendState('running', 'מעבד קבצים...');
 
@@ -435,31 +444,27 @@ async function processAndSend() {
 
             const finalSizeMB = finalBytes.byteLength / (1024 * 1024);
             const base64Data = uint8ArrayToBase64(new Uint8Array(finalBytes));
-            const isPlusFile = itemMeta.isPlusSelected;
+            const useDrive = finalSizeMB > DRIVE_THRESHOLD_MB;
+            // אובייקט אחד משותף לכל היעדים - כך קובץ גדול עולה לדרייב פעם אחת בלבד
+            const payload = useDrive
+                ? { name: fileName, url: null, base64Data, mimeType: fileMimeType, quantity: itemMeta.quantity, format: newFormat, note: itemMeta.note }
+                : { name: fileName, data: base64Data, mimeType: fileMimeType, quantity: itemMeta.quantity, format: newFormat, note: itemMeta.note };
 
-            if (isPlusFile) {
-                if (secondaryRecipients.length > 0) {
-                    (finalSizeMB > DRIVE_THRESHOLD_MB ? secondaryDriveLinks : secondaryAttachments).push(
-                        finalSizeMB > DRIVE_THRESHOLD_MB
-                            ? { name: fileName, url: null, base64Data, mimeType: fileMimeType, quantity: itemMeta.quantity, format: newFormat, note: itemMeta.note }
-                            : { name: fileName, data: base64Data, mimeType: fileMimeType, quantity: itemMeta.quantity, format: newFormat, note: itemMeta.note }
-                    );
-                }
-                (finalSizeMB > DRIVE_THRESHOLD_MB ? primaryDriveLinks : primaryAttachments).push(
-                    finalSizeMB > DRIVE_THRESHOLD_MB
-                        ? { name: fileName, url: null, base64Data, mimeType: fileMimeType, quantity: itemMeta.quantity, format: newFormat, note: itemMeta.note }
-                        : { name: fileName, data: base64Data, mimeType: fileMimeType, quantity: itemMeta.quantity, format: newFormat, note: itemMeta.note }
-                );
-            } else {
-                (finalSizeMB > DRIVE_THRESHOLD_MB ? primaryDriveLinks : primaryAttachments).push(
-                    finalSizeMB > DRIVE_THRESHOLD_MB
-                        ? { name: fileName, url: null, base64Data, mimeType: fileMimeType, quantity: itemMeta.quantity, format: newFormat, note: itemMeta.note }
-                        : { name: fileName, data: base64Data, mimeType: fileMimeType, quantity: itemMeta.quantity, format: newFormat, note: itemMeta.note }
-                );
-            }
+            const targetIds = fileDests(itemMeta).filter(id => perDest[id]);
+            const targetNames = [];
+            targetIds.forEach(id => {
+                const d = destinations.find(x => x.id === id);
+                if (!d.recipients.length) return; // הוזהר למעלה
+                (useDrive ? perDest[id].driveLinks : perDest[id].attachments).push(payload);
+                targetNames.push(d.name);
+            });
+            addLog(`  ↳ ${fileName} → ${targetNames.length ? targetNames.join(', ') : 'אף יעד (אין נמענים)'}`, 'info');
+            producedFiles.push({ name: fileName, quantity: itemMeta.quantity, format: newFormat, dests: targetNames });
         }
 
-        for (const link of [...primaryDriveLinks, ...secondaryDriveLinks]) {
+        // העלאה לדרייב - כל קובץ פעם אחת (אותו אובייקט משותף בין היעדים)
+        const uniqueDriveLinks = [...new Set(Object.values(perDest).flatMap(p => p.driveLinks))];
+        for (const link of uniqueDriveLinks) {
             if (!link.url) {
                 setSendStep('upload'); setSendState('running', 'מעלה לדרייב...');
                 addLog(`מעלה ${link.name} לדרייב...`, 'info');
@@ -469,38 +474,39 @@ async function processAndSend() {
             }
         }
 
-        if (mainRecipients.length > 0 && (primaryAttachments.length > 0 || primaryDriveLinks.length > 0)) {
-            setSendStep('send'); setSendState('running', 'שולח...');
-            addLog(`שולח מייל ראשי ל: ${mainRecipients.join(', ')}`, 'info');
-            await sendFilesToEmail(mainRecipients.join(','), subject, { filesToEmail: primaryAttachments, driveLinks: primaryDriveLinks });
-            addLog('מייל ראשי נשלח!', 'success');
-        } else {
-            addLog('אין קבצים לשליחה לנמענים הראשיים.', 'info');
+        // שליחה - מייל לכל יעד שיש לו קבצים ונמענים
+        setSendStep('send'); setSendState('running', 'שולח...');
+        const sentTo = [];
+        let sentCount = 0;
+        for (const d of destinations) {
+            const bucket = perDest[d.id];
+            if (!d.recipients.length) continue;
+            if (!bucket.attachments.length && !bucket.driveLinks.length) { addLog(`אין קבצים ליעד "${d.name}" - מדלג.`, 'info'); continue; }
+            if (sentCount > 0) await new Promise(r => setTimeout(r, 3000)); // ריווח בין מיילים
+            const destSubject = destinations.length > 1 && d.id !== defaultDest.id ? `[${d.name}] ${subject}` : subject;
+            addLog(`שולח ליעד "${d.name}" (${d.recipients.join(', ')}) - ${bucket.attachments.length + bucket.driveLinks.length} קבצים...`, 'info');
+            await sendFilesToEmail(d.recipients.join(','), destSubject, { filesToEmail: bucket.attachments, driveLinks: bucket.driveLinks });
+            addLog(`מייל ליעד "${d.name}" נשלח!`, 'success');
+            sentTo.push({ id: d.id, name: d.name, recipients: d.recipients, fileCount: bucket.attachments.length + bucket.driveLinks.length });
+            d.recipients.forEach(saveEmailToHistory);
+            sentCount++;
         }
+        if (!sentCount) throw new Error('לא נשלח אף מייל - אין קבצים ליעדים עם נמענים.');
 
-        if (mainRecipients.length > 0 && secondaryRecipients.length > 0) await new Promise(r => setTimeout(r, 3000));
-
-        if (secondaryRecipients.length > 0 && (secondaryAttachments.length > 0 || secondaryDriveLinks.length > 0)) {
-            addLog(`שולח מייל משני ל: ${secondaryRecipients.join(', ')}`, 'info');
-            await sendFilesToEmail(secondaryRecipients.join(','), `(+) ${subject}`, { filesToEmail: secondaryAttachments, driveLinks: secondaryDriveLinks });
-            addLog('מייל משני נשלח!', 'success');
-        }
-
-        mainEmailsRaw.forEach(saveEmailToHistory);
-        secondaryEmailsRaw.forEach(saveEmailToHistory);
         if (wakeLock) wakeLock.release().then(() => { wakeLock = null; });
 
         addLog('הכל נשלח בהצלחה!', 'success');
         setSendState('done', 'השליחה הסתיימה בהצלחה!');
 
         try {
-            const logs = Array.from(document.getElementById('progressLog').children).map(el => el.innerText);
-            const allFiles = [...primaryAttachments, ...primaryDriveLinks, ...secondaryAttachments, ...secondaryDriveLinks];
-            const uniqueFilesMap = new Map();
-            allFiles.forEach(f => uniqueFilesMap.set(f.name, f));
+            const logs = Array.from(document.getElementById('progressLog').children).map(el => el.innerText).reverse();
             const sendData = {
-                subject, mainRecipients, secondaryRecipients,
-                files: Array.from(uniqueFilesMap.values()).map(f => ({ name: f.name, quantity: f.quantity, format: f.format })),
+                subject,
+                destinations: sentTo,
+                // תאימות לאחור לצפייה בהיסטוריה הישנה
+                mainRecipients: (sentTo[0] || {}).recipients || [],
+                secondaryRecipients: sentTo.slice(1).flatMap(x => x.recipients),
+                files: producedFiles,
                 logs
             };
             saveFullSendToHistory(sendData);
@@ -566,7 +572,8 @@ async function writeLogFile(sendData) {
         const filename = `send_log_${date.toISOString().replace(/[:.]/g, '-')}.txt`;
         const fileHandle = await logDirectoryHandle.getFileHandle(filename, { create: true });
         const writable = await fileHandle.createWritable();
-        const logContent = `--- פרטי שליחה ---\nתאריך ושעה: ${date.toLocaleString('he-IL')}\nנושא: ${sendData.subject}\n\n[נמענים ראשיים]\n${sendData.mainRecipients.length ? sendData.mainRecipients.join(', ') : 'אין'}\n\n[נמענים משניים]\n${sendData.secondaryRecipients.length ? sendData.secondaryRecipients.join(', ') : 'אין'}\n\n[קבצים]\n${sendData.files.map(f => `- ${f.name} (כמות: ${f.quantity}) [פורמט: ${f.format}]`).join('\n')}\n\n[סטטוס הודעות]\n${sendData.logs.join('\n')}\n--------------------\n`;
+        const destBlock = (sendData.destinations || []).map(d => `[יעד: ${d.name}] ${d.recipients.join(', ')} — ${d.fileCount} קבצים`).join('\n') || 'אין';
+        const logContent = `--- פרטי שליחה ---\nתאריך ושעה: ${date.toLocaleString('he-IL')}\nנושא: ${sendData.subject}\n\n[יעדים]\n${destBlock}\n\n[קבצים]\n${sendData.files.map(f => `- ${f.name} (כמות: ${f.quantity}) [פורמט: ${f.format}]${f.dests && f.dests.length ? ' → ' + f.dests.join(', ') : ''}`).join('\n')}\n\n[סטטוס הודעות]\n${sendData.logs.join('\n')}\n--------------------\n`;
         await writable.write(logContent);
         await writable.close();
     } catch (e) { console.error('Failed to write log file:', e); }

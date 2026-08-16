@@ -90,8 +90,6 @@ function getLogoBase64(n) {
 }
 
 // ---- selected recipients ----
-function getSelectedMainEmailsRaw() { return JSON.parse(localStorage.getItem('selectedMainEmails') || '[]'); }
-function getSelectedSecondaryEmailsRaw() { return JSON.parse(localStorage.getItem('selectedSecondaryEmails') || '[]'); }
 
 // ---- email history (simple recent-email list, used for autocomplete) ----
 function saveEmailToHistory(email) {
@@ -112,7 +110,9 @@ function saveFullSendToHistory(sendData) {
         subject: sendData.subject,
         mainRecipients: sendData.mainRecipients,
         secondaryRecipients: sendData.secondaryRecipients,
-        files: sendData.files
+        destinations: sendData.destinations || [],   // [{id,name,recipients,fileCount}]
+        files: sendData.files,                        // [{name,quantity,format,dests:[names]}]
+        logs: sendData.logs || []                     // מוצג בטאב "לוגים" בהיסטוריה
     });
     if (history.length > 100) history.pop();
     localStorage.setItem('fullSendHistory', JSON.stringify(history));

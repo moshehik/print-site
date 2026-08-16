@@ -67,14 +67,15 @@ function updateDestSummary() {
     if (!el) return;
     const contacts = getSavedContacts();
     const nameOf = (e) => { const c = contacts.find(x => x.email === e); return c ? c.name : e; };
-    const main = getSelectedMainEmailsRaw().map(nameOf);
-    const sec = getSelectedSecondaryEmailsRaw().map(nameOf);
+    const list = getDestinations();
     const subject = (document.getElementById('subject') || {}).value || '';
-    const parts = [];
-    parts.push(main.length ? 'אל: ' + main.join(', ') : 'לא נבחרו נמענים');
-    if (sec.length) parts.push('⊕ ' + sec.join(', '));
-    if (subject) parts.push('נושא: ' + subject);
-    el.textContent = parts.join(' · ');
+    const parts = list.map((d, i) => {
+        const who = (d.emails || []).map(nameOf).join(', ');
+        return `${destDotHtml(d, true)}<b>${escHtml(d.name)}</b>${i === 0 ? '' : ''}: ${who ? escHtml(who) : '<span style="color:var(--danger)">אין נמענים</span>'}`;
+    });
+    if (subject) parts.push('נושא: ' + escHtml(subject));
+    el.innerHTML = parts.join(' <span class="dest-sep">·</span> ');
     el.title = el.textContent;
-    el.style.color = main.length ? '' : 'var(--danger)';
+    const missing = !(list[0].emails || []).length;
+    el.style.color = missing ? 'var(--danger)' : '';
 }

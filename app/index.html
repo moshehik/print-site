@@ -101,11 +101,10 @@
           <option value="2">לוגו 2</option>
         </select>
       </div>
-      <div class="field">
-        <label>&nbsp;</label>
-        <label class="opt-chip" style="width:100%;"><input type="checkbox" id="groupSendSecondary" onchange="applyGroupSetting('sendSecondary', this.checked)"><span>שליחה משנית ⊕</span></label>
-      </div>
     </div>
+
+    <div class="section-title">יעדי שליחה <span class="hint" style="font-weight:400; text-transform:none;">(הקובץ הממוזג נשלח לכל היעדים המסומנים)</span></div>
+    <div class="opt-chips" id="groupDestChips"></div>
 
     <div class="section-title">סדר המיזוג</div>
     <div id="mergeListContainer"></div>
@@ -410,24 +409,25 @@
             <!-- תצוגה -->
             <div class="hint dest-summary" id="destSummary" title="">טוען…</div>
 
-            <!-- עריכה -->
-            <div class="send-dest-row hidden" id="destEditRow">
-              <div class="field">
-                <label>נמענים ראשיים</label>
-                <div class="multiselect" id="mainEmailMultiselect"></div>
-              </div>
-              <div class="field">
-                <label>נמענים משניים <span class="hint">(⊕)</span></label>
-                <div class="multiselect" id="secondaryEmailMultiselect"></div>
+            <!-- עריכה: רשימת יעדים (כל יעד = שם + נמענים) + נושא -->
+            <div class="hidden" id="destEditRow">
+              <div class="dest-list" id="destList"></div>
+              <div class="dest-actions">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="askAddDestination()">
+                  <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  יעד נוסף
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="openModal('contactsModal')">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  ניהול אנשי קשר
+                </button>
                 <datalist id="contacts-datalist"></datalist>
+                <span class="spacer" style="flex:1"></span>
+                <div class="field dest-subject">
+                  <label>נושא ההודעה</label>
+                  <input type="text" id="subject" class="input">
+                </div>
               </div>
-              <div class="field">
-                <label>נושא ההודעה</label>
-                <input type="text" id="subject" class="input">
-              </div>
-              <button type="button" class="btn btn-secondary btn-icon-only" onclick="openModal('contactsModal')" title="ניהול אנשי קשר">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              </button>
             </div>
           </div>
         </section>
@@ -503,6 +503,7 @@
 <script src="js/state.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/utils.js"></script>
+<script src="js/destinations.js"></script>
 <script src="js/contacts.js"></script>
 <script src="js/files.js"></script>
 <script src="js/modals.js"></script>
