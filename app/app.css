@@ -89,7 +89,7 @@ body{ background:var(--bg); }
 .file-thumb .file-ext{ position:absolute; top:8px; inset-inline-start:8px; }
 .file-thumb .btn-plus{ position:absolute; top:8px; inset-inline-end:8px; }
 
-.file-body{ padding:12px 14px 14px; display:flex; flex-direction:column; gap:10px; }
+.file-body{ padding:12px 14px 12px; display:flex; flex-direction:column; gap:6px; }
 .file-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
 .file-name{ font-weight:700; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
 .file-meta{ font-size:11.5px; color:var(--text-3); display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
@@ -97,31 +97,22 @@ body{ background:var(--bg); }
 .file-modified-dot{ width:7px; height:7px; border-radius:50%; background:var(--success-solid); display:none; }
 .file-modified-dot.show{ display:inline-block; }
 
-/* quick controls: quantity + format side by side */
-.file-quick{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.file-quick label{ font-size:11px; color:var(--text-3); font-weight:700; margin-bottom:3px; display:block; }
-.file-quick .select{ padding:7px 9px; font-size:12.5px; }
+/* status chips under the name — quantity · format · style · group · options · note */
+.file-chips{ display:flex; flex-wrap:wrap; gap:4px; min-height:22px; }
+.file-chips .badge{ font-size:11px; padding:2px 8px; }
 
-/* actions row: group tabs + icon buttons */
-.file-actions{ display:flex; align-items:center; justify-content:space-between; gap:6px; padding-top:10px; border-top:1px solid var(--border); }
-.file-icon-actions{ display:flex; align-items:center; gap:2px; }
-.file-icon-actions .btn-icon-only{ width:30px; height:30px; }
-.file-icon-actions .btn-icon-only.active-toggle{ color:var(--primary-solid); background:var(--primary-tint); }
-
-.group-tabs{ display:flex; gap:3px; align-items:center; }
-.group-tab{ width:24px; height:24px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface-alt); color:var(--text-2); font-size:10.5px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:var(--font); }
-.group-tab:hover{ border-color:var(--border-strong); }
-.group-tab[data-g="1"].active{ background:var(--primary-solid); color:var(--text-on-primary); border-color:var(--primary-solid); }
-.group-tab[data-g="2"].active{ background:var(--accent-solid);  color:var(--text-on-primary); border-color:var(--accent-solid); }
-.group-tab[data-g="3"].active{ background:var(--success-solid); color:var(--text-on-primary); border-color:var(--success-solid); }
-.group-tab[data-g="4"].active{ background:var(--info);          color:var(--text-on-primary); border-color:var(--info); }
-.group-tab[data-g="0"].active{ background:var(--text-3); color:var(--text-on-primary); border-color:var(--text-3); }
-.btn-edit-group{ width:24px; height:24px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); color:var(--text-2); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
-.btn-edit-group:hover{ color:var(--primary-solid); border-color:var(--primary-solid); }
-
-.btn-plus{ width:26px; height:26px; border-radius:50%; border:1px solid var(--border-strong); background:var(--surface); color:var(--text-3); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; font-family:var(--font); font-weight:800; font-size:14px; line-height:1; box-shadow:var(--shadow-sm); }
-.btn-plus:hover{ color:var(--accent-solid); border-color:var(--accent-solid); }
-.btn-plus.active{ background:var(--accent-solid); color:var(--text-on-primary); border-color:var(--accent-solid); }
+/* single icon toolbar — every setting opens a floating popover from its icon */
+.file-toolbar{ display:flex; align-items:center; gap:2px; flex-wrap:wrap; padding-top:10px; border-top:1px solid var(--border); margin-top:2px; }
+.file-toolbar .btn-icon-only{ width:30px; height:30px; }
+.file-toolbar .btn-icon-only.active-toggle{ color:var(--primary-solid); background:var(--primary-tint); }
+.file-toolbar .btn-icon-only.popover-open{ background:var(--surface-alt); color:var(--text); box-shadow:inset 0 0 0 1px var(--border-strong); }
+.file-toolbar .btn-icon-only.group-on-1{ color:var(--primary-solid); background:var(--primary-tint); }
+.file-toolbar .btn-icon-only.group-on-2{ color:var(--accent-solid);  background:var(--accent-tint); }
+.file-toolbar .btn-icon-only.group-on-3{ color:var(--success);       background:var(--success-tint); }
+.file-toolbar .btn-icon-only.group-on-4{ color:var(--info);          background:var(--info-tint); }
+.file-toolbar .tb-danger{ color:var(--danger); }
+.file-toolbar .tb-danger:hover{ background:var(--danger-tint); }
+.file-toolbar .tb-sep{ width:1px; height:18px; background:var(--border); margin:0 3px; }
 
 /* per-file style select + "more" toggle */
 .style-select-row .select{ padding:7px 9px; font-size:12.5px; }
@@ -140,9 +131,8 @@ body{ background:var(--bg); }
 .list-view .file-card{ flex-direction:row; align-items:stretch; }
 .list-view .file-thumb{ width:88px; height:auto; min-height:88px; flex:0 0 auto; }
 .list-view .file-body{ flex:1; min-width:0; }
-.list-view .file-quick{ grid-template-columns:120px 160px; }
-.list-view .file-actions{ border-top:none; padding-top:0; }
-@media (max-width:640px){ .list-view .file-quick{ grid-template-columns:1fr 1fr; } }
+.list-view .file-body{ gap:6px; }
+.list-view .file-toolbar{ border-top:none; padding-top:0; margin-top:0; }
 
 /* ---- send bar (sticky bottom action bar) ---- */
 .send-bar{ position:sticky; bottom:0; z-index:20; margin:0 -24px -60px; padding:12px 24px 16px; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(8px); border-top:1px solid var(--border); }

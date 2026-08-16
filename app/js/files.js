@@ -181,6 +181,12 @@ const SVG = {
     edit:  '<svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>',
     gear:  '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
     up:    '<svg class="icon" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>',
+    qty:   '<svg class="icon" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/></svg>',
+    format:'<svg class="icon" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18h12v3H6zM6 14h12M4 9h16a2 2 0 0 1 2 2v6h-4v-4H6v4H2v-6a2 2 0 0 1 2-2z"/></svg>',
+    style: '<svg class="icon" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>',
+    group: '<svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+    note:  '<svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    plus:  '<svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
 };
 
 function previewContentFor(item) {
@@ -203,14 +209,24 @@ function extBadgeFor(item) {
 // מתקפלות בלחיצה - אותו מודל נתונים בדיוק (updateFileParam וכו').
 function renderFileCard(item) {
     const isLarge = item.fileObj.size > LARGE_FILE_THRESHOLD_MB * 1024 * 1024;
-    const groupTabs = getGroupTabsHTML(item);
-    const stylesOptions = getStylesOptionsHTML(item.appliedStyleName);
-    const editGroupBtn = item.group > 0
-        ? `<button type="button" class="btn-edit-group" onclick="openMergeSidebar(${item.group})" title="ערוך קבוצה ${item.group}">${SVG.edit}</button>` : '';
     const meta = [
         formatSize(item.fileObj.size) + (isLarge ? ' (גדול)' : ''),
         item.pageCount ? item.pageCount + ' עמ׳' : '',
     ].filter(Boolean).join(' · ');
+    const on = (v) => v ? ' active-toggle' : '';
+    const activeOpts = countActiveOptions(item);
+    const groupClass = item.group > 0 ? ` group-on group-on-${item.group}` : '';
+
+    // סיכום המצב הנוכחי - תגים קטנים מתחת לשם (כמות · פורמט · סגנון), כדי
+    // שהמידע נראה גם בלי לפתוח שום תפריט
+    const chips = [
+        `<span class="badge badge-neutral" title="כמות">${escHtml(String(item.quantity || ''))}</span>`,
+        `<span class="badge badge-neutral" title="פורמט">${escHtml(item.format || '')}</span>`,
+        item.appliedStyleName ? `<span class="badge badge-primary" title="סגנון">${escHtml(item.appliedStyleName)}</span>` : '',
+        item.group > 0 ? `<span class="badge badge-info" title="קבוצת מיזוג">שילוב ${item.group}</span>` : '',
+        activeOpts ? `<span class="badge badge-neutral" title="אפשרויות פעילות">${activeOpts} אפשרויות</span>` : '',
+        item.note ? `<span class="badge badge-warning" title="${escAttr(item.note)}">הערה</span>` : '',
+    ].filter(Boolean).join('');
 
     return `
     <div class="file-card group-${item.group}" data-id="${item.id}">
@@ -220,44 +236,132 @@ function renderFileCard(item) {
             <button type="button" class="btn-plus ${item.isPlusSelected ? 'active' : ''}" onclick="togglePlus('${item.id}')" title="סימון לשליחה משנית (⊕)">+</button>
         </div>
         <div class="file-body">
-            <div class="file-head">
-                <div style="min-width:0; flex:1;">
-                    <div class="file-name" title="${escAttr(item.fileObj.name)}">${escHtml(item.fileObj.name)}</div>
-                    <div class="file-meta ${isLarge ? 'large' : ''}">
-                        <span class="file-modified-dot ${item.isModified ? 'show' : ''}" title="הוגדר"></span>
-                        <span>${meta}</span>
-                    </div>
-                </div>
+            <div class="file-name" title="${escAttr(item.fileObj.name)}">${escHtml(item.fileObj.name)}</div>
+            <div class="file-meta ${isLarge ? 'large' : ''}">
+                <span class="file-modified-dot ${item.isModified ? 'show' : ''}" title="הוגדר"></span>
+                <span>${meta}</span>
             </div>
-
-            <div class="file-quick">
-                <div><label>כמות</label><select class="select" onchange="updateFileParam('${item.id}', 'quantity', this.value)">${getQuantityOptionsHTML(item.quantity)}</select></div>
-                <div><label>פורמט</label><select class="select" onchange="updateFileParam('${item.id}', 'format', this.value)">${getFormatOptionsHTML(item.format)}</select></div>
+            <div class="file-chips">${chips}</div>
+            ${getLargeFileOptions(item, isLarge)}
+            <div class="file-toolbar">
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm" data-pop="qty"    onclick="openCardMenu(this,'${item.id}','qty')"    title="כמות">${SVG.qty}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm" data-pop="format" onclick="openCardMenu(this,'${item.id}','format')" title="פורמט">${SVG.format}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.appliedStyleName)}" data-pop="style" onclick="openCardMenu(this,'${item.id}','style')" title="סגנון שליחה">${SVG.style}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(activeOpts)}" data-pop="options" onclick="openCardMenu(this,'${item.id}','options')" title="אפשרויות הדפסה ועיצוב">${SVG.gear}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm${groupClass}" data-pop="group" onclick="openCardMenu(this,'${item.id}','group')" title="קבוצת מיזוג">${SVG.group}</button>
+                <span class="tb-sep"></span>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.blurLogo)}" onclick="toggleBlurLogo('${item.id}')" title="הסתרת לוגו / טשטוש">${SVG.blur}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.pageSelection)}" onclick="openPageSelectionPrompt('${item.id}')" title="בחירת עמודים">${SVG.pages}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.note)}" data-pop="note" onclick="openCardMenu(this,'${item.id}','note')" title="הערה">${SVG.note}</button>
+                <span class="tb-sep"></span>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm" onclick="downloadSingleItem('${item.id}')" title="הורדת קובץ מעובד">${SVG.down}</button>
+                <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-danger" onclick="removeFile('${item.id}')" title="הסר">${SVG.trash}</button>
             </div>
-
-            <div class="style-select-row">
-                <select class="select ${item.appliedStyleName ? 'has-style' : ''}" onchange="applyStyleToFile('${item.id}', this.value)">${stylesOptions}</select>
-            </div>
-
-            <div class="file-actions">
-                <div class="group-tabs">${editGroupBtn}${groupTabs}</div>
-                <div class="file-icon-actions">
-                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm ${item.isExpanded ? 'active-toggle' : ''}" onclick="toggleExpand('${item.id}')" title="${item.isExpanded ? 'סגור אפשרויות' : 'אפשרויות הדפסה ועיצוב'}">${SVG.gear}</button>
-                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm ${item.blurLogo ? 'active-toggle' : ''}" onclick="toggleBlurLogo('${item.id}')" title="הסתרת לוגו / טשטוש">${SVG.blur}</button>
-                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm ${item.pageSelection ? 'active-toggle' : ''}" onclick="openPageSelectionPrompt('${item.id}')" title="בחירת עמודים">${SVG.pages}</button>
-                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm" onclick="downloadSingleItem('${item.id}')" title="הורדת קובץ מעובד">${SVG.down}</button>
-                    <button type="button" class="btn btn-secondary btn-icon-only btn-sm" style="color:var(--danger);" onclick="removeFile('${item.id}')" title="הסר">${SVG.trash}</button>
-                </div>
-            </div>
-            <div class="advanced-controls ${item.isExpanded ? 'show' : ''}">
-                ${getOptionChips(item)}
-                ${getLargeFileOptions(item, isLarge)}
-                <div class="opt-note"><input type="text" class="input" placeholder="הערה לקובץ…" value="${escAttr(item.note)}" onchange="updateFileParam('${item.id}', 'note', this.value)"></div>
-                <button type="button" class="btn btn-ghost btn-sm" style="align-self:flex-start;" onclick="saveAsStyleFromFile('${item.id}')">שמור הגדרות אלו כסגנון</button>
-            </div>
-
         </div>
     </div>`;
+}
+
+const CARD_OPTION_KEYS = ['convertToPdf', 'addBsd', 'addPageNumbers', 'reverseLastPage', 'addArrows', 'duplicateTwoUp', 'addEvenBlankPage', 'marginCut'];
+function countActiveOptions(item) {
+    let n = CARD_OPTION_KEYS.filter(k => item[k]).length;
+    if (item.addLogo && item.addLogo !== '') n++;
+    if (item.multiUpMode) n++;
+    return n;
+}
+
+// ---- תפריטים צפים של הכרטיס: כל הגדרה נפתחת מהאייקון שלה ----
+function openCardMenu(anchor, id, kind) {
+    const item = filesData.find(f => f.id === id);
+    if (!item) return;
+    // מכיוון ש-renderFiles מחליף את ה-DOM, אחרי כל שינוי מאתרים את העוגן מחדש
+    const reopen = (k) => {
+        const btn = document.querySelector(`.file-card[data-id="${id}"] [data-pop="${k}"]`);
+        if (btn) openCardMenu(btn, id, k);
+    };
+    const set = (key, val, keepOpen) => {
+        closePopover();
+        updateFileParam(id, key, val);
+        if (keepOpen) setTimeout(() => reopen(kind), 0);
+    };
+
+    if (kind === 'qty') {
+        const items = getStoredQuantities().map(q => ({ value: q, label: q }));
+        openPopover(anchor, pickerMenu('כמות', items, item.quantity, v => set('quantity', v)));
+        return;
+    }
+    if (kind === 'format') {
+        const items = getStoredFormats().map(f => ({ value: f.name, label: f.name }));
+        openPopover(anchor, pickerMenu('פורמט', items, item.format, v => set('format', v)), { width: 240 });
+        return;
+    }
+    if (kind === 'style') {
+        const styles = getStoredStyles();
+        const wrap = document.createElement('div');
+        if (!styles.length) {
+            wrap.innerHTML = '<div class="popover-title">סגנון שליחה</div><div class="manager-list-empty">אין סגנונות שמורים</div>';
+        } else {
+            wrap.appendChild(pickerMenu('סגנון שליחה', styles.map(st => ({ value: st.name, label: st.name })), item.appliedStyleName, v => { closePopover(); applyStyleToFile(id, v); }));
+        }
+        const foot = document.createElement('div'); foot.className = 'popover-foot';
+        foot.innerHTML = '<button type="button" class="btn btn-secondary btn-sm">שמור הגדרות נוכחיות כסגנון</button>';
+        foot.querySelector('button').addEventListener('click', () => { closePopover(); saveAsStyleFromFile(id); });
+        wrap.appendChild(foot);
+        openPopover(anchor, wrap, { width: 260 });
+        return;
+    }
+    if (kind === 'group') {
+        const items = [0, 1, 2, 3, 4].map(g => ({ value: g, label: g === 0 ? 'ללא מיזוג' : `שילוב ${g}` }));
+        const wrap = document.createElement('div');
+        wrap.appendChild(pickerMenu('קבוצת מיזוג', items, item.group, v => set('group', v)));
+        if (item.group > 0) {
+            const foot = document.createElement('div'); foot.className = 'popover-foot';
+            foot.innerHTML = `<button type="button" class="btn btn-primary btn-sm">ניהול קבוצה ${item.group}</button>`;
+            foot.querySelector('button').addEventListener('click', () => { closePopover(); openMergeSidebar(item.group); });
+            wrap.appendChild(foot);
+        }
+        openPopover(anchor, wrap);
+        return;
+    }
+    if (kind === 'note') {
+        const wrap = document.createElement('div');
+        wrap.innerHTML = `<div class="popover-title">הערה לקובץ</div>
+            <div class="field"><textarea class="textarea" rows="3" placeholder="הערה שתצורף לקובץ…"></textarea></div>
+            <div class="popover-foot"><button type="button" class="btn btn-primary btn-sm">שמור</button></div>`;
+        const ta = wrap.querySelector('textarea'); ta.value = item.note || '';
+        wrap.querySelector('.btn').addEventListener('click', () => set('note', ta.value.trim()));
+        ta.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) set('note', ta.value.trim()); });
+        openPopover(anchor, wrap, { width: 280 });
+        setTimeout(() => ta.focus(), 0);
+        return;
+    }
+    if (kind === 'options') {
+        const logoVal = item.addLogo === true || item.addLogo === '1' ? '1' : (item.addLogo === '2' ? '2' : '');
+        const wrap = document.createElement('div');
+        wrap.innerHTML = `<div class="popover-title">אפשרויות הדפסה ועיצוב</div>
+            <div class="opt-chips"></div>
+            <div class="menu-divider"></div>
+            <div class="form-grid" style="gap:0 8px; padding:0 4px;">
+                <div class="field"><label>לוגו</label><select class="select" data-k="addLogo">
+                    <option value="">ללא</option><option value="1">לוגו 1</option><option value="2">לוגו 2</option></select></div>
+                <div class="field"><label>מרובים בעמוד</label><select class="select" data-k="multiUpMode">
+                    <option value="">ללא</option><option value="4">4 בעמוד</option><option value="4_dup">4 (משוכפל)</option>
+                    <option value="9">9 בעמוד</option><option value="9_dup">9 (משוכפל)</option><option value="16">16 בעמוד</option><option value="16_dup">16 (משוכפל)</option></select></div>
+            </div>`;
+        const chipsEl = wrap.querySelector('.opt-chips');
+        const labels = { convertToPdf: 'המר ל-PDF', addBsd: 'בס"ד', addPageNumbers: 'מספור', reverseLastPage: 'הפוך דף אחרון', addArrows: '9 בעמוד + חיצים', duplicateTwoUp: '2 משוכפל', addEvenBlankPage: 'דף ריק זוגי', marginCut: 'חיתוך שוליים' };
+        CARD_OPTION_KEYS.forEach(k => {
+            if (k === 'convertToPdf' && !item.canConvert) return;
+            const lab = document.createElement('label'); lab.className = 'opt-chip';
+            lab.innerHTML = `<input type="checkbox" ${item[k] ? 'checked' : ''}><span>${labels[k]}</span>`;
+            lab.querySelector('input').addEventListener('change', e => set(k, e.target.checked, true));
+            chipsEl.appendChild(lab);
+        });
+        wrap.querySelector('[data-k="addLogo"]').value = logoVal;
+        wrap.querySelector('[data-k="multiUpMode"]').value = item.multiUpMode || '';
+        wrap.querySelectorAll('select').forEach(sel => sel.addEventListener('change', e => set(e.target.dataset.k, e.target.value, true)));
+        openPopover(anchor, wrap, { width: 320 });
+        return;
+    }
 }
 
 function toggleFileOptionsMultiselect(id) {
@@ -278,42 +382,6 @@ function getStylesOptionsHTML(selectedStyleName) {
 
 function getGroupTabsHTML(item) {
     return [0, 1, 2, 3, 4].map(g => `<button type="button" class="group-tab ${item.group === g ? 'active' : ''}" data-g="${g}" onclick="updateFileParam('${item.id}','group',${g})" title="${g === 0 ? 'ללא מיזוג' : 'שילוב ' + g}">${g === 0 ? '−' : g}</button>`).join('');
-}
-
-// אפשרויות ההדפסה/עיצוב של הקובץ - צ'יפים שטוחים וגלויים (לא תפריט-בתוך-תפריט),
-// אותם מפתחות בדיוק שמופיעים בפאנל הקבוצה ובעורך הסגנונות.
-function getOptionChips(item) {
-    const logoVal = item.addLogo === true || item.addLogo === '1' ? '1' : (item.addLogo === '2' ? '2' : '');
-    let html = '<div class="opt-chips">';
-    if (item.canConvert) html += chip(item.id, 'convertToPdf', item.convertToPdf, 'המר ל-PDF');
-    html += chip(item.id, 'addBsd', item.addBsd, 'בס"ד');
-    html += chip(item.id, 'addPageNumbers', item.addPageNumbers, 'מספור');
-    html += chip(item.id, 'reverseLastPage', item.reverseLastPage, 'הפוך דף אחרון');
-    html += chip(item.id, 'addArrows', item.addArrows, '9 בעמוד + חיצים');
-    html += chip(item.id, 'duplicateTwoUp', item.duplicateTwoUp, '2 משוכפל');
-    html += chip(item.id, 'addEvenBlankPage', item.addEvenBlankPage, 'דף ריק זוגי');
-    html += chip(item.id, 'marginCut', item.marginCut, 'חיתוך שוליים');
-    html += '</div>';
-    html += `<div class="file-quick">
-        <div><label>לוגו</label><select class="select" onchange="updateFileParam('${item.id}', 'addLogo', this.value)">
-            <option value="" ${logoVal === '' ? 'selected' : ''}>ללא</option>
-            <option value="1" ${logoVal === '1' ? 'selected' : ''}>לוגו 1</option>
-            <option value="2" ${logoVal === '2' ? 'selected' : ''}>לוגו 2</option>
-        </select></div>
-        <div><label>מרובים בעמוד</label><select class="select" onchange="updateFileParam('${item.id}', 'multiUpMode', this.value)">
-            <option value="" ${!item.multiUpMode ? 'selected' : ''}>ללא</option>
-            <option value="4" ${item.multiUpMode === '4' ? 'selected' : ''}>4 בעמוד</option>
-            <option value="4_dup" ${item.multiUpMode === '4_dup' ? 'selected' : ''}>4 (משוכפל)</option>
-            <option value="9" ${item.multiUpMode === '9' ? 'selected' : ''}>9 בעמוד</option>
-            <option value="9_dup" ${item.multiUpMode === '9_dup' ? 'selected' : ''}>9 (משוכפל)</option>
-            <option value="16" ${item.multiUpMode === '16' ? 'selected' : ''}>16 בעמוד</option>
-            <option value="16_dup" ${item.multiUpMode === '16_dup' ? 'selected' : ''}>16 (משוכפל)</option>
-        </select></div>
-    </div>`;
-    return html;
-}
-function chip(id, key, checked, label) {
-    return `<label class="opt-chip"><input type="checkbox" ${checked ? 'checked' : ''} onchange="updateFileParam('${id}', '${key}', this.checked)"><span>${label}</span></label>`;
 }
 
 function getLargeFileOptions(item, isLarge) {
