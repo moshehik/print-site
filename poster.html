@@ -7,8 +7,9 @@
 
 <link rel="stylesheet" href="css/design-system.css">
 
-<!-- שגיאות משותפות (toast + כפתור העתקה + לוג מתמיד) - נטען מוקדם ככל
-     האפשר כדי לתפוס גם שגיאות מוקדמות. -->
+<!-- מעטפת משותפת (sidebar/topbar/מצב כהה) + שגיאות משותפות (toast +
+     כפתור העתקה + לוג מתמיד) - נטענים מוקדם ככל האפשר. -->
+<script src="js/shell.js"></script>
 <script src="js/errors.js"></script>
 
 <!-- Vendored locally (pdf.js 3.11.174 + jsPDF 2.5.1 — same versions the
@@ -17,16 +18,10 @@
 <script src="libs/jspdf.umd.min.js"></script>
 
 <style>
-  .site-tabbar{ max-width:1280px; margin:0 auto; padding:14px 24px 0; }
-  .site-tabbar .tabs{ margin-bottom:0; }
   /* ---- page-local styling. Layout/spacing only — colors come from the
      design-system tokens (var(--...)), nothing new is invented here. ---- */
   body{ padding:0; }
-  .pt-page{ max-width:1280px; margin:0 auto; padding:28px 24px 60px; }
-  .pt-head{ display:flex; align-items:center; gap:12px; margin-bottom:22px; }
-  .pt-head .brand-mark{ width:40px; height:40px; }
-  .pt-head h1{ font-size:20px; }
-  .pt-head p{ margin:2px 0 0; color:var(--text-2); font-size:13px; }
+  .pt-page{ max-width:1280px; margin:0 auto; }
 
   .pt-shell{ display:grid; grid-template-columns:350px 1fr; gap:20px; align-items:start; }
   @media (max-width:860px){ .pt-shell{ grid-template-columns:1fr; } }
@@ -68,34 +63,51 @@
 </head>
 <body>
 
-<div class="site-tabbar">
-  <div class="tabs">
-    <a href="app/index.html" class="tab">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-      שליחה להדפסה
-    </a>
-    <a href="poster.html" class="tab active">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
-      פוסטרים ופריסה
-    </a>
-    <a href="app/history.html" class="tab">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-      היסטוריה
-    </a>
-  </div>
-</div>
+<div class="app-shell">
 
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg class="icon" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18h12v3H6zM6 14h12M4 9h16a2 2 0 0 1 2 2v6h-4v-4H6v4H2v-6a2 2 0 0 1 2-2z"/></svg></div>
+      <div>
+        <div class="brand-text">מערכת הדפסה</div>
+        <div class="brand-sub">שליחה · פוסטרים · היסטוריה</div>
+      </div>
+    </div>
+    <nav class="nav-group">
+      <div class="nav-group-label">כלים</div>
+      <a class="nav-link" href="app/index.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        <span class="nav-label">שליחה להדפסה</span>
+      </a>
+      <a class="nav-link active" href="poster.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+        <span class="nav-label">פוסטרים ופריסה</span>
+      </a>
+      <a class="nav-link" href="app/history.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        <span class="nav-label">היסטוריה</span>
+      </a>
+    </nav>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <button type="button" class="icon-btn menu-toggle" id="menuToggle" title="תפריט">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div>
+        <div class="topbar-title">מערכת פריסה מתקדמת</div>
+        <div class="crumb">פיצול קבצים וסידור מרובה בעמוד אחד</div>
+      </div>
+      <span style="flex:1"></span>
+      <button type="button" class="icon-btn" id="themeToggle" title="מצב כהה/בהיר">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+
+    <div class="content">
 <div class="pt-page">
-
-  <div class="pt-head">
-    <div class="brand-mark">
-      <svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
-    </div>
-    <div>
-      <h1>מערכת פריסה מתקדמת</h1>
-      <p>פיצול קבצים וסידור מרובה בעמוד אחד</p>
-    </div>
-  </div>
 
   <div class="pt-shell">
 
@@ -200,6 +212,9 @@
 
   </div>
 </div>
+    </div><!-- /.content -->
+  </div><!-- /.main -->
+</div><!-- /.app-shell -->
 
 <!-- Loader overlay -->
 <div class="pt-overlay" id="loader">

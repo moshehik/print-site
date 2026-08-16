@@ -7,9 +7,7 @@
 <link rel="stylesheet" href="design-system.css">
 <style>
   .hidden{ display:none !important; }
-  .site-tabbar{ max-width:1280px; margin:0 auto; padding:14px 20px 0; }
-  .site-tabbar .tabs{ margin-bottom:0; }
-  .page-wrap{ max-width:1080px; margin:0 auto; padding:26px 20px 80px; }
+  .page-wrap{ max-width:1080px; margin:0 auto; }
   .recipients-cell{ max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .error-row{ display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:var(--radius-md); border:1px solid var(--border); background:var(--surface); margin-bottom:8px; }
   .error-row .error-time{ font-size:11px; color:var(--text-3); white-space:nowrap; }
@@ -18,45 +16,69 @@
   .error-row .err-copy-btn{ position:static !important; transform:none !important; opacity:1 !important; }
 </style>
 
-<!-- שגיאות משותפות (toast + כפתור העתקה + לוג מתמיד) - אותו מודול שנטען
-     בכל עמודי print-site; כאן גם מציגים את הלוג המלא (getErrorLog). -->
+<!-- מעטפת משותפת (sidebar/topbar/מצב כהה) + שגיאות משותפות - אותם
+     מודולים שנטענים בכל עמודי print-site; כאן גם מציגים את הלוג המלא
+     (getErrorLog). -->
+<script src="../js/shell.js"></script>
 <script src="../js/errors.js"></script>
 </head>
 <body>
 
-<div class="site-tabbar">
-  <div class="tabs">
-    <a href="index.html" class="tab">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-      שליחה להדפסה
-    </a>
-    <a href="../poster.html" class="tab">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
-      פוסטרים ופריסה
-    </a>
-    <a href="history.html" class="tab active">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-      היסטוריה
-    </a>
-  </div>
-</div>
+<div class="app-shell">
 
-<div class="page-wrap">
-
-  <div class="page-head">
-    <div>
-      <h1>היסטוריית שליחות</h1>
-      <div class="page-desc">כל השליחות שבוצעו מהמחשב הזה (נשמר בדפדפן בלבד)</div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg class="icon" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18h12v3H6zM6 14h12M4 9h16a2 2 0 0 1 2 2v6h-4v-4H6v4H2v-6a2 2 0 0 1 2-2z"/></svg></div>
+      <div>
+        <div class="brand-text">מערכת הדפסה</div>
+        <div class="brand-sub">שליחה · פוסטרים · היסטוריה</div>
+      </div>
     </div>
-    <div class="page-actions">
-      <button type="button" class="btn btn-danger-ghost" id="clearHistoryBtn">
-        <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg>
-        נקה היסטוריה
+    <nav class="nav-group">
+      <div class="nav-group-label">כלים</div>
+      <a class="nav-link" href="index.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        <span class="nav-label">שליחה להדפסה</span>
+      </a>
+      <a class="nav-link" href="../poster.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+        <span class="nav-label">פוסטרים ופריסה</span>
+      </a>
+      <a class="nav-link active" href="history.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        <span class="nav-label">היסטוריה</span>
+      </a>
+    </nav>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <button type="button" class="icon-btn menu-toggle" id="menuToggle" title="תפריט">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div>
+        <div class="topbar-title">היסטוריית שליחות</div>
+        <div class="crumb">כל השליחות שבוצעו מהמחשב הזה (נשמר בדפדפן בלבד)</div>
+      </div>
+      <span style="flex:1"></span>
+      <button type="button" class="icon-btn" id="themeToggle" title="מצב כהה/בהיר">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
     </div>
+
+    <div class="content">
+<div class="page-wrap">
+
+  <div class="toolbar">
+    <span class="spacer"></span>
+    <button type="button" class="btn btn-danger-ghost" id="clearHistoryBtn">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg>
+      נקה היסטוריה
+    </button>
   </div>
 
-  <div class="tabs" id="historyTabs" style="margin-top:22px;">
+  <div class="tabs" id="historyTabs">
     <div class="tab active" data-tab="sends">שליחות</div>
     <div class="tab" data-tab="errors">שגיאות אחרונות</div>
   </div>
@@ -92,6 +114,9 @@
   </div>
 
 </div>
+    </div><!-- /.content -->
+  </div><!-- /.main -->
+</div><!-- /.app-shell -->
 
 <!-- ---- Details modal ---- -->
 <div id="detailsModal" class="modal-backdrop-wrap hidden" style="position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(20,14,10,.5); z-index:1000;">

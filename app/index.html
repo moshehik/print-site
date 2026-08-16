@@ -7,13 +7,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="design-system.css">
 <link rel="stylesheet" href="app.css">
-<style>
-  .site-tabbar{ max-width:1280px; margin:0 auto; padding:14px 20px 0; }
-  .site-tabbar .tabs{ margin-bottom:0; }
-</style>
-
-<!-- שגיאות משותפות (toast + כפתור העתקה + לוג מתמיד) - נטען מוקדם ככל
-     האפשר כדי לתפוס גם שגיאות מוקדמות. -->
+<!-- מעטפת משותפת (sidebar/topbar/מצב כהה) + שגיאות משותפות (toast +
+     כפתור העתקה + לוג מתמיד) - נטענים מוקדם ככל האפשר. -->
+<script src="../js/shell.js"></script>
 <script src="../js/errors.js"></script>
 
 <!-- PDF / image engine libs (shared with the rest of the site) -->
@@ -28,23 +24,6 @@
 <script src="../js/logo-blur.js"></script>
 </head>
 <body>
-
-<div class="site-tabbar">
-  <div class="tabs">
-    <a href="index.html" class="tab active">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-      שליחה להדפסה
-    </a>
-    <a href="../poster.html" class="tab">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
-      פוסטרים ופריסה
-    </a>
-    <a href="history.html" class="tab">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-      היסטוריה
-    </a>
-  </div>
-</div>
 
 <div class="bsd-icon" id="bsdContainer" style="position:fixed; top:16px; inset-inline-end:20px; z-index:1000; opacity:.85; pointer-events:none; display:none; font-size:1.05rem; font-weight:800; color:var(--primary-solid);">בס"ד</div>
 <img class="top-logo" id="mainLogo" style="position:fixed; top:0; left:50%; transform:translateX(-50%); height:60px; width:auto; max-width:190px; z-index:1000; background:#fff; padding:5px 18px; border-radius:0 0 12px 12px; box-shadow:var(--shadow-md); display:none; object-fit:contain;">
@@ -339,16 +318,52 @@
   </div>
 </div>
 
-<!-- ============== MAIN PAGE ============== -->
-<div class="page-wrap">
+<!-- ============== APP SHELL ============== -->
+<div class="app-shell">
 
-  <div class="brand-row">
-    <div class="brand-mark"><i class="fas fa-print icon" style="width:22px;height:22px;font-size:20px;display:flex;align-items:center;justify-content:center;"></i></div>
-    <div>
-      <h1>מערכת שליחה להדפסה</h1>
-      <div class="page-desc">העלאת קבצים, תיוג הוראות הדפסה ושליחה במייל</div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg class="icon" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18h12v3H6zM6 14h12M4 9h16a2 2 0 0 1 2 2v6h-4v-4H6v4H2v-6a2 2 0 0 1 2-2z"/></svg></div>
+      <div>
+        <div class="brand-text">מערכת הדפסה</div>
+        <div class="brand-sub">שליחה · פוסטרים · היסטוריה</div>
+      </div>
     </div>
-  </div>
+    <nav class="nav-group">
+      <div class="nav-group-label">כלים</div>
+      <a class="nav-link active" href="index.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        <span class="nav-label">שליחה להדפסה</span>
+      </a>
+      <a class="nav-link" href="../poster.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+        <span class="nav-label">פוסטרים ופריסה</span>
+      </a>
+      <a class="nav-link" href="history.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        <span class="nav-label">היסטוריה</span>
+      </a>
+    </nav>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <button type="button" class="icon-btn menu-toggle" id="menuToggle" title="תפריט">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div>
+        <div class="topbar-title">מערכת שליחה להדפסה</div>
+        <div class="crumb">העלאת קבצים, תיוג הוראות הדפסה ושליחה במייל</div>
+      </div>
+      <span style="flex:1"></span>
+      <button type="button" class="icon-btn" id="themeToggle" title="מצב כהה/בהיר">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+
+    <div class="content">
+<div class="page-wrap" style="padding-top:0;">
 
   <div class="top-toolbar">
     <div class="view-switcher">
@@ -415,6 +430,9 @@
     <i class="fas fa-paper-plane"></i> שלח הכל
   </button>
 </div>
+    </div><!-- /.content -->
+  </div><!-- /.main -->
+</div><!-- /.app-shell -->
 
 <canvas id="bsdCanvas" width="100" height="50" class="hidden"></canvas>
 
