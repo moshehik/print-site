@@ -130,7 +130,7 @@ body{ background:var(--bg); }
 .file-modified-dot.show{ display:inline-block; }
 
 /* status chips under the name — quantity · format · style · group · options · note */
-.file-chips{ display:flex; flex-wrap:nowrap; gap:4px; min-width:0; overflow-x:auto; overflow-y:hidden; margin-inline-start:auto; scrollbar-width:none; padding-bottom:1px; }
+.file-chips{ display:flex; flex-wrap:nowrap; gap:4px; min-width:0; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; padding-bottom:1px; }
 .file-chips::-webkit-scrollbar{ display:none; }
 .file-chips .badge{ font-size:10.5px; padding:1px 7px; white-space:nowrap; flex:0 0 auto; }
 
@@ -154,7 +154,7 @@ body{ background:var(--bg); }
 .btn-edit-group:hover{ color:var(--primary-solid); background:var(--primary-tint); }
 .btn-edit-group .icon{ width:13px; height:13px; }
 .file-toolbar .tb-secondary.active-toggle{ color:var(--accent-solid); background:var(--accent-tint); }
-.file-toolbar .tb-bsd .icon{ width:22px; height:22px; }
+.file-toolbar .tb-bsd{ height:30px; padding:0 8px; font-size:11px; font-weight:800; letter-spacing:.02em; line-height:1; }
 .file-toolbar .tb-logo{ position:relative; }
 .file-toolbar .tb-logo-num{ position:absolute; top:-3px; inset-inline-end:-3px; min-width:14px; height:14px; padding:0 3px; border-radius:var(--radius-full); background:var(--primary-solid); color:var(--text-on-primary); font-size:9.5px; font-weight:800; line-height:14px; text-align:center; border:1.5px solid var(--surface); }
 .file-toolbar .tb-danger{ color:var(--danger); }
