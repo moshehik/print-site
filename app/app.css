@@ -124,6 +124,7 @@ body{ background:var(--bg); }
 .file-toolbar .tb-danger{ color:var(--danger); }
 .file-toolbar .tb-danger:hover{ background:var(--danger-tint); }
 .file-toolbar .tb-sep{ width:1px; height:18px; background:var(--border); margin:0 3px; }
+.file-toolbar .tb-spacer{ flex:1; }
 
 /* per-file style select + "more" toggle */
 .style-select-row .select{ padding:7px 9px; font-size:12.5px; }

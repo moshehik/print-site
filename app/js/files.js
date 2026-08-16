@@ -257,6 +257,7 @@ function renderFileCard(item) {
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm${on(item.note)}" data-pop="note" onclick="openCardMenu(this,'${item.id}','note')" title="הערה">${SVG.note}</button>
                 <span class="tb-sep"></span>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm" onclick="downloadSingleItem('${item.id}')" title="הורדת קובץ מעובד">${SVG.down}</button>
+                <span class="tb-spacer"></span>
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm tb-danger" onclick="removeFile('${item.id}')" title="הסר">${SVG.trash}</button>
             </div>
         </div>
