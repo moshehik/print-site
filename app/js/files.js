@@ -239,9 +239,9 @@ function renderFileCard(item) {
             <div class="file-name" title="${escAttr(item.fileObj.name)}">${escHtml(item.fileObj.name)}</div>
             <div class="file-meta ${isLarge ? 'large' : ''}">
                 <span class="file-modified-dot ${item.isModified ? 'show' : ''}" title="הוגדר"></span>
-                <span>${meta}</span>
+                <span class="file-meta-text">${meta}</span>
+                <span class="file-chips">${chips}</span>
             </div>
-            <div class="file-chips">${chips}</div>
             ${getLargeFileOptions(item, isLarge)}
             <div class="file-toolbar">
                 <button type="button" class="btn btn-secondary btn-icon-only btn-sm" data-pop="qty"    onclick="openCardMenu(this,'${item.id}','qty')"    title="כמות">${SVG.qty}</button>

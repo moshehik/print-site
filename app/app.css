@@ -92,14 +92,16 @@ body{ background:var(--bg); }
 .file-body{ padding:12px 14px 12px; display:flex; flex-direction:column; gap:6px; }
 .file-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
 .file-name{ font-weight:700; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
-.file-meta{ font-size:11.5px; color:var(--text-3); display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.file-meta{ font-size:11.5px; color:var(--text-3); display:flex; gap:6px; align-items:center; flex-wrap:nowrap; min-width:0; }
+.file-meta-text{ white-space:nowrap; flex:0 0 auto; }
 .file-meta.large{ color:var(--danger); font-weight:700; }
 .file-modified-dot{ width:7px; height:7px; border-radius:50%; background:var(--success-solid); display:none; }
 .file-modified-dot.show{ display:inline-block; }
 
 /* status chips under the name — quantity · format · style · group · options · note */
-.file-chips{ display:flex; flex-wrap:wrap; gap:4px; min-height:22px; }
-.file-chips .badge{ font-size:11px; padding:2px 8px; }
+.file-chips{ display:flex; flex-wrap:nowrap; gap:4px; min-width:0; overflow:hidden; margin-inline-start:auto; }
+.file-chips .badge{ font-size:10.5px; padding:1px 7px; white-space:nowrap; flex:0 0 auto; }
+.file-chips .badge:last-child{ overflow:hidden; text-overflow:ellipsis; flex:0 1 auto; display:inline-block; max-width:100%; }
 
 /* single icon toolbar — every setting opens a floating popover from its icon */
 .file-toolbar{ display:flex; align-items:center; gap:2px; flex-wrap:wrap; padding-top:10px; border-top:1px solid var(--border); margin-top:2px; }
