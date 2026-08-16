@@ -217,16 +217,23 @@ function renderFileCard(item) {
     const on = (v) => v ? ' active-toggle' : '';
     const activeOpts = countActiveOptions(item);
 
-    // סיכום המצב הנוכחי - תגים קטנים מתחת לשם (כמות · פורמט · סגנון), כדי
-    // שהמידע נראה גם בלי לפתוח שום תפריט
+    // תג לכל הגדרה פעילה - רואים את כל מצב הקובץ בלי לפתוח שום תפריט
+    const OPT_LABELS = { convertToPdf: 'PDF', addBsd: 'בס"ד', addPageNumbers: 'מספור', reverseLastPage: 'הפוך אחרון', addArrows: '9+חיצים', duplicateTwoUp: '2 משוכפל', addEvenBlankPage: 'דף ריק', marginCut: 'חיתוך שוליים' };
+    const MULTI_LABELS = { '4': '4 בעמוד', '4_dup': '4 משוכפל', '9': '9 בעמוד', '9_dup': '9 משוכפל', '16': '16 בעמוד', '16_dup': '16 משוכפל' };
+    const logoVal = item.addLogo === true || item.addLogo === '1' ? '1' : (item.addLogo === '2' ? '2' : '');
+    const badge = (cls, text, title) => `<span class="badge ${cls}" title="${escAttr(title || text)}">${escHtml(text)}</span>`;
     const chips = [
-        `<span class="badge badge-neutral" title="כמות">${escHtml(String(item.quantity || ''))}</span>`,
-        `<span class="badge badge-neutral" title="פורמט">${escHtml(item.format || '')}</span>`,
-        item.appliedStyleName ? `<span class="badge badge-primary" title="סגנון">${escHtml(item.appliedStyleName)}</span>` : '',
-        item.group > 0 ? `<span class="badge badge-info" title="קבוצת מיזוג">שילוב ${item.group}</span>` : '',
-        activeOpts ? `<span class="badge badge-neutral" title="אפשרויות פעילות">${activeOpts} אפשרויות</span>` : '',
-        item.note ? `<span class="badge badge-warning" title="${escAttr(item.note)}">הערה</span>` : '',
-        item.isPlusSelected ? `<span class="badge badge-warning" title="נשלח גם לנמענים המשניים">⊕ משני</span>` : '',
+        badge('badge-neutral', String(item.quantity || ''), 'כמות'),
+        badge('badge-neutral', item.format || '', 'פורמט'),
+        item.appliedStyleName ? badge('badge-primary', item.appliedStyleName, 'סגנון') : '',
+        item.group > 0 ? badge('badge-info', `שילוב ${item.group}`, 'קבוצת מיזוג') : '',
+        item.isPlusSelected ? badge('badge-warning', '⊕ משני', 'נשלח גם לנמענים המשניים') : '',
+        ...CARD_OPTION_KEYS.filter(k => item[k]).map(k => badge('badge-neutral', OPT_LABELS[k])),
+        logoVal ? badge('badge-neutral', `לוגו ${logoVal}`) : '',
+        item.multiUpMode ? badge('badge-neutral', MULTI_LABELS[item.multiUpMode] || item.multiUpMode, 'מרובים בעמוד') : '',
+        item.pageSelection ? badge('badge-info', `עמ׳ ${item.pageSelection}`, 'בחירת עמודים') : '',
+        item.blurLogo ? badge('badge-neutral', 'טשטוש לוגו') : '',
+        item.note ? badge('badge-warning', 'הערה', item.note) : '',
     ].filter(Boolean).join('');
 
     return `
