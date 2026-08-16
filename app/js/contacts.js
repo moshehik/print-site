@@ -93,8 +93,8 @@ function addContactManual() {
     renderContactsDatalist();
     renderEmailMultiselects();
 }
-function deleteContact(idx) {
-    if (!confirm('למחוק איש קשר זה?')) return;
+async function deleteContact(idx) {
+    if (!await askConfirm({ title: 'למחוק איש קשר?', message: 'איש הקשר יוסר מהרשימה. אפשר להוסיף אותו שוב בכל עת.', danger: true })) return;
     const contacts = getSavedContacts();
     contacts.splice(idx, 1);
     saveContactsToStorage(contacts);
@@ -133,18 +133,48 @@ function renderEmailMultiselect(containerId, type) {
     if (!container) return;
     const dropdownId = `dropdown_${containerId}`;
     const wasOpen = document.getElementById(dropdownId) ? document.getElementById(dropdownId).classList.contains('show') : false;
+    const manualId = type === 'main' ? 'mainEmailManual' : 'secondaryEmailManual';
+    const prevManual = document.getElementById(manualId) ? document.getElementById(manualId).value : '';
 
-    const selectedNames = contacts.filter(c => selected.includes(c.email)).map(c => c.name);
-    const displayText = selectedNames.length ? selectedNames.join(', ') : 'בחר אנשי קשר';
-    let html = `<div class="multiselect-btn" onclick="toggleEmailMultiselect('${containerId}')"><span class="${selectedNames.length ? '' : 'placeholder'}">${escHtml(displayText)}</span><svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>`;
+    // תווית הכפתור: שמות אנשי קשר שנבחרו + כתובות ידניות (שאינן ברשימה)
+    const knownEmails = new Set(contacts.map(c => c.email));
+    const labels = selected.map(e => { const c = contacts.find(x => x.email === e); return c ? c.name : e; });
+    const displayText = labels.length ? labels.join(', ') : 'בחר אנשי קשר או הקלד מייל…';
+
+    let html = `<div class="multiselect-btn" onclick="toggleEmailMultiselect('${containerId}')"><span class="${labels.length ? '' : 'placeholder'}">${escHtml(displayText)}</span><svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>`;
     html += `<div id="${dropdownId}" class="multiselect-content ${wasOpen ? 'show' : ''}">`;
     if (contacts.length === 0) html += `<div class="manager-list-empty">אין אנשי קשר שמורים</div>`;
     contacts.forEach(c => {
         const checked = selected.includes(c.email) ? 'checked' : '';
-        html += `<label class="multiselect-item"><input type="checkbox" value="${escAttr(c.email)}" ${checked} onchange="onEmailMultiselectChange('${containerId}', '${type}', this)"><span>${escHtml(c.name)} &lt;${escHtml(c.email)}&gt;</span></label>`;
+        html += `<label class="multiselect-item"><input type="checkbox" value="${escAttr(c.email)}" ${checked} onchange="onEmailMultiselectChange('${containerId}', '${type}', this)"><span>${escHtml(c.name)} <span class="hint">&lt;${escHtml(c.email)}&gt;</span></span></label>`;
     });
+    // כתובות ידניות שכבר נוספו (לא באנשי הקשר) - עם אפשרות הסרה
+    selected.filter(e => !knownEmails.has(e)).forEach(e => {
+        html += `<label class="multiselect-item"><input type="checkbox" value="${escAttr(e)}" checked onchange="onEmailMultiselectChange('${containerId}', '${type}', this)"><span>${escHtml(e)} <span class="badge badge-neutral" style="margin-inline-start:6px;">ידני</span></span></label>`;
+    });
+    // שורת הקלדה ידנית - חלק מהרשימה הנגללת, לא שדה נפרד בטופס
+    html += `<div class="multiselect-manual" onclick="event.stopPropagation()">
+        <input type="text" id="${manualId}" class="input" placeholder="הקלד מייל ולחץ Enter…" list="contacts-datalist" dir="ltr" value="${escAttr(prevManual)}"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();addManualEmail('${containerId}','${type}');}">
+        <button type="button" class="btn btn-primary btn-sm btn-icon-only" title="הוסף" onclick="addManualEmail('${containerId}','${type}')"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    </div>`;
     html += `</div>`;
     container.innerHTML = html;
+}
+// מוסיף כתובת שהוקלדה ידנית לרשימת הנבחרים (נשמר יחד עם אנשי הקשר המסומנים)
+function addManualEmail(containerId, type) {
+    const input = document.getElementById(type === 'main' ? 'mainEmailManual' : 'secondaryEmailManual');
+    if (!input) return;
+    const email = input.value.trim();
+    if (!email) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('כתובת מייל לא תקינה: ' + email); return; }
+    const storageKey = type === 'main' ? 'selectedMainEmails' : 'selectedSecondaryEmails';
+    const arr = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    if (!arr.includes(email)) arr.push(email);
+    localStorage.setItem(storageKey, JSON.stringify(arr));
+    input.value = '';
+    renderEmailMultiselects();
+    if (typeof updateDestSummary === 'function') updateDestSummary();
 }
 function toggleEmailMultiselect(containerId) {
     document.querySelectorAll('.multiselect-content.show').forEach(d => { if (d.id !== `dropdown_${containerId}`) d.classList.remove('show'); });
@@ -163,6 +193,7 @@ function onEmailMultiselectChange(containerId, type, el) {
     }
     localStorage.setItem(storageKey, JSON.stringify(arr));
     renderEmailMultiselects();
+    if (typeof updateDestSummary === 'function') updateDestSummary();
 }
 function getSelectedMainEmails() {
     let arr = getSelectedMainEmailsRaw();

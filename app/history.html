@@ -27,6 +27,7 @@
      (getErrorLog). -->
 <script src="../js/shell.js"></script>
 <script src="../js/errors.js"></script>
+<script src="../js/dialogs.js"></script>
 <script src="../js/hebrew-date.js"></script>
 </head>
 <body>
@@ -243,8 +244,8 @@ function closeModal() { document.getElementById('detailsModal').style.display = 
 document.getElementById('closeModalBtn').addEventListener('click', closeModal);
 document.getElementById('detailsModal').addEventListener('click', (e) => { if (e.target.id === 'detailsModal') closeModal(); });
 
-document.getElementById('clearHistoryBtn').addEventListener('click', () => {
-  if (confirm('האם אתה בטוח שברצונך למחוק את כל ההיסטוריה? לא ניתן לשחזר פעולה זו.')) {
+document.getElementById('clearHistoryBtn').addEventListener('click', async () => {
+  if (await askConfirm({ title: 'למחוק את כל ההיסטוריה?', message: 'כל רשומות השליחה והלוגים יימחקו לצמיתות. לא ניתן לשחזר פעולה זו.', danger: true, confirmText: 'מחק הכל' })) {
     localStorage.removeItem('fullSendHistory');
     historyData = [];
     renderTable();
@@ -330,8 +331,8 @@ function renderErrors() {
   });
 }
 
-document.getElementById('clearErrorsBtn').addEventListener('click', () => {
-  if (confirm('לנקות את כל רשימת השגיאות השמורות?')) {
+document.getElementById('clearErrorsBtn').addEventListener('click', async () => {
+  if (await askConfirm({ title: 'לנקות את רשימת השגיאות?', message: 'כל השגיאות השמורות יימחקו.', danger: true, confirmText: 'נקה' })) {
     window.clearErrorLog();
     renderErrors();
   }

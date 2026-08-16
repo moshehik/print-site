@@ -184,7 +184,7 @@ function savePageOrder() {
     customPageOrders[currentMergeGroup] = pageSorterState.finalOrder.map(p =>
         p.type === 'blank' ? { type: 'blank' } : { type: 'page', fileId: p.fileId, pageIndex: p.pageIndex });
     closeModal('pageSorterModal');
-    showError('סדר הדפים נשמר. הוא ייושם בעת השליחה.');
+    notify('סדר הדפים נשמר. הוא ייושם בעת השליחה.', 'success');
 }
 
 async function downloadSortedFile() {

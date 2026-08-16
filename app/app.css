@@ -26,19 +26,23 @@ body{ background:var(--bg); }
 .dropdown-item:hover{ background:var(--surface-alt); }
 .dropdown-item .icon{ width:15px; height:15px; color:var(--text-3); flex:0 0 auto; }
 
-/* ---- step 1: destination — one compact row (recipients / secondary / subject) ---- */
-.send-dest{ padding:14px 18px; }
-.send-dest-row{ display:grid; grid-template-columns:auto 1.4fr 1.2fr 1fr auto; gap:14px; align-items:end; }
-.send-dest-row .step-num{ margin-bottom:8px; }
-.send-dest-row .field{ margin-bottom:0; }
+/* ---- step 1: destination — "customer card" pattern: summary line + pencil; edit row on click ---- */
+.send-dest .card-title-row h3{ font-size:14.5px; }
+.send-dest .card-title-row .step-num{ width:24px; height:24px; font-size:11.5px; }
+.dest-summary{ color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:6px; }
+/* edit row: all controls bottom-aligned (align-items:end) so inputs/buttons share one baseline */
+.send-dest-row{ display:grid; grid-template-columns:1.4fr 1.2fr 1fr auto; gap:12px; align-items:end; }
+.send-dest-row .field{ margin-bottom:0; min-width:0; }
 .send-dest-row .field label{ font-size:11.5px; }
-.send-dest-row .btn-icon-only{ margin-bottom:0; }
-@media (max-width:1100px){ .send-dest-row{ grid-template-columns:auto 1fr 1fr; } .send-dest-row .field:nth-child(4){ grid-column:2 / -1; } .send-dest-row .btn-icon-only{ grid-column:1; grid-row:1; } }
-@media (max-width:700px){ .send-dest-row{ grid-template-columns:1fr; } .send-dest-row .step-num, .send-dest-row .btn-icon-only{ display:none; } .send-dest-row .field:nth-child(4){ grid-column:auto; } }
+.send-dest-row .multiselect-btn, .send-dest-row .input, .send-dest-row .btn-icon-only{ height:41px; }
+@media (max-width:1000px){ .send-dest-row{ grid-template-columns:1fr 1fr; } .send-dest-row .field:nth-child(3){ grid-column:1 / -1; } .send-dest-row .btn-icon-only{ justify-self:end; } }
+@media (max-width:640px){ .send-dest-row{ grid-template-columns:1fr; } }
 
-.recipient-row{ display:flex; gap:6px; align-items:flex-start; }
-.recipient-row .multiselect{ flex:1 1 55%; min-width:0; }
-.recipient-row .input{ flex:1 1 45%; min-width:0; }
+/* manual-email row lives INSIDE the contacts dropdown */
+.multiselect-manual{ display:flex; gap:6px; padding:8px; margin-top:4px; border-top:1px solid var(--border); background:var(--surface-alt); border-radius:0 0 var(--radius-md) var(--radius-md); position:sticky; bottom:0; }
+.multiselect-manual .input{ flex:1; min-width:0; height:34px; font-size:12.5px; }
+.multiselect-manual .btn-icon-only{ width:34px; height:34px; }
+.multiselect-content{ padding-bottom:0; }
 
 /* ---- option chips: flat, visible, one-click toggles (file card + group panel) ---- */
 .opt-chips{ display:flex; flex-wrap:wrap; gap:6px; }

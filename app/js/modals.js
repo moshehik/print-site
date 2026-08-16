@@ -25,8 +25,8 @@ function addFormatManual() {
     input.value = ''; check.checked = false;
     renderManagerList();
 }
-function deleteFormat(name) {
-    if (!confirm(`למחוק את "${name}" מהרשימה?`)) return;
+async function deleteFormat(name) {
+    if (!await askConfirm({ title: 'למחוק פורמט?', message: `"${name}" יוסר מרשימת הפורמטים.`, danger: true })) return;
     saveFormatsToStorage(getStoredFormats().filter(f => f.name !== name));
     renderManagerList();
 }
@@ -47,8 +47,8 @@ function addQuantityManual() {
     input.value = '';
     renderQuantityManagerList();
 }
-function deleteQuantity(val) {
-    if (!confirm(`למחוק את הכמות "${val}"?`)) return;
+async function deleteQuantity(val) {
+    if (!await askConfirm({ title: 'למחוק כמות?', message: `"${val}" תוסר מרשימת הכמויות.`, danger: true })) return;
     saveQuantitiesToStorage(getStoredQuantities().filter(q => q !== val));
     renderQuantityManagerList();
 }
@@ -67,7 +67,7 @@ function populateStyleSourceFile() {
     sel.innerHTML = '<option value="-1">ברירת מחדל (מיתוג)</option>' + filesData.map(f => `<option value="${escAttr(f.fileObj.name)}">${escHtml(f.fileObj.name)}</option>`).join('');
     if (cur && Array.from(sel.options).some(o => o.value === cur)) sel.value = cur;
 }
-function saveCurrentAsStyle() {
+async function saveCurrentAsStyle() {
     const nameInput = document.getElementById('newStyleNameInput');
     const name = (nameInput.value || '').trim();
     if (!name) { showError('הכנס שם לסגנון'); return; }
@@ -82,7 +82,7 @@ function saveCurrentAsStyle() {
     const styles = getStoredStyles();
     const idx = styles.findIndex(s => s.name === name);
     if (idx > -1) {
-        if (!confirm('סגנון בשם זה קיים. להחליף?')) return;
+        if (!await askConfirm({ title: 'סגנון בשם זה כבר קיים', message: 'להחליף את הסגנון הקיים בהגדרות החדשות?', confirmText: 'החלף' })) return;
         styles[idx] = { name, ...styleData };
     } else {
         styles.push({ name, ...styleData });
@@ -105,8 +105,8 @@ function renderStyleList() {
             </div>
         </div>`).join('');
 }
-function deleteStyle(name) {
-    if (!confirm(`למחוק את הסגנון "${name}"?`)) return;
+async function deleteStyle(name) {
+    if (!await askConfirm({ title: 'למחוק סגנון?', message: `הסגנון "${name}" יימחק לצמיתות.`, danger: true })) return;
     saveStylesToStorage(getStoredStyles().filter(s => s.name !== name));
     renderStyleList();
     updateStyleSelect();

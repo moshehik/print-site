@@ -553,7 +553,7 @@ async function requestLogDirectoryAccess() {
         logDirectoryHandle = await window.showDirectoryPicker();
         const db = await openLogDb();
         await db.put('logDir', 'handle', logDirectoryHandle);
-        showError('תיקיית הלוגים הוגדרה בהצלחה!');
+        notify('תיקיית הלוגים הוגדרה בהצלחה!', 'success');
     } catch (err) {
         if (err.name !== 'AbortError') { console.error(err); showError('שגיאה: ' + err.message); }
     }

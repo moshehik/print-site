@@ -398,10 +398,10 @@ function updateStyleSelect() {
     if (row) row.classList.toggle('show', filesData.length > 0);
     if (btn) btn.disabled = !sel.value || filesData.length === 0;
 }
-function saveAsStyleFromFile(fileId) {
+async function saveAsStyleFromFile(fileId) {
     const item = filesData.find(f => f.id === fileId);
     if (!item) return;
-    const name = prompt('שם לסגנון החדש:');
+    const name = await askPrompt({ title: 'שמירה כסגנון', message: 'ההגדרות הנוכחיות של הקובץ יישמרו כסגנון לשימוש חוזר.', placeholder: 'שם הסגנון…', confirmText: 'שמור' });
     if (!name || !name.trim()) return;
     const styleData = {};
     STYLE_KEYS.forEach(k => { styleData[k] = item[k]; });
