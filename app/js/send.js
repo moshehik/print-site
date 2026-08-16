@@ -23,6 +23,37 @@ function addLog(msg, type = 'info') {
     log.prepend(div);
 }
 
+// ---- מסילת השלבים בחלון ההתקדמות (הכנה / עיבוד / העלאה / שליחה) ----
+const SEND_STEPS = ['prepare', 'process', 'upload', 'send'];
+function setSendStep(current) {
+    const idx = SEND_STEPS.indexOf(current);
+    document.querySelectorAll('.send-steps .step').forEach((el) => {
+        const i = SEND_STEPS.indexOf(el.dataset.step);
+        el.classList.toggle('done', i < idx);
+        el.classList.toggle('current', i === idx);
+    });
+}
+function setSendState(state, title) { // 'running' | 'done' | 'error'
+    document.getElementById('loaderSpinner').classList.toggle('hidden', state !== 'running');
+    document.getElementById('loaderDoneIcon').classList.toggle('hidden', state !== 'done');
+    document.getElementById('loaderErrIcon').classList.toggle('hidden', state !== 'error');
+    document.getElementById('loaderCloseBtn').classList.toggle('hidden', state === 'running');
+    document.getElementById('loaderTitle').innerText = title;
+    const hint = document.getElementById('loaderHint');
+    if (hint) hint.innerText = state === 'running' ? 'אנא המתן — אל תסגור את החלון'
+        : (state === 'done' ? 'החלון ייסגר אוטומטית' : 'ניתן להעתיק את הלוג ולפנות לתמיכה');
+    if (state === 'done') document.querySelectorAll('.send-steps .step').forEach((el) => { el.classList.add('done'); el.classList.remove('current'); });
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const closeBtn = document.getElementById('loaderCloseBtn');
+    if (closeBtn) closeBtn.addEventListener('click', () => document.getElementById('loader').classList.remove('open'));
+    const copyBtn = document.getElementById('loaderCopyBtn');
+    if (copyBtn) copyBtn.addEventListener('click', (e) => {
+        const lines = Array.from(document.getElementById('progressLog').children).map((el) => el.innerText).reverse();
+        if (window.copyErrorText) window.copyErrorText(lines.join('\n'), e.currentTarget);
+    });
+});
+
 async function callEngine(fnName, fallbackFn, ...args) {
     if (window.PdfEngine && typeof window.PdfEngine[fnName] === 'function') {
         try { return await window.PdfEngine[fnName](...args); }
@@ -338,10 +369,11 @@ async function sendFilesToEmail(targetEmail, subject, { filesToEmail, driveLinks
 // ---- the main pipeline ----
 async function processAndSend() {
     const loader = document.getElementById('loader');
-    const loaderTitle = document.getElementById('loaderTitle');
+    let sendFailed = false;
     loader.classList.add('open');
-    loaderTitle.innerText = 'מתחיל עיבוד...';
     document.getElementById('progressLog').innerHTML = '';
+    setSendState('running', 'מתחיל עיבוד...');
+    setSendStep('prepare');
 
     try {
         if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); addLog('מצב ערות מסך הופעל.', 'info'); }
@@ -366,6 +398,8 @@ async function processAndSend() {
         });
 
         const primaryAttachments = [], primaryDriveLinks = [], secondaryAttachments = [], secondaryDriveLinks = [];
+        setSendStep('process');
+        setSendState('running', 'מעבד קבצים...');
 
         for (const groupKey of Object.keys(fileGroups).sort()) {
             const filesInGroup = fileGroups[groupKey];
@@ -427,6 +461,7 @@ async function processAndSend() {
 
         for (const link of [...primaryDriveLinks, ...secondaryDriveLinks]) {
             if (!link.url) {
+                setSendStep('upload'); setSendState('running', 'מעלה לדרייב...');
                 addLog(`מעלה ${link.name} לדרייב...`, 'info');
                 link.url = await uploadToDriveServer({ name: link.name, mimeType: link.mimeType }, link.base64Data);
                 addLog(`${link.name} הועלה בהצלחה!`, 'drive');
@@ -435,6 +470,7 @@ async function processAndSend() {
         }
 
         if (mainRecipients.length > 0 && (primaryAttachments.length > 0 || primaryDriveLinks.length > 0)) {
+            setSendStep('send'); setSendState('running', 'שולח...');
             addLog(`שולח מייל ראשי ל: ${mainRecipients.join(', ')}`, 'info');
             await sendFilesToEmail(mainRecipients.join(','), subject, { filesToEmail: primaryAttachments, driveLinks: primaryDriveLinks });
             addLog('מייל ראשי נשלח!', 'success');
@@ -455,7 +491,7 @@ async function processAndSend() {
         if (wakeLock) wakeLock.release().then(() => { wakeLock = null; });
 
         addLog('הכל נשלח בהצלחה!', 'success');
-        loaderTitle.innerText = 'השליחה הסתיימה בהצלחה!';
+        setSendState('done', 'השליחה הסתיימה בהצלחה!');
 
         try {
             const logs = Array.from(document.getElementById('progressLog').children).map(el => el.innerText);
@@ -474,9 +510,11 @@ async function processAndSend() {
     } catch (err) {
         console.error('Send process failed:', err);
         addLog(`שגיאה קריטית: ${err.message}`, 'error');
-        loaderTitle.innerText = 'שגיאה...';
+        setSendState('error', 'השליחה נכשלה');
+        sendFailed = true;
     } finally {
-        setTimeout(() => { loader.classList.remove('open'); }, 5000);
+        // הצלחה - נסגר לבד; שגיאה - נשאר פתוח כדי שאפשר לקרוא/להעתיק את הלוג
+        if (!sendFailed) setTimeout(() => { loader.classList.remove('open'); }, 5000);
     }
 }
 

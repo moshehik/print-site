@@ -14,6 +14,12 @@
   .error-row .error-page{ font-size:11px; color:var(--text-3); }
   .error-row .error-msg{ flex:1; font-size:12.5px; word-break:break-word; }
   .error-row .err-copy-btn{ position:static !important; transform:none !important; opacity:1 !important; }
+  .log-lines{ background:var(--surface-alt); border:1px solid var(--border); border-radius:var(--radius-md); padding:8px 12px; max-height:260px; overflow-y:auto; font-family:Consolas,monospace; font-size:12px; direction:rtl; }
+  .log-line{ padding:3px 0; border-bottom:1px dashed var(--border); color:var(--text-2); }
+  .log-line:last-child{ border-bottom:none; }
+  .log-line.is-error{ color:var(--danger); font-weight:700; }
+  .log-line.is-success{ color:var(--success); }
+  .faq-item summary{ padding:12px 16px; font-size:13.5px; }
 </style>
 
 <!-- מעטפת משותפת (sidebar/topbar/מצב כהה) + שגיאות משותפות - אותם
@@ -21,6 +27,7 @@
      (getErrorLog). -->
 <script src="../js/shell.js"></script>
 <script src="../js/errors.js"></script>
+<script src="../js/hebrew-date.js"></script>
 </head>
 <body>
 
@@ -85,6 +92,7 @@
 
   <div class="tabs" id="historyTabs">
     <div class="tab active" data-tab="sends">שליחות</div>
+    <div class="tab" data-tab="logs">לוגים</div>
     <div class="tab" data-tab="errors">שגיאות אחרונות</div>
   </div>
 
@@ -107,6 +115,19 @@
       <svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
       <h4>אין נתוני היסטוריה</h4>
       <p>ברגע שתבצע שליחות, הן יופיעו כאן.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" data-panel="logs">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title-row">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <h3>לוגי שליחה</h3>
+        </div>
+        <span class="hint">כל הודעות התהליך שנרשמו בזמן כל שליחה</span>
+      </div>
+      <div class="card-pad" id="logsContainer"></div>
     </div>
   </div>
 
@@ -170,7 +191,8 @@ function renderTable() {
   historyData.forEach((item, index) => {
     const tr = document.createElement('tr');
     const date = new Date(item.date);
-    const dateStr = date.toLocaleDateString('he-IL') + ' ' + date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = window.formatHebrewAndGregorian ? window.formatHebrewAndGregorian(date, true)
+      : (date.toLocaleDateString('he-IL') + ' ' + date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }));
 
     const recipientsCount = (item.mainRecipients?.length || 0) + (item.secondaryRecipients?.length || 0);
     const filesCount = item.files?.length || 0;
@@ -179,7 +201,7 @@ function renderTable() {
     if (recipientsCount > 2) recipientsPreview += ` (+עוד ${recipientsCount - 2})`;
 
     tr.innerHTML = `
-      <td class="cell-muted">${escapeHtml(dateStr)}</td>
+      <td><div style="font-weight:700; font-size:12.5px;">${escapeHtml(dateStr.split(' · ')[0])}</div><div class="cell-muted" style="font-size:11.5px;">${escapeHtml(dateStr.split(' · ')[1] || '')}</div></td>
       <td class="cell-primary">${escapeHtml(item.subject) || '-'}</td>
       <td class="recipients-cell" title="${escapeHtml((item.mainRecipients || []).join(', '))}">${escapeHtml(recipientsPreview) || 'אין'}</td>
       <td><span class="badge badge-info">${filesCount} קבצים</span></td>
@@ -208,7 +230,7 @@ function showDetails(index) {
   if (!filesHtml) filesHtml = '<li>אין קבצים</li>';
 
   detailsContainer.innerHTML = `
-    <div class="field"><label>תאריך ושעה</label><div class="callout callout-info">${escapeHtml(date.toLocaleString('he-IL'))}</div></div>
+    <div class="field"><label>תאריך ושעה</label><div class="callout callout-info">${escapeHtml(window.formatHebrewAndGregorian ? window.formatHebrewAndGregorian(date, true) : date.toLocaleString('he-IL'))}</div></div>
     <div class="field"><label>נושא</label><div class="callout callout-info">${escapeHtml(item.subject) || '-'}</div></div>
     <div class="field"><label>נמענים ראשיים</label><div class="callout callout-info" style="white-space:pre-wrap;">${escapeHtml((item.mainRecipients || []).join('\n')) || 'אין'}</div></div>
     <div class="field"><label>נמענים משניים (קובץ +)</label><div class="callout callout-info" style="white-space:pre-wrap;">${escapeHtml((item.secondaryRecipients || []).join('\n')) || 'אין'}</div></div>
@@ -237,7 +259,47 @@ document.getElementById('historyTabs').addEventListener('click', (e) => {
   document.querySelectorAll('#historyTabs .tab').forEach((t) => t.classList.toggle('active', t === tabEl));
   document.querySelectorAll('.tab-panel').forEach((p) => p.classList.toggle('active', p.dataset.panel === name));
   if (name === 'errors') renderErrors();
+  if (name === 'logs') renderLogs();
 });
+
+// ---- לוגי שליחה - מתוך fullSendHistory[].logs (נשמר ע"י send.js בכל שליחה) ----
+function renderLogs() {
+  const container = document.getElementById('logsContainer');
+  const withLogs = historyData.filter((h) => Array.isArray(h.logs) && h.logs.length);
+  if (!withLogs.length) {
+    container.innerHTML = '<div class="empty-state"><h4>אין לוגים שמורים</h4><p>הודעות התהליך של כל שליחה נשמרות אוטומטית ויופיעו כאן.</p></div>';
+    return;
+  }
+  container.innerHTML = '';
+  withLogs.forEach((h) => {
+    const det = document.createElement('details');
+    det.className = 'faq-item';
+    const when = window.formatHebrewAndGregorian ? window.formatHebrewAndGregorian(new Date(h.date), true) : new Date(h.date).toLocaleString('he-IL');
+    const hasErr = h.logs.some((l) => /שגיאה/.test(l));
+    det.innerHTML = `
+      <summary>
+        <svg class="icon q-icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        <span style="min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(h.subject || '(ללא נושא)')}</span>
+        <span class="badge ${hasErr ? 'badge-danger' : 'badge-success'}" style="margin-inline-start:8px;">${hasErr ? 'עם שגיאות' : 'הושלם'}</span>
+        <span class="hint" style="margin-inline-start:8px; white-space:nowrap;">${escapeHtml(when)}</span>
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
+      <div class="faq-body">
+        <div class="log-lines"></div>
+        <button type="button" class="btn btn-secondary btn-sm" style="margin-top:10px;">העתק לוג</button>
+      </div>
+    `;
+    const lines = det.querySelector('.log-lines');
+    h.logs.forEach((line) => {
+      const row = document.createElement('div');
+      row.className = 'log-line' + (/שגיאה/.test(line) ? ' is-error' : (/בהצלחה|נשלח!/.test(line) ? ' is-success' : ''));
+      row.textContent = line;
+      lines.appendChild(row);
+    });
+    det.querySelector('.btn').addEventListener('click', (e) => window.copyErrorText(h.logs.join('\n'), e.currentTarget));
+    container.appendChild(det);
+  });
+}
 
 // ---- שגיאות אחרונות (מ-js/errors.js - משותף לכל עמודי print-site) ----
 function renderErrors() {

@@ -243,12 +243,10 @@ function renderFileCard(item) {
                 ${item.isExpanded ? SVG.up + ' סגור אפשרויות' : SVG.gear + ' אפשרויות הדפסה ועיצוב'}
             </button>
             <div class="advanced-controls ${item.isExpanded ? 'show' : ''}">
-                <div class="multiselect">
-                    <div class="multiselect-btn" onclick="toggleFileOptionsMultiselect('${item.id}')"><span>בחר אפשרויות…</span><span class="hint">▾</span></div>
-                    <div id="dropdown_${item.id}" class="multiselect-content">${getDropdownItems(item)}</div>
-                </div>
+                ${getOptionChips(item)}
                 ${getLargeFileOptions(item, isLarge)}
                 <div class="opt-note"><input type="text" class="input" placeholder="הערה לקובץ…" value="${escAttr(item.note)}" onchange="updateFileParam('${item.id}', 'note', this.value)"></div>
+                <button type="button" class="btn btn-ghost btn-sm" style="align-self:flex-start;" onclick="saveAsStyleFromFile('${item.id}')">שמור הגדרות אלו כסגנון</button>
             </div>
 
             <div class="file-actions">
@@ -284,34 +282,40 @@ function getGroupTabsHTML(item) {
     return [0, 1, 2, 3, 4].map(g => `<button type="button" class="group-tab ${item.group === g ? 'active' : ''}" data-g="${g}" onclick="updateFileParam('${item.id}','group',${g})" title="${g === 0 ? 'ללא מיזוג' : 'שילוב ' + g}">${g === 0 ? '−' : g}</button>`).join('');
 }
 
-function getDropdownItems(item) {
+// אפשרויות ההדפסה/עיצוב של הקובץ - צ'יפים שטוחים וגלויים (לא תפריט-בתוך-תפריט),
+// אותם מפתחות בדיוק שמופיעים בפאנל הקבוצה ובעורך הסגנונות.
+function getOptionChips(item) {
     const logoVal = item.addLogo === true || item.addLogo === '1' ? '1' : (item.addLogo === '2' ? '2' : '');
-    const logoLabel = logoVal === '' ? 'אין' : (logoVal === '1' ? 'לוגו 1' : 'לוגו 2');
-    let items = '';
-    if (item.canConvert) items += chkItem(item.id, 'convertToPdf', item.convertToPdf, 'המר ל-PDF');
-    items += chkItem(item.id, 'addBsd', item.addBsd, 'הוסף בס"ד');
-    items += `<label class="multiselect-item"><span>הוסף לוגו: ${logoLabel}</span><button class="btn btn-secondary btn-sm" style="margin-inline-start:auto;" onclick="event.stopPropagation(); cycleFileLogo('${item.id}')">החלף</button></label>`;
-    items += chkItem(item.id, 'addPageNumbers', item.addPageNumbers, 'הוסף מספור');
-    items += chkItem(item.id, 'addArrows', item.addArrows, '9 בעמוד + חיצים');
-    items += chkItem(item.id, 'reverseLastPage', item.reverseLastPage, 'הפוך דף אחרון');
-    items += chkItem(item.id, 'duplicateTwoUp', item.duplicateTwoUp, '2 בעמוד (משוכפל)');
-    items += chkItem(item.id, 'addEvenBlankPage', item.addEvenBlankPage, 'הוסף דף ריק זוגי');
-    items += chkItem(item.id, 'marginCut', item.marginCut, 'חיתוך שוליים');
-    items += `<div class="multiselect-item" style="justify-content:space-between;"><span>מרובים בעמוד:</span><select class="file-opt-select" onchange="updateFileParam('${item.id}', 'multiUpMode', this.value)">
-        <option value="" ${!item.multiUpMode ? 'selected' : ''}>ללא</option>
-        <option value="4" ${item.multiUpMode === '4' ? 'selected' : ''}>4 בעמוד</option>
-        <option value="4_dup" ${item.multiUpMode === '4_dup' ? 'selected' : ''}>4 (משוכפל)</option>
-        <option value="9" ${item.multiUpMode === '9' ? 'selected' : ''}>9 בעמוד</option>
-        <option value="9_dup" ${item.multiUpMode === '9_dup' ? 'selected' : ''}>9 (משוכפל)</option>
-        <option value="16" ${item.multiUpMode === '16' ? 'selected' : ''}>16 בעמוד</option>
-        <option value="16_dup" ${item.multiUpMode === '16_dup' ? 'selected' : ''}>16 (משוכפל)</option>
-    </select></div>`;
-    items += `<div class="multiselect-item"><input type="text" class="input" style="height:32px;" placeholder="הערה..." value="${escAttr(item.note)}" onchange="updateFileParam('${item.id}', 'note', this.value)"></div>`;
-    items += `<div class="multiselect-item"><button class="btn btn-secondary btn-sm multiselect-footer-btn" style="width:100%;" onclick="saveAsStyleFromFile('${item.id}')">שמור כסגנון</button></div>`;
-    return items;
+    let html = '<div class="opt-chips">';
+    if (item.canConvert) html += chip(item.id, 'convertToPdf', item.convertToPdf, 'המר ל-PDF');
+    html += chip(item.id, 'addBsd', item.addBsd, 'בס"ד');
+    html += chip(item.id, 'addPageNumbers', item.addPageNumbers, 'מספור');
+    html += chip(item.id, 'reverseLastPage', item.reverseLastPage, 'הפוך דף אחרון');
+    html += chip(item.id, 'addArrows', item.addArrows, '9 בעמוד + חיצים');
+    html += chip(item.id, 'duplicateTwoUp', item.duplicateTwoUp, '2 משוכפל');
+    html += chip(item.id, 'addEvenBlankPage', item.addEvenBlankPage, 'דף ריק זוגי');
+    html += chip(item.id, 'marginCut', item.marginCut, 'חיתוך שוליים');
+    html += '</div>';
+    html += `<div class="file-quick">
+        <div><label>לוגו</label><select class="select" onchange="updateFileParam('${item.id}', 'addLogo', this.value)">
+            <option value="" ${logoVal === '' ? 'selected' : ''}>ללא</option>
+            <option value="1" ${logoVal === '1' ? 'selected' : ''}>לוגו 1</option>
+            <option value="2" ${logoVal === '2' ? 'selected' : ''}>לוגו 2</option>
+        </select></div>
+        <div><label>מרובים בעמוד</label><select class="select" onchange="updateFileParam('${item.id}', 'multiUpMode', this.value)">
+            <option value="" ${!item.multiUpMode ? 'selected' : ''}>ללא</option>
+            <option value="4" ${item.multiUpMode === '4' ? 'selected' : ''}>4 בעמוד</option>
+            <option value="4_dup" ${item.multiUpMode === '4_dup' ? 'selected' : ''}>4 (משוכפל)</option>
+            <option value="9" ${item.multiUpMode === '9' ? 'selected' : ''}>9 בעמוד</option>
+            <option value="9_dup" ${item.multiUpMode === '9_dup' ? 'selected' : ''}>9 (משוכפל)</option>
+            <option value="16" ${item.multiUpMode === '16' ? 'selected' : ''}>16 בעמוד</option>
+            <option value="16_dup" ${item.multiUpMode === '16_dup' ? 'selected' : ''}>16 (משוכפל)</option>
+        </select></div>
+    </div>`;
+    return html;
 }
-function chkItem(id, key, checked, label) {
-    return `<label class="multiselect-item checkbox-item"><input type="checkbox" ${checked ? 'checked' : ''} onchange="updateFileParam('${id}', '${key}', this.checked)"><span>${label}</span></label>`;
+function chip(id, key, checked, label) {
+    return `<label class="opt-chip"><input type="checkbox" ${checked ? 'checked' : ''} onchange="updateFileParam('${id}', '${key}', this.checked)"><span>${label}</span></label>`;
 }
 
 function getLargeFileOptions(item, isLarge) {

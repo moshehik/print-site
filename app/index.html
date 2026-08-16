@@ -24,64 +24,105 @@
 </head>
 <body>
 
-<!-- ============== LOADER / PROGRESS OVERLAY ============== -->
+<!-- ============== SEND PROGRESS (design-system modal) ============== -->
 <div class="loader-overlay" id="loader">
-  <div class="spinner lg"></div>
-  <div id="loaderTitle" style="margin-top:14px; font-weight:700; font-size:15px;">מתחיל...</div>
-  <div class="progress-log" id="progressLog"></div>
+  <div class="modal send-progress-modal">
+    <div class="modal-head">
+      <strong>
+        <span class="spinner" id="loaderSpinner"></span>
+        <svg class="icon hidden" id="loaderDoneIcon" viewBox="0 0 24 24" style="color:var(--success);"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg class="icon hidden" id="loaderErrIcon" viewBox="0 0 24 24" style="color:var(--danger);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="loaderTitle">מתחיל...</span>
+      </strong>
+      <button type="button" class="btn btn-ghost btn-icon-only btn-sm hidden" id="loaderCloseBtn" title="סגור">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body send-progress-body">
+      <div class="send-steps">
+        <div class="step" data-step="prepare"><span class="step-num">1</span><span>הכנת קבצים</span></div>
+        <div class="step" data-step="process"><span class="step-num">2</span><span>עיבוד</span></div>
+        <div class="step" data-step="upload"><span class="step-num">3</span><span>העלאה</span></div>
+        <div class="step" data-step="send"><span class="step-num">4</span><span>שליחה</span></div>
+      </div>
+      <div class="progress-log" id="progressLog"></div>
+    </div>
+    <div class="modal-foot">
+      <span class="hint" id="loaderHint">אנא המתן — אל תסגור את החלון</span>
+      <span style="flex:1"></span>
+      <button type="button" class="btn btn-secondary btn-sm" id="loaderCopyBtn" title="העתק את הלוג">העתק לוג</button>
+    </div>
+  </div>
 </div>
 
-<!-- ============== MERGE GROUP SIDEBAR ============== -->
+<!-- ============== MERGE GROUP SIDE PANEL (design-system) ============== -->
 <div id="mergeSidebar" class="side-panel">
   <div class="side-panel-head">
-    <span class="side-panel-title" id="mergeSidebarTitle"><svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> ניהול קבוצה</span>
-    <button class="modal-close-x" onclick="closeMergeSidebar()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div>
+      <div class="side-panel-title" id="mergeSidebarTitle">ניהול קבוצה</div>
+      <div class="hint">ההגדרות חלות על כל הקבצים בקבוצה - הם ימוזגו לקובץ אחד</div>
+    </div>
+    <button type="button" class="btn btn-ghost btn-icon-only btn-sm" onclick="closeMergeSidebar()" title="סגור">
+      <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
   </div>
+
   <div class="side-panel-body">
-    <div class="group-settings-box">
-      <div class="group-settings-title"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> הגדרות לכל הקבוצה</div>
-      <div class="field" style="margin-bottom:9px;">
-        <label>החל סגנון על הקבוצה</label>
-        <select id="groupStyleSelect" class="select" onchange="applyStyleToGroup(this.value)"></select>
-      </div>
-      <div class="group-setting-row">
-        <div style="flex:1;"><label style="font-size:11.5px;">כמות</label><select id="groupQtySelect" class="select" onchange="applyGroupSetting('quantity', this.value)"></select></div>
-        <div style="flex:1;"><label style="font-size:11.5px;">פורמט</label><select id="groupFormatSelect" class="select" onchange="applyGroupSetting('format', this.value)"></select></div>
-      </div>
-      <div class="group-check-grid">
-        <label class="group-check-item"><input type="checkbox" id="groupPdfCheck" onchange="applyGroupSetting('convertToPdf', this.checked)"> המר ל-PDF</label>
-        <label class="group-check-item"><input type="checkbox" id="groupBsdCheck" onchange="applyGroupSetting('addBsd', this.checked)"> בס"ד</label>
-        <label class="group-check-item"><input type="checkbox" id="groupNumCheck" onchange="applyGroupSetting('addPageNumbers', this.checked)"> מספור</label>
-        <label class="group-check-item"><input type="checkbox" id="groupRevCheck" onchange="applyGroupSetting('reverseLastPage', this.checked)"> הפוך דף אחרון</label>
-        <label class="group-check-item"><input type="checkbox" id="groupArrowsCheck" onchange="applyGroupSetting('addArrows', this.checked)"> 9 בעמוד + חיצים</label>
-        <label class="group-check-item"><input type="checkbox" id="groupDupCheck" onchange="applyGroupSetting('duplicateTwoUp', this.checked)"> 2 משוכפל</label>
-        <label class="group-check-item"><input type="checkbox" id="groupBlankCheck" onchange="applyGroupSetting('addEvenBlankPage', this.checked)"> דף ריק זוגי</label>
-        <label class="group-check-item"><input type="checkbox" id="groupMarginCutCheck" onchange="applyGroupSetting('marginCut', this.checked)"> חיתוך שוליים</label>
-      </div>
-      <div class="field" style="margin-top:9px;">
-        <label>לוגו קבוצתי</label>
+
+    <div class="section-title">סגנון מהיר</div>
+    <select id="groupStyleSelect" class="select" onchange="applyStyleToGroup(this.value)"></select>
+
+    <div class="section-title">הדפסה</div>
+    <div class="form-grid">
+      <div class="field"><label>כמות</label><select id="groupQtySelect" class="select" onchange="applyGroupSetting('quantity', this.value)"></select></div>
+      <div class="field"><label>פורמט</label><select id="groupFormatSelect" class="select" onchange="applyGroupSetting('format', this.value)"></select></div>
+    </div>
+
+    <div class="section-title">עיצוב ועיבוד</div>
+    <div class="opt-chips">
+      <label class="opt-chip"><input type="checkbox" id="groupPdfCheck" onchange="applyGroupSetting('convertToPdf', this.checked)"><span>המר ל-PDF</span></label>
+      <label class="opt-chip"><input type="checkbox" id="groupBsdCheck" onchange="applyGroupSetting('addBsd', this.checked)"><span>בס"ד</span></label>
+      <label class="opt-chip"><input type="checkbox" id="groupNumCheck" onchange="applyGroupSetting('addPageNumbers', this.checked)"><span>מספור עמודים</span></label>
+      <label class="opt-chip"><input type="checkbox" id="groupRevCheck" onchange="applyGroupSetting('reverseLastPage', this.checked)"><span>הפוך דף אחרון</span></label>
+      <label class="opt-chip"><input type="checkbox" id="groupArrowsCheck" onchange="applyGroupSetting('addArrows', this.checked)"><span>9 בעמוד + חיצים</span></label>
+      <label class="opt-chip"><input type="checkbox" id="groupDupCheck" onchange="applyGroupSetting('duplicateTwoUp', this.checked)"><span>2 בעמוד משוכפל</span></label>
+      <label class="opt-chip"><input type="checkbox" id="groupBlankCheck" onchange="applyGroupSetting('addEvenBlankPage', this.checked)"><span>דף ריק זוגי</span></label>
+      <label class="opt-chip"><input type="checkbox" id="groupMarginCutCheck" onchange="applyGroupSetting('marginCut', this.checked)"><span>חיתוך שוליים</span></label>
+    </div>
+
+    <div class="form-grid" style="margin-top:14px;">
+      <div class="field">
+        <label>לוגו</label>
         <select id="groupLogoSelect" class="select" onchange="applyGroupSetting('addLogo', this.value)">
           <option value="">ללא לוגו</option>
           <option value="1">לוגו 1</option>
           <option value="2">לוגו 2</option>
         </select>
       </div>
-      <label class="group-check-item" style="margin-top:9px;"><input type="checkbox" id="groupSendSecondary" onchange="applyGroupSetting('sendSecondary', this.checked)"> שליחה משנית (+)</label>
+      <div class="field">
+        <label>&nbsp;</label>
+        <label class="opt-chip" style="width:100%;"><input type="checkbox" id="groupSendSecondary" onchange="applyGroupSetting('sendSecondary', this.checked)"><span>שליחה משנית ⊕</span></label>
+      </div>
     </div>
-    <div style="margin-bottom:8px; font-weight:700; font-size:12.5px;">קבצים בקבוצה (לפי סדר מיזוג)</div>
+
+    <div class="section-title">סדר המיזוג</div>
     <div id="mergeListContainer"></div>
   </div>
-  <div class="side-panel-foot">
-    <button class="btn btn-secondary" style="width:100%;" onclick="openPageSorter()"><svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg> סדר וערבב דפים</button>
-    <button class="btn btn-ghost" style="width:100%;" onclick="closeMergeSidebar()">סגור</button>
+
+  <div class="side-panel-foot" style="flex-direction:row;">
+    <button type="button" class="btn btn-secondary" style="flex:1;" onclick="openPageSorter()">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
+      סדר וערבב דפים
+    </button>
+    <button type="button" class="btn btn-primary" onclick="closeMergeSidebar()">סיום</button>
   </div>
 </div>
 
 <!-- ============== EDIT STYLE SIDEBAR ============== -->
 <div id="editStyleSidebar" class="side-panel">
   <div class="side-panel-head">
-    <span class="side-panel-title"><svg class="icon" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg> עריכת סגנון</span>
-    <button class="modal-close-x" onclick="closeEditStyleSidebar()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="side-panel-title"><svg class="icon" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg> עריכת סגנון</div>
+    <button type="button" class="btn btn-ghost btn-icon-only btn-sm" onclick="closeEditStyleSidebar()" title="סגור"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
   <div class="side-panel-body">
     <input type="hidden" id="editStyleOriginalName">
@@ -94,15 +135,15 @@
         <div style="flex:1;"><label style="font-size:11.5px;">כמות</label><select id="editStyleQuantity" class="select"></select></div>
         <div style="flex:1;"><label style="font-size:11.5px;">פורמט</label><select id="editStyleFormat" class="select"></select></div>
       </div>
-      <div class="group-check-grid">
-        <label class="group-check-item"><input type="checkbox" id="editStyleConvertPdf"> המר ל-PDF</label>
-        <label class="group-check-item"><input type="checkbox" id="editStyleBsd"> בס"ד</label>
-        <label class="group-check-item"><input type="checkbox" id="editStylePageNumbers"> מספור</label>
-        <label class="group-check-item"><input type="checkbox" id="editStyleReverseLast"> היפוך סוף</label>
-        <label class="group-check-item"><input type="checkbox" id="editStyleArrows"> 9 בעמוד + חיצים</label>
-        <label class="group-check-item"><input type="checkbox" id="editStyleDuplicateTwoUp"> 2 משוכפל</label>
-        <label class="group-check-item"><input type="checkbox" id="editStyleAddEvenBlank"> דף ריק זוגי</label>
-        <label class="group-check-item"><input type="checkbox" id="editStyleMarginCut"> חיתוך שוליים</label>
+      <div class="opt-chips">
+        <label class="opt-chip"><input type="checkbox" id="editStyleConvertPdf"><span>המר ל-PDF</span></label>
+        <label class="opt-chip"><input type="checkbox" id="editStyleBsd"><span>בס"ד</span></label>
+        <label class="opt-chip"><input type="checkbox" id="editStylePageNumbers"><span>מספור</span></label>
+        <label class="opt-chip"><input type="checkbox" id="editStyleReverseLast"><span>היפוך סוף</span></label>
+        <label class="opt-chip"><input type="checkbox" id="editStyleArrows"><span>9 בעמוד + חיצים</span></label>
+        <label class="opt-chip"><input type="checkbox" id="editStyleDuplicateTwoUp"><span>2 משוכפל</span></label>
+        <label class="opt-chip"><input type="checkbox" id="editStyleAddEvenBlank"><span>דף ריק זוגי</span></label>
+        <label class="opt-chip"><input type="checkbox" id="editStyleMarginCut"><span>חיתוך שוליים</span></label>
       </div>
       <div class="field" style="margin-top:9px;">
         <label>לוגו</label>
@@ -112,8 +153,8 @@
           <option value="2">לוגו 2</option>
         </select>
       </div>
-      <label class="group-check-item" style="margin-top:9px;"><input type="checkbox" id="editStyleSendSecondary"> שליחה משנית (+)</label>
-      <label class="group-check-item" style="margin-top:5px;"><input type="checkbox" id="editStylePlusSelected"> סימון קובץ לשליחה משנית (⊕) כברירת מחדל</label>
+      <label class="opt-chip" style="margin-top:9px;"><input type="checkbox" id="editStyleSendSecondary"><span>שליחה משנית (+)</span></label>
+      <label class="opt-chip" style="margin-top:5px;"><input type="checkbox" id="editStylePlusSelected"><span>סימון קובץ לשליחה משנית (⊕) כברירת מחדל</span></label>
     </div>
   </div>
   <div class="side-panel-foot">
@@ -368,20 +409,11 @@
       <!-- ============ SEND WORKSPACE (built from scratch on the אריג system) ============ -->
       <div class="send-workspace">
 
-        <!-- ---- שלב 1: יעד ---- -->
+        <!-- ---- שלב 1: יעד (קומפקטי - שורה אחת) ---- -->
         <section class="card">
-          <div class="card-head">
-            <div class="card-title-row">
+          <div class="card-pad send-dest">
+            <div class="send-dest-row">
               <span class="step-num current">1</span>
-              <h3>למי שולחים</h3>
-            </div>
-            <button type="button" class="btn btn-ghost btn-sm" onclick="openModal('contactsModal')">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              אנשי קשר
-            </button>
-          </div>
-          <div class="card-pad">
-            <div class="form-grid">
               <div class="field">
                 <label>נמענים ראשיים</label>
                 <div class="recipient-row">
@@ -390,17 +422,20 @@
                 </div>
               </div>
               <div class="field">
-                <label>נמענים משניים <span class="hint">(לקבצים שסומנו ⊕)</span></label>
+                <label>נמענים משניים <span class="hint">(⊕)</span></label>
                 <div class="recipient-row">
                   <div class="multiselect" id="secondaryEmailMultiselect"></div>
                   <input type="text" id="secondaryEmailManual" class="input" placeholder="או הקלד מייל…" list="contacts-datalist">
                 </div>
                 <datalist id="contacts-datalist"></datalist>
               </div>
-            </div>
-            <div class="field" style="margin-bottom:0;">
-              <label>נושא ההודעה</label>
-              <input type="text" id="subject" class="input">
+              <div class="field">
+                <label>נושא ההודעה</label>
+                <input type="text" id="subject" class="input">
+              </div>
+              <button type="button" class="btn btn-secondary btn-icon-only" onclick="openModal('contactsModal')" title="אנשי קשר">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </button>
             </div>
           </div>
         </section>
