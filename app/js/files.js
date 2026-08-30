@@ -43,7 +43,8 @@ async function handleFiles(fileList) {
             canConvert, previewUrl, ext,
             pageCount: isImage ? 1 : undefined,
             isExpanded: file.size > (LARGE_FILE_THRESHOLD_MB * 1024 * 1024),
-            appliedStyleName: '', isModified: false, isPlusSelected: false, quantityManuallyChanged: false
+            appliedStyleName: '', isModified: false, isPlusSelected: false, quantityManuallyChanged: false,
+            docxPreviewHtml: null, docxPreviewState: ext === 'docx' ? 'loading' : null
         };
         filesData.push(itemData);
         renderFiles();
@@ -55,6 +56,20 @@ async function handleFiles(fileList) {
                 renderFiles();
                 checkAutoReverse(itemData);
             });
+        } else if (ext === 'docx') {
+            getDocxPreviewHtml(file).then(result => {
+                itemData.docxPreviewHtml = result.html || '';
+                itemData.docxPreviewState = result.html ? 'ready' : 'error';
+                // הערכת כמות עמודים גסה לפי אורך הטקסט - רק לתצוגה, לא משפיע על עיבוד
+                if (result.html) itemData.pageCount = estimateDocxPages(result.html);
+                renderFiles();
+            }).catch(() => {
+                itemData.docxPreviewState = 'error';
+                renderFiles();
+            });
+        } else if (ext === 'doc') {
+            itemData.docxPreviewState = 'unsupported';
+            renderFiles();
         }
     }
     const input = document.getElementById('fileInput');
@@ -76,6 +91,77 @@ async function getPdfPageCountOnly(file) {
         } catch (e) { /* fall back to icon */ }
         return { url: thumbnailUrl, numPages: pdf.numPages || 0 };
     } catch (e) { return { url: null, numPages: 0 }; }
+}
+
+// ---- Word (docx) preview — mammoth הכי מהיר/קל, ללא המרה ל-PDF ----
+async function getDocxPreviewHtml(file) {
+    if (!window.mammoth || typeof window.mammoth.convertToHtml !== 'function') {
+        console.warn('mammoth not loaded');
+        return { html: '' };
+    }
+    try {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await window.mammoth.convertToHtml({ arrayBuffer }, {
+            // המרת תמונות ל-data URI כדי שיוצגו מיד בתצוגה
+            convertImage: window.mammoth.images.imgElement(function (image) {
+                return image.read("base64").then(function (imageBuffer) {
+                    return { src: "data:" + image.contentType + ";base64," + imageBuffer };
+                });
+            })
+        });
+        return { html: result.value || '', messages: result.messages || [] };
+    } catch (e) {
+        console.warn('docx preview failed', e);
+        return { html: '' };
+    }
+}
+function estimateDocxPages(html) {
+    // הערכה גסה: ~1800 תווים לעמוד (לא מדויק, רק לתצוגת "עמ'")
+    const text = (html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!text) return undefined;
+    return Math.max(1, Math.ceil(text.length / 1800));
+}
+function openDocxPreview(id) {
+    const item = filesData.find(f => f.id === id);
+    if (!item || !item.docxPreviewHtml) return;
+    const host = document.getElementById('pagePreviewContent');
+    if (!host) return;
+    host.innerHTML = '<div class="docx-preview-host">' + item.docxPreviewHtml + '</div>';
+    openModal('pagePreviewModal');
+}
+async function openPagePreview(id) {
+    const item = filesData.find(f => f.id === id);
+    if (!item || item.ext !== 'pdf') return;
+    const host = document.getElementById('pagePreviewContent');
+    if (!host) return;
+    host.innerHTML = '<div class="spinner"></div>';
+    openModal('pagePreviewModal');
+    try {
+        const bytes = await item.fileObj.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+        host.innerHTML = '';
+        const container = document.createElement('div');
+        container.style.display = 'flex'; container.style.flexDirection = 'column'; container.style.gap = '12px'; container.style.alignItems = 'center';
+        container.style.maxHeight = '70vh'; container.style.overflow = 'auto'; container.style.width = '100%';
+        for (let i = 1; i <= Math.min(pdf.numPages, 3); i++) {
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 1.2 });
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width; canvas.height = viewport.height;
+            canvas.style.maxWidth = '100%'; canvas.style.height = 'auto'; canvas.style.background = '#fff'; canvas.style.boxShadow = '0 2px 10px rgba(0,0,0,.12)'; canvas.style.borderRadius = '6px';
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+            const label = document.createElement('div'); label.textContent = 'עמוד ' + i; label.style.fontSize = '11px'; label.style.color = 'var(--text-3)';
+            container.appendChild(label); container.appendChild(canvas);
+        }
+        if (pdf.numPages > 3) {
+            const more = document.createElement('div'); more.textContent = '...' + (pdf.numPages - 3) + ' עמודים נוספים - התצוגה המלאה תיווצר בעיבוד'; more.style.fontSize = '11px'; more.style.color = 'var(--text-3)';
+            container.appendChild(more);
+        }
+        host.appendChild(container);
+    } catch (e) {
+        console.error(e);
+        host.innerHTML = '<div class="manager-list-empty">שגיאה בטעינת תצוגה</div>';
+    }
 }
 
 function toggleExpand(id) {
@@ -195,11 +281,26 @@ const SVG = {
 };
 
 function previewContentFor(item) {
+    if (item.ext === 'docx') {
+        if (item.docxPreviewState === 'loading') return `<div class="docx-loading"><span class="spinner"></span><span>טוען תצוגה...</span></div>`;
+        if (item.docxPreviewState === 'ready' && item.docxPreviewHtml) {
+            return `<div class="docx-thumb">${item.docxPreviewHtml}<div class="docx-thumb-fade"></div></div>`;
+        }
+        if (item.docxPreviewState === 'unsupported' || item.docxPreviewState === 'error') {
+            return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">${SVG.word}<span style="font-size:10px;color:var(--text-3);text-align:center;">${item.docxPreviewState === 'unsupported' ? 'תצוגה לא נתמכת ל-doc<br>(שמור כ-docx)' : 'שגיאה בתצוגה'}</span></div>`;
+        }
+        return SVG.word;
+    }
     if (item.previewUrl) return `<img src="${item.previewUrl}" alt="" onerror="this.style.display='none';">`;
     if (item.ext === 'pdf') return SVG.pdf;
     if (item.ext.includes('doc')) return SVG.word;
     if (item.fileObj.type.startsWith('image/')) return SVG.image;
     return SVG.file;
+}
+function thumbClickFor(item) {
+    if (item.ext === 'docx' && item.docxPreviewState === 'ready' && item.docxPreviewHtml) return `onclick="openDocxPreview('${item.id}')" title="לחץ לתצוגה מלאה"`;
+    if (item.ext === 'pdf' && item.previewUrl) return `onclick="openPagePreview('${item.id}')" title="לחץ לתצוגה מלאה"`;
+    return '';
 }
 
 function extBadgeFor(item) {
@@ -241,9 +342,11 @@ function renderFileCard(item) {
         item.note ? badge('badge-warning', 'הערה', item.note) : '',
     ].filter(Boolean).join('');
 
+    const thumbExtra = thumbClickFor(item);
+    const hasClickablePreview = !!thumbExtra;
     return `
     <div class="file-card group-${item.group}" data-id="${item.id}">
-        <div class="file-thumb">
+        <div class="file-thumb${hasClickablePreview ? ' has-preview' : ''}" ${thumbExtra}>
             ${previewContentFor(item)}
             ${extBadgeFor(item)}
         </div>
