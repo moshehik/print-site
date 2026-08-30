@@ -10,7 +10,7 @@
 
   var style = document.createElement('style');
   style.textContent =
-    '.popover{position:fixed;z-index:60000;min-width:200px;max-width:min(360px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:8px;animation:pop-in .12s ease;max-height:min(70vh,520px);overflow-y:auto}' +
+    '.popover{position:fixed;z-index:60000;min-width:200px;max-width:min(360px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:8px;animation:pop-in .12s ease;max-height:min(70vh,520px);overflow-y:auto;overscroll-behavior:contain}' +
     '@keyframes pop-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}' +
     '@media (prefers-reduced-motion:reduce){.popover{animation:none}}' +
     '.popover-title{font-size:11.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.03em;padding:4px 8px 8px}' +
@@ -57,7 +57,15 @@
     closePopover();
   }
   function onKey(e) { if (e.key === 'Escape') closePopover(); }
-  function onScroll() { if (current) place(current.el, current.anchor); }
+  function onScroll(e) {
+    if (!current) return;
+    // גלילה בתוך התפריט עצמו - לא לסגור ולא להזיז (overscroll-behavior:contain כבר מונע שרשור לדף)
+    if (e && e.target && current.el.contains(e.target)) return;
+    // גלילת הדף/עוגן - סגירת התפריט במקום הזזתו עם הדף (מונע "גם הדף וגם התפריט זזים יחד")
+    // התפריט מוצמד למיקום שבו היה העכבר בעת הפתיחה, לא לעוגן שזז עם הגלילה
+    closePopover();
+  }
+  function onResize() { if (current) place(current.el, current.anchor); }
 
   window.repositionPopover = function () { if (current) place(current.el, current.anchor); };
 
@@ -70,7 +78,7 @@
     document.removeEventListener('mousedown', onDocClick, true);
     document.removeEventListener('keydown', onKey);
     window.removeEventListener('scroll', onScroll, true);
-    window.removeEventListener('resize', onScroll);
+    window.removeEventListener('resize', onResize);
     if (c.onClose) c.onClose();
   };
 
@@ -94,12 +102,28 @@
       ro.observe(el);
       current.ro = ro;
     }
+    // הגלילה בתוך הפופאובר עצמו צריכה להיות מבודדת - מונע שרשור גלילה לדף מאחור
+    // overscroll-behavior:contain מטפל בזה ברמת CSS, אבל מוסיפים גם חסימת wheel כגיבוי
+    el.addEventListener('wheel', function (e) {
+      var atTop = el.scrollTop <= 0;
+      var atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+      var delta = e.deltaY;
+      var canScroll = el.scrollHeight > el.clientHeight;
+      if (!canScroll) { e.preventDefault(); return; }
+      if ((delta < 0 && !atTop) || (delta > 0 && !atBottom)) {
+        e.stopPropagation();
+      } else if ((delta < 0 && atTop) || (delta > 0 && atBottom)) {
+        // בקצה הרשימה - חוסם שרשור לדף
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, { passive: false });
     // defer so the opening click doesn't immediately close it
     setTimeout(function () {
       document.addEventListener('mousedown', onDocClick, true);
       document.addEventListener('keydown', onKey);
       window.addEventListener('scroll', onScroll, true);
-      window.addEventListener('resize', onScroll);
+      window.addEventListener('resize', onResize);
     }, 0);
     return el;
   };
