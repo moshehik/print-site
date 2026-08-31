@@ -86,3 +86,12 @@ document.addEventListener('click', (event) => {
         document.querySelectorAll('.multiselect-content.show').forEach(d => d.classList.remove('show'));
     }
 });
+// גלילה: כל dropdown תלוי-מיקום (absolute) ייסגר בגלילת דף כדי למנוע "פס של העמוד שייך לתפריט"
+// (התפריט היה זז עם הדף כי הוא absolute בתוך הכרטיס). גלילה בתוך הפאנל עצמו לא סוגרת.
+window.addEventListener('scroll', (e) => {
+    if (e.target && e.target.closest && e.target.closest('.dropdown-panel')) return;
+    if (e.target && e.target.closest && e.target.closest('.multiselect-content')) return;
+    document.querySelectorAll('.dropdown-wrap.open').forEach(d => d.classList.remove('open'));
+    // multiselect מטופל גם ב-contacts.js עם אותו מנגנון, אבל סגירה כאן היא גיבוי
+    document.querySelectorAll('.multiselect-content.show').forEach(d => d.classList.remove('show'));
+}, true);

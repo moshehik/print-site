@@ -57,14 +57,9 @@
     closePopover();
   }
   function onKey(e) { if (e.key === 'Escape') closePopover(); }
-  function onScroll(e) {
-    if (!current) return;
-    // גלילה בתוך התפריט עצמו - לא לסגור ולא להזיז (overscroll-behavior:contain כבר מונע שרשור לדף)
-    if (e && e.target && current.el.contains(e.target)) return;
-    // גלילת הדף/עוגן - סגירת התפריט במקום הזזתו עם הדף (מונע "גם הדף וגם התפריט זזים יחד")
-    // התפריט מוצמד למיקום שבו היה העכבר בעת הפתיחה, לא לעוגן שזז עם הגלילה
-    closePopover();
-  }
+  // הגלילה מוצמדת למיקום העכבר: גלגלת מעל התפריט מגלגלת רק את התפריט (overscroll-behavior:contain),
+  // גלגלת מעל הדף מגלגלת רק את הדף. התפריט position:fixed ולכן נשאר באותן קואורדינטות viewport
+  // ולא זז עם הדף — מונע "גם הדף וגם התפריט זזים יחד".
   function onResize() { if (current) place(current.el, current.anchor); }
 
   window.repositionPopover = function () { if (current) place(current.el, current.anchor); };
@@ -77,7 +72,6 @@
     c.anchor.classList.remove('popover-open');
     document.removeEventListener('mousedown', onDocClick, true);
     document.removeEventListener('keydown', onKey);
-    window.removeEventListener('scroll', onScroll, true);
     window.removeEventListener('resize', onResize);
     if (c.onClose) c.onClose();
   };
@@ -102,27 +96,10 @@
       ro.observe(el);
       current.ro = ro;
     }
-    // הגלילה בתוך הפופאובר עצמו צריכה להיות מבודדת - מונע שרשור גלילה לדף מאחור
-    // overscroll-behavior:contain מטפל בזה ברמת CSS, אבל מוסיפים גם חסימת wheel כגיבוי
-    el.addEventListener('wheel', function (e) {
-      var atTop = el.scrollTop <= 0;
-      var atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
-      var delta = e.deltaY;
-      var canScroll = el.scrollHeight > el.clientHeight;
-      if (!canScroll) { e.preventDefault(); return; }
-      if ((delta < 0 && !atTop) || (delta > 0 && !atBottom)) {
-        e.stopPropagation();
-      } else if ((delta < 0 && atTop) || (delta > 0 && atBottom)) {
-        // בקצה הרשימה - חוסם שרשור לדף
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }, { passive: false });
     // defer so the opening click doesn't immediately close it
     setTimeout(function () {
       document.addEventListener('mousedown', onDocClick, true);
       document.addEventListener('keydown', onKey);
-      window.addEventListener('scroll', onScroll, true);
       window.addEventListener('resize', onResize);
     }, 0);
     return el;

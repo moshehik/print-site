@@ -202,6 +202,17 @@ function toggleEmailMultiselect(containerId) {
     const dd = document.getElementById(`dropdown_${containerId}`);
     if (dd) dd.classList.toggle('show');
 }
+// גלילה: התפריט הנפתח של אנשי קשר מוצמד למיקום העכבר — גלילת הדף לא מזיזה אותו איתו.
+// אם הגלילה היא מחוץ לתפריט עצמו, סוגרים אותו כדי למנוע "גם הדף וגם התפריט זזים יחד".
+(function () {
+    function onPageScroll(e) {
+        const open = document.querySelectorAll('.multiselect-content.show');
+        if (!open.length) return;
+        if (e && e.target && e.target.closest && e.target.closest('.multiselect-content')) return;
+        open.forEach(d => d.classList.remove('show'));
+    }
+    window.addEventListener('scroll', onPageScroll, true);
+})();
 function onEmailMultiselectChange(containerId, destId, el) {
     const email = el.value;
     const dest = getDestination(destId); if (!dest) return;
