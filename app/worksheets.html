@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מחולל דפי עבודה</title>
+<link rel="stylesheet" href="design-system.css">
+<link rel="stylesheet" href="app.css">
+<script src="../js/shell.js"></script>
+<script src="../js/errors.js"></script>
+<script src="../js/dialogs.js"></script>
+<script src="../libs/jspdf.umd.min.js"></script>
+<style>
+  .ws-layout{ display:flex; gap:16px; align-items:start; max-width:1520px; margin:0 auto; }
+  @media (max-width:1100px){ .ws-layout{ flex-direction:column; } }
+  /* תפריט ראשי */
+  .ws-menu{ width:300px; flex:0 0 300px; position:sticky; top:16px; max-height: calc(100vh - 32px); overflow:hidden; display:flex; flex-direction:column; }
+  @media (max-width:1100px){ .ws-menu{ width:100%; flex:1; position:static; max-height:none; } }
+  .ws-menu-head{ padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .ws-menu-head strong{ font-size:14.5px; }
+  .ws-menu-head .hint{ font-size:11.5px; }
+  .ws-menu-list{ overflow-y:auto; padding:12px; display:grid; grid-template-columns:1fr 1fr; gap:8px; align-content:start; }
+  @media (max-width:480px){ .ws-menu-list{ grid-template-columns:1fr; } }
+  .ws-tpl-card{ background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius-md); padding:10px 11px; cursor:pointer; text-align:right; transition: border-color .15s, background .15s, box-shadow .15s; display:flex; flex-direction:column; gap:4px; min-height:84px; }
+  .ws-tpl-card:hover{ border-color:var(--border-strong); background:var(--surface-alt); }
+  .ws-tpl-card.active{ border-color:var(--primary-solid); background:var(--primary-tint); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-solid) 18%, transparent); }
+  .ws-tpl-card .t-icon{ font-size:19px; line-height:1; }
+  .ws-tpl-card .t-name{ font-size:12.5px; font-weight:800; color:var(--text); line-height:1.2; }
+  .ws-tpl-card .t-desc{ font-size:11px; color:var(--text-3); line-height:1.3; }
+  .ws-tpl-card.active .t-name{ color:var(--primary-solid); }
+  .ws-menu-foot{ padding:10px 12px; border-top:1px solid var(--border); background:var(--surface); }
+  /* אזור תצוגת דף במחולל */
+  .ws-preview-col{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:12px; }
+  .ws-canvas-wrap{ background:var(--surface-sunken); border:1px solid var(--border); border-radius:var(--radius-lg); padding:18px; display:flex; justify-content:center; align-items:start; min-height:520px; }
+  /* דף A4 מדומה */
+  .ws-page-frame{ background: #fff; box-shadow: var(--shadow-lg); border-radius:4px; overflow:hidden; width:100%; max-width: 540px; aspect-ratio: 210/297; position:relative; display:flex; flex-direction:column; }
+  .ws-page-frame canvas{ width:100%; height:100%; display:block; }
+  .ws-preview-toolbar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:10px 14px; border-top:1px solid var(--border); background:var(--surface); border-radius:0 0 var(--radius-lg) var(--radius-lg); margin:0 -18px -18px; }
+  @media (max-width:640px){ .ws-preview-toolbar{ flex-direction:column; align-items:stretch; } .ws-preview-toolbar .btn{ width:100%; justify-content:center; } }
+  /* בקרים */
+  .ws-controls{ width:360px; flex:0 0 360px; position:sticky; top:16px; max-height: calc(100vh - 32px); overflow-y:auto; }
+  @media (max-width:1100px){ .ws-controls{ width:100%; flex:1; position:static; max-height:none; } }
+  .ws-ctrl-head{ padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .ws-ctrl-head h3{ font-size:14px; display:flex; align-items:center; gap:8px; margin:0; }
+  .ws-ctrl-body{ padding:14px 16px; display:flex; flex-direction:column; gap:16px; }
+  .ws-section{ display:flex; flex-direction:column; gap:10px; }
+  .ws-section-title{ font-size:12.5px; font-weight:800; color:var(--primary-solid); display:flex; align-items:center; gap:6px; border-bottom:1px dashed var(--border); padding-bottom:6px; }
+  .ws-grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .ws-hint{ font-size:11.5px; color:var(--text-3); line-height:1.5; }
+  /* כפתורי פעולה עליונים */
+  .ws-action-bar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .ws-action-bar .btn{ flex:0 0 auto; }
+  /* modal תצוגה מקדימה */
+  #previewModal .modal{ max-width:860px; width:100%; }
+  #previewModal .modal-body{ background:var(--surface-sunken); display:flex; justify-content:center; align-items:start; padding:18px; overflow:auto; max-height:78vh; }
+  #previewModal canvas{ background:#fff; box-shadow:var(--shadow-md); max-width:100%; height:auto; }
+  /* הדפסה - הסתר כרום בהדפסה */
+  @media print{
+    body *{ visibility:hidden; }
+    .ws-page-frame, .ws-page-frame *{ visibility:visible; }
+    .ws-page-frame{ position:fixed; inset:0; max-width:none; margin:0; box-shadow:none; border-radius:0; }
+    .app-shell{ display:block; }
+    .sidebar, .topbar, .ws-menu, .ws-controls, .ws-preview-toolbar{ display:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg class="icon" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18h12v3H6zM6 14h12M4 9h16a2 2 0 0 1 2 2v6h-4v-4H6v4H2v-6a2 2 0 0 1 2-2z"/></svg></div>
+      <div>
+        <div class="brand-text">מערכת הדפסה</div>
+        <div class="brand-sub">שליחה · פוסטרים · היסטוריה</div>
+      </div>
+    </div>
+    <nav class="nav-group">
+      <div class="nav-group-label">כלים</div>
+      <a class="nav-link" href="index.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        <span class="nav-label">שליחה להדפסה</span>
+      </a>
+      <a class="nav-link active" href="worksheets.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="8" y1="9" x2="8" y2="9"/><line x1="16" y1="9" x2="8" y2="9"/></svg>
+        <span class="nav-label">מחולל דפי עבודה</span>
+      </a>
+      <a class="nav-link" href="../poster.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+        <span class="nav-label">פוסטרים ופריסה</span>
+      </a>
+      <a class="nav-link" href="history.html">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        <span class="nav-label">היסטוריה</span>
+      </a>
+      <div class="nav-group-label">העדפות</div>
+      <a class="nav-link" href="display-settings.html">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+        <span class="nav-label">עיצוב ותצוגה</span>
+      </a>
+    </nav>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <button type="button" class="icon-btn menu-toggle" id="menuToggle" title="תפריט">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div>
+        <div class="topbar-title">מחולל דפי עבודה</div>
+        <div class="crumb">תפריט ראשי · כל הדפים נוצרים אוטומטית · תצוגת דף חיה במחולל</div>
+      </div>
+      <span style="flex:1"></span>
+      <button type="button" class="icon-btn" id="themeToggle" title="מצב כהה/בהיר">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+
+    <div class="content">
+
+      <div class="callout callout-info" style="max-width:1520px; margin:0 auto 14px;">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div style="font-size:12.5px; line-height:1.6;">
+          בחר דף מהתפריט הימני — כל הדפים נוצרים אוטומטית. ערוך כותרת, כמות תרגילים ורמת קושי מימין, וראה <b>תצוגת דף חיה</b> במרכז. בסיום — <b>תצוגה מקדימה</b> או <b>הורדה מידית כ-PDF מוכן</b> עם <b>בס"ד</b> בצד ימין למעלה.
+        </div>
+      </div>
+
+      <div class="ws-layout">
+
+        <!-- תפריט ראשי -->
+        <div class="card ws-menu" id="wsMenuCard">
+          <div class="ws-menu-head">
+            <div style="flex:1;">
+              <strong style="display:flex; align-items:center; gap:7px;">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                תפריט ראשי
+              </strong>
+              <div class="hint" id="tplCountHint">12 תבניות מוכנות</div>
+            </div>
+            <span class="badge badge-primary" id="currentTplBadge">—</span>
+          </div>
+          <div class="ws-menu-list" id="tplList"></div>
+          <div class="ws-menu-foot">
+            <div class="field" style="margin-bottom:8px;">
+              <label style="font-size:11.5px;">חיפוש תבנית</label>
+              <input type="text" id="tplSearch" class="input" placeholder="לדוגמה: חיבור, אותיות..." style="padding:8px 10px; font-size:12.5px;">
+            </div>
+            <div class="hint" style="line-height:1.5;">כל דף נוצר רנדומלית מחדש בלחיצה על <b>רענן תרגילים</b>. אפשר להדפיס ישירות או להוריד.</div>
+          </div>
+        </div>
+
+        <!-- תצוגת דף במחולל -->
+        <div class="ws-preview-col">
+          <div class="card ws-canvas-wrap" style="flex-direction:column; align-items:stretch; padding:0; overflow:hidden;">
+            <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--border); background:var(--surface); flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                <span class="badge badge-neutral" style="font-size:11px; padding:2px 8px;"><svg class="icon" viewBox="0 0 24 24" style="width:12px;height:12px;"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg> תצוגת דף במחולל</span>
+                <span class="hint" id="liveHint">מתעדכן אוטומטית</span>
+              </div>
+              <div class="ws-action-bar">
+                <button type="button" class="btn btn-secondary btn-sm" id="btnReroll" title="הגרל תרגילים חדשים">
+                  <svg class="icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                  רענן
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnPreview">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  תצוגה מקדימה
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" id="btnDownload">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  הורדה מידית (PDF)
+                </button>
+              </div>
+            </div>
+            <div style="padding:18px; background:var(--surface-sunken); display:flex; justify-content:center; flex:1; overflow:auto;">
+              <div class="ws-page-frame" id="pageFrame">
+                <canvas id="wsCanvas" width="794" height="1123"></canvas>
+              </div>
+            </div>
+            <div class="ws-preview-toolbar" style="margin:0; border-radius:0; border-top:1px solid var(--border);">
+              <span class="hint">דף A4 אנכי · שוליים להדפסה · <b>בס"ד</b> בצד ימין למעלה (ניתן לביטול)</span>
+              <span style="flex:1"></span>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">
+                <svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                הדפס
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm" id="btnCopyImage" title="העתק כתמונה">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v3"/></svg>
+                העתק תמונה
+              </button>
+            </div>
+          </div>
+
+          <div class="card card-pad" style="padding:12px 14px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <span class="badge badge-info" id="pageInfoBadge" style="font-size:11px;">—</span>
+              <span class="hint" id="pageMetaHint"></span>
+              <span style="flex:1"></span>
+              <label class="checkbox-row" style="font-size:12.5px; cursor:pointer;">
+                <input type="checkbox" id="autoPreviewCheck" checked>
+                עדכון חי במחולל
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- בקרים -->
+        <div class="card ws-controls" id="ctrlCard">
+          <div class="ws-ctrl-head">
+            <h3>
+              <svg class="icon" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+              <span id="ctrlTitle">הגדרות דף</span>
+            </h3>
+            <span class="badge badge-neutral" id="ctrlSubBadge">A4</span>
+          </div>
+          <div class="ws-ctrl-body" id="ctrlBody">
+            <!-- נטען דינמית -->
+          </div>
+          <div style="padding:12px 16px; border-top:1px solid var(--border); background:var(--surface-alt); display:flex; gap:8px;">
+            <button type="button" class="btn btn-primary" style="flex:1;" id="btnDownload2">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              הורד PDF מוכן
+            </button>
+            <button type="button" class="btn btn-secondary" id="btnPreview2">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              תצוגה
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /.content -->
+  </div><!-- /.main -->
+</div><!-- /.app-shell -->
+
+<!-- תצוגה מקדימה modal -->
+<div id="previewModal" class="modal-backdrop-wrap">
+  <div class="modal">
+    <div class="modal-head">
+      <strong>
+        <svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        תצוגה מקדימה — דף מוכן להדפסה
+      </strong>
+      <button class="modal-close-x" onclick="closeModal('previewModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body" id="previewBody">
+      <canvas id="previewCanvas" width="794" height="1123" style="width:100%; max-width:620px;"></canvas>
+    </div>
+    <div class="modal-foot">
+      <span class="hint">זה בדיוק מה שיירד ב-PDF — עם בס"ד למעלה מימין</span>
+      <span style="flex:1"></span>
+      <button class="btn btn-ghost" onclick="closeModal('previewModal')">סגור</button>
+      <button class="btn btn-primary" id="btnDownloadFromPreview">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        הורד PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/worksheets.js"></script>
+</body>
+</html>
